@@ -1,0 +1,16 @@
+.food-toolbar,.food-categories{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}.food-toolbar label{display:flex;align-items:center;gap:6px}.food-toolbar input,.food-toolbar select{font:inherit;padding:10px;border:1px solid #bcc3d8;border-radius:8px;max-width:100%}.food-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;max-height:620px;overflow:auto;padding:4px}.food-card{border:1px solid #dce1ee;border-radius:14px;background:white;padding:16px;display:flex;flex-direction:column;gap:10px}.food-card strong{font-size:17px}.food-card small,.food-kind{color:#4a5369}.food-kind{font-size:12px}.food-card p{margin:0}.food-card details{font-size:13px}.food-card details p{margin:10px 0}.food-card summary{cursor:pointer}.picker-dialog{width:min(960px,94vw);max-height:88vh;overflow:auto;border:1px solid #dce1ee;border-radius:16px;padding:24px;box-sizing:border-box}.picker-dialog::backdrop{background:#11143388}@media(max-width:480px){.food-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.food-card{padding:10px}.food-card strong{font-size:15px}.food-toolbar input{width:150px}}
+.food-toolbar{align-items:center;gap:18px;}
+.food-pick-group{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.food-pick-label{font-size:13px;font-weight:700;}
+.food-choice-buttons{display:flex;gap:5px;flex-wrap:wrap;}
+.food-choice{font:inherit;font-size:13px;min-height:38px;min-width:36px;padding:7px 10px;border:1px solid #DCDFEA;border-radius:9px;background:#fff;color:#343C67;cursor:pointer;}
+.food-choice[aria-pressed=true]{background:#2340E8;border-color:#2340E8;color:white;font-weight:700;}
+.food-choice:focus-visible{outline:2px solid #2340E8;outline-offset:2px;}
+.food-toolbar .food-search-field{margin-left:auto;}
+.food-toolbar [hidden]{display:none!important;}
+.habit-heading-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+.habit-heading-row h2{margin:0;}
+.habit-heading-actions{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;}
+@media(max-width:600px){.food-toolbar{gap:12px;}.food-toolbar .food-search-field{margin-left:auto;}.food-choice{padding:7px 9px;min-width:32px;}.habit-heading-actions .btn{padding:8px 10px;}}
+
+.food-toolbar #pick-status{margin:0;font-size:13px;color:#6A6F8E;line-height:1.6;flex:0 1 auto;}

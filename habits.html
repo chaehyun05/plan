@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>My Plan 습관 트래커</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Poppins:wght@500;600&display=swap">
+<style>
+:root{--paper:#fff;--ink:#111433;--muted:#6A6F8E;--line:#DCDFEA;--cell-bg:#fff;--accent:#2340E8;--hi:#EEF1FF;--sun:#C62828;--card:#fff;--hand:"Noto Sans KR",-apple-system,"Apple SD Gothic Neo",sans-serif;--body:var(--hand);--cell:30px;color-scheme:light}
+*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font-family:var(--body);line-height:1.5;background-image:none}
+.page{max-width:100%;padding:0 2px 12px;margin:auto;display:flex;flex-direction:column;gap:22px}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding-bottom:18px;border-bottom:1px solid #EDEEF3}
+.month{display:flex;align-items:center;gap:12px}.month h1{margin:0;font-size:28px;font-weight:900;letter-spacing:-.02em}.month h1 small{font-size:14px;color:var(--muted);font-weight:500;margin-left:8px}
+button,select,input{font:inherit;color:inherit}.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 14px;cursor:pointer;font-size:13px;font-weight:700;line-height:1.4;text-decoration:none}.btn:hover{background:#F4F5F9;border-color:#b9bfd3}.btn:disabled{opacity:.45;cursor:default}.btn:focus-visible,.cell:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.nav{min-width:40px;min-height:40px;font-size:22px;padding:4px 12px}#editBtn,#sleepForm button[type=submit]{background:var(--accent);border-color:var(--accent);color:#fff}#editBtn:hover,#sleepForm button[type=submit]:hover{background:#1A31C2}.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.status{font-size:12px;color:var(--muted)}.tools .status{flex-basis:100%}
+h2{font-size:19px;font-weight:900;margin:0 0 16px;letter-spacing:-.02em}section{min-width:0}.scroll{overflow-x:auto;padding:3px 2px 10px;max-width:100%;-webkit-overflow-scrolling:touch}
+table.tracker{border-collapse:separate;border-spacing:3px;font-variant-numeric:tabular-nums}.tracker th,.tracker td{padding:0}.tracker thead th{width:var(--cell);min-width:var(--cell);text-align:center;font-size:12px;font-weight:500;color:var(--muted);line-height:1.6;padding-bottom:8px}.tracker thead th.today .dn{display:inline-block;width:24px;height:24px;line-height:24px;background:var(--accent);border-radius:8px;color:#fff}.tracker thead th.sun{color:var(--sun)}.tracker th.name{position:sticky;left:0;z-index:2;background:#fff;text-align:left;font-size:13px;font-weight:700;padding-right:14px;white-space:nowrap;min-width:150px;max-width:230px;overflow:hidden;text-overflow:ellipsis;border-bottom:1px solid #EDEEF3}.tracker th.name .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:8px}
+.cell{display:block;width:var(--cell);height:var(--cell);border:1px solid #E3E6EF;border-radius:7px;background:#F4F5F9;cursor:pointer;padding:0;position:relative;user-select:none;-webkit-user-select:none;transition:background .12s}.cell.on{background:var(--c,#2340E8);border-color:var(--c,#2340E8)}.cell.on:after{content:'✓';position:absolute;inset:0;display:grid;place-items:center;color:white;font-weight:900;font-size:18px}.cell.future{opacity:.5}.cell:hover{outline:2px solid var(--accent);outline-offset:1px}td.count{font-size:13px;text-align:center;font-weight:700;color:var(--accent)}tr.sum td{font-size:12px;text-align:center;padding-top:10px}tr.sum th{position:sticky;left:0;background:#fff;text-align:right;padding-right:12px;font-size:12px;color:var(--muted);font-weight:500}.edit-row{display:flex;align-items:center;gap:6px}.edit-row input{width:155px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:7px 9px;font-size:13px}.x{border:0;background:none;color:#C62828;cursor:pointer;font-size:19px}.hint{font-size:12px;color:var(--muted);margin:8px 0 0}
+.grid2{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:18px}.card{background:#fff;border:1px solid #EDEEF3;border-radius:14px;padding:22px;min-width:0}.stats{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:16px}.stat b{display:block;font-family:Poppins,var(--body);font-size:30px;line-height:1.2;color:var(--accent);font-variant-numeric:tabular-nums}.stat span{font-size:12px;color:var(--muted)}svg text{font-family:var(--body);fill:var(--muted)}.hbar{display:grid;grid-template-columns:minmax(85px,130px) 1fr 42px;gap:8px;align-items:center;font-size:12px;margin:12px 0}.hbar .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hbar .track{height:10px;border:0;border-radius:999px;overflow:hidden;background:#F0F2F8}.hbar .fill{height:100%;background:var(--c,#2340E8);border-radius:999px;transition:width .2s}.hbar .pct{text-align:right;font-weight:700}.sleepform{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:16px;font-size:13px}.sleepform select{border:1px solid var(--line);background:white;border-radius:8px;padding:9px;font-size:13px}#sleepSvg .col{cursor:pointer}#sleepSvg .col:hover rect{fill:var(--hi);opacity:.7}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}.card{padding:16px}.month h1{font-size:24px}.tools{width:100%}.btn{padding:9px 11px;font-size:12px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+table.tracker{width:100%;table-layout:fixed}.tracker th.name{width:165px;min-width:165px;max-width:165px}.tracker thead th:not(.name){width:auto;min-width:0}.cell{width:100%;min-width:22px;height:auto;aspect-ratio:1 / 1}.tracker{min-width:960px}
+
+/* Comfortable typography and a sleep plot that fills the same content width. */
+.tracker th.name{font-size:15px;font-weight:700;width:190px;min-width:190px;max-width:190px}.edit-row input{font-size:15px;width:160px}.hbar{font-size:14px;grid-template-columns:minmax(130px,180px) 1fr 48px;gap:12px;margin:15px 0}.hbar .nm{font-weight:600}.hbar .pct{font-size:14px}#sleepSvg{display:block;width:100%;min-width:760px;height:298px}.sleep-time-field{display:flex;align-items:center;gap:10px}.sleep-time-field>label{font-size:13px;font-weight:700;white-space:nowrap}.sleep-time-box{display:flex;border:1.5px solid #DCDFEA;border-radius:10px;overflow:hidden;background:#fff}.sleep-time-box:focus-within{border-color:#2340E8}.sleep-ap{display:flex;gap:2px;padding:3px;background:#F4F5F9}.sleep-ap button{border:0;border-radius:6px;padding:0 9px;background:transparent;color:#6A6F8E;cursor:pointer;font-size:13px}.sleep-ap button[aria-pressed=true]{background:#fff;color:#111433;font-weight:700;box-shadow:0 1px 2px #11143322}.sleep-time-box input{width:88px;border:0;background:white;padding:10px 12px;font-family:Poppins,var(--body);font-size:15px;outline:none}.sleepform{gap:14px;align-items:center}#sAvg{flex-basis:100%}
+@media(max-width:600px){.hbar{grid-template-columns:minmax(105px,140px) 1fr 42px;font-size:14px;gap:8px}.sleep-time-field{flex-wrap:wrap}.tracker th.name{width:180px;min-width:180px;max-width:180px}}
+.sleep-entry{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}.sleep-date-field{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:700}.sleep-date-field input{font:inherit;min-height:41px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;max-width:100%;min-width:0}.sleepform{align-items:flex-end}.sleep-entry .sleep-time-field{flex-direction:column;align-items:flex-start;gap:5px}@media(max-width:600px){.sleep-entry{width:100%;gap:10px}.sleep-date-field{flex:1 1 135px}.sleep-entry .sleep-time-field{flex:1 1 180px}}
+
+/* 수면 기록: 그래프 왼쪽, 입력은 오른쪽 아래 */
+.sleep-layout{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(340px,1fr);align-items:end;gap:18px}
+.sleep-layout>.scroll{min-width:0}
+.sleep-layout>.sleepform{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:0}
+.sleep-layout .sleep-date-field select{width:100%}.sleep-layout .sleep-time-field{min-width:0}.sleep-layout .sleep-time-box{width:100%}.sleep-layout .sleep-time-box input{flex:1 1 auto;min-width:0;width:auto}.sleep-layout .sleep-entry{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;align-items:end;padding:10px}
+.sleep-layout .sleep-actions{display:flex;justify-content:flex-end;gap:8px}
+.sleep-layout #sAvg{text-align:right;margin:0}
+@media(max-width:900px){.sleep-layout{grid-template-columns:1fr}.sleep-layout>.sleepform{width:100%}}
+.sleep-layout .sleep-ap{flex:0 0 auto}.sleep-layout .sleep-ap button{white-space:nowrap}
+@media(max-width:600px){.sleep-layout .sleep-entry{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+  <header>
+    <div class="month">
+      <button class="btn nav" id="prev" aria-label="이전 달">‹</button>
+      <h1 id="mTitle">10월</h1>
+      <button class="btn nav" id="next" aria-label="다음 달">›</button>
+    </div>
+    <div class="tools" hidden>
+      <span class="status" id="status">불러오는 중…</span>
+      
+      
+      <button class="btn" id="exportBtn" title="기록을 파일로 저장">백업</button>
+      <label class="btn" for="importFile" title="백업 파일 불러오기">복원</label><input type="file" id="importFile" accept="application/json" hidden>
+      <button class="btn" id="editBtn">습관 편집</button>
+    </div>
+  </header>
+  <p id="habit-feedback" role="status" hidden></p>
+
+  <section>
+    <h2>매일의 습관</h2>
+    <div class="scroll"><table class="tracker" id="tracker"></table></div>
+    <p class="hint" id="hint">칸을 누르면 색이 칠해지고, 한 번 더 누르면 지워져요. 마우스로 끌면 여러 칸을 한 번에 칠하거나 지울 수 있고, Ctrl+Z로 되돌릴 수 있어요.</p>
+  </section>
+
+  <section class="grid2">
+    <div class="card">
+      <h2>하루 습관 달성 현황</h2>
+      <div class="stats" id="stats"></div>
+      <div class="scroll"><svg id="dayChart" role="img" aria-label="날짜별 지킨 습관 개수 꺾은선 그래프"></svg></div>
+    </div>
+    <div class="card">
+      <h2>습관별 달성률</h2>
+      <div id="habitBars"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>수면 기록</h2>
+    <div class="sleep-layout"><div class="scroll"><svg id="sleepSvg" role="img" aria-label="수면 기록"></svg></div>
+    <form class="sleepform" id="sleepForm">
+      <div class="sleep-entry"><label class="sleep-date-field" for="sBedDate">잠든 날짜<select id="sBedDate" required aria-label="잠든 일"></select></label>
+      <div class="sleep-time-field"><label for="sBed">잠든 시간</label><div class="sleep-time-box"><div class="sleep-ap" role="group" aria-label="잠든 시간 오전 오후"><button type="button" data-ap-target="sBed" data-ap="am" aria-pressed="true">오전</button><button type="button" data-ap-target="sBed" data-ap="pm" aria-pressed="false">오후</button></div><input type="text" inputmode="numeric" id="sBed" autocomplete="off" maxlength="5" placeholder="예: 07:30"></div></div>
+      </div><div class="sleep-entry"><label class="sleep-date-field" for="sWakeDate">일어난 날짜<select id="sWakeDate" required aria-label="일어난 일"></select></label><div class="sleep-time-field"><label for="sWake">일어난 시간</label><div class="sleep-time-box"><div class="sleep-ap" role="group" aria-label="일어난 시간 오전 오후"><button type="button" data-ap-target="sWake" data-ap="am" aria-pressed="true">오전</button><button type="button" data-ap-target="sWake" data-ap="pm" aria-pressed="false">오후</button></div><input type="text" inputmode="numeric" id="sWake" autocomplete="off" maxlength="5" placeholder="예: 07:30"></div></div>
+      </div><div class="sleep-actions"><button class="btn" type="button" id="sClear">지우기</button><button class="btn" type="submit">기록</button></div>
+      <span class="status" id="sAvg" role="status"></span>
+    </form></div>
+  </section>
+</div>
+
+<script>
+(function(){
+const habitStorage={
+ read(){try{return JSON.parse(parent.localStorage.getItem('myplan-habits-v1')||'{}')}catch{return {}}},
+ get length(){return Object.keys(this.read()).length},key(i){return Object.keys(this.read())[i]??null},
+ getItem(k){return this.read()[k]??null},
+ setItem(k,v){const data=this.read();data[k]=String(v);parent.localStorage.setItem('myplan-habits-v1',JSON.stringify(data));},
+ removeItem(k){const data=this.read();delete data[k];parent.localStorage.setItem('myplan-habits-v1',JSON.stringify(data));}
+};
+
+const PALETTE=['#2340E8','#0E9F82','#7B4DFF','#C62828','#0277BD','#AD1457','#5E35B1','#00695C','#6D4C41','#3F51B5'];
+const WD=['일','월','화','수','목','금','토'];
+const DEFAULT_HABITS=['물 2L','한 시간 이상 운동','영어단어 외우기','코딩 공부하기','면접 연습하기','8시 전 기상하기'];
+// sleep axis: 20:00 → 12:00 next day, in 30-min steps (0..32)
+const S0=20*60, SPAN=16*60;
+
+const now=new Date();
+let view={y:now.getFullYear(),m:now.getMonth()};
+let habits=null; // [{id,name}]
+const months={};  // key -> {c:{hid:[days]}, s:{day:[bedStep,wakeStep]}}
+let editing=false, store={kind:'local'};
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mkey=()=>`m-${view.y}-${String(view.m+1).padStart(2,'0')}`;
+const dim=()=>new Date(view.y,view.m+1,0).getDate();
+const uid=()=>Math.random().toString(36).slice(2,9);
+
+/* ---------- storage: per-person private db, fallback to this browser ---------- */
+function lsGet(k){try{return JSON.parse(habitStorage.getItem('ht:'+k)||'null')}catch(e){return null}}
+function lsSet(k,v){try{habitStorage.setItem('ht:'+k,JSON.stringify(v))}catch(e){}}
+async function load(k){
+  if(store.kind==='db'){
+    try{const s=await store.db.doc(`data/users/${store.uid}/${k}`).get();return s.exists?JSON.parse(JSON.stringify(s.data())):null}
+    catch(e){return lsGet(k)}
+  }
+  return lsGet(k);
+}
+const timers={}, busy={}, pending={};
+function save(k,v){
+  lsSet(k,v);
+  if(store.kind!=='db') return;
+  clearTimeout(timers[k]);
+  timers[k]=setTimeout(()=>flush(k,v),600);
+  setStatus('저장 중…');
+}
+async function flush(k,v){
+  if(busy[k]){pending[k]=v;return}
+  busy[k]=true;
+  try{await store.db.doc(`data/users/${store.uid}/${k}`).set(v);setStatus('저장됨')}
+  catch(e){setStatus('저장 실패 · 이 브라우저에만 남아 있어요')}
+  busy[k]=false;
+  if(pending[k]){const n=pending[k];delete pending[k];flush(k,n)}
+}
+function setStatus(t){$('status').textContent=t;$('status').hidden=!t;const feedback=$('habit-feedback');if(feedback){feedback.textContent=t;feedback.hidden=!t;}}
+
+async function initStore(){store={kind:'local'};}
+
+async function ensureMonth(){
+  const k=mkey();
+  if(!months[k]) months[k]=(await load(k))||{c:{},s:{}};
+  months[k].c=months[k].c||{}; months[k].s=months[k].s||{};
+  return months[k];
+}
+
+/* ---------- render ---------- */
+function isToday(d){return view.y===now.getFullYear()&&view.m===now.getMonth()&&d===now.getDate()}
+function isFuture(d){return new Date(view.y,view.m,d)>new Date(now.getFullYear(),now.getMonth(),now.getDate())}
+function color(i){return PALETTE[i%PALETTE.length]}
+
+function render(){
+  const M=months[mkey()], n=dim();
+  $('mTitle').innerHTML=`${view.m+1}월<small>${view.y}</small>`;
+  // header
+  let h='<thead><tr><th class="name" style="border:none"></th>';
+  for(let d=1;d<=n;d++){
+    const wd=new Date(view.y,view.m,d).getDay();
+    h+=`<th class="${isToday(d)?'today':''} ${wd===0?'sun':''}"><span class="dn">${d}</span><br>${WD[wd]}</th>`;
+  }
+  h+='</tr></thead><tbody>';
+  habits.forEach((hb,i)=>{
+    const done=new Set(M.c[hb.id]||[]);
+    const nameCell=editing
+      ?`<div class="edit-row"><input id="hn-${hb.id}" data-hid="${hb.id}" value="${esc(hb.name)}" aria-label="습관 이름"><button class="x" data-del="${hb.id}" aria-label="삭제">✕</button></div>`
+      :`<span class="dot"></span>${esc(hb.name)}`;
+    h+=`<tr style="--c:${color(i)}"><th class="name" title="${esc(hb.name)}">${nameCell}</th>`;
+    for(let d=1;d<=n;d++){
+      const on=done.has(d);
+      const ang=(d*37+i*53)%3===0?'38deg':((d+i)%2?'45deg':'52deg');
+      h+=`<td><button class="cell ${on?'on':''} ${isFuture(d)?'future':''}" style="--a:${ang}" data-h="${hb.id}" data-d="${d}" aria-pressed="${on}" aria-label="${esc(hb.name)} ${d}일"></button></td>`;
+    }
+    h+=`</tr>`;
+  });
+  if(editing) h+=`<tr><th class="name" style="border:none;padding-top:8px"><button class="btn" id="addHabit">+ 습관 추가</button></th></tr>`;
+  // daily sum row
+  const per=dailyCounts();
+  h+='<tr class="sum"><th>합계</th>';
+  for(let d=1;d<=n;d++) h+=`<td>${per[d-1]||''}</td>`;
+  h+='</tr></tbody>';
+  $('tracker').innerHTML=h;
+  $('editBtn').textContent=editing?'편집 완료':'습관 편집';
+  const proxy=parent.document?.getElementById('habit-edit-proxy');if(proxy)proxy.textContent=$('editBtn').textContent;
+  renderCharts(per);
+  renderSleep();
+}
+
+function dailyCounts(){
+  const M=months[mkey()], n=dim(), arr=new Array(n).fill(0);
+  habits.forEach(hb=>(M.c[hb.id]||[]).forEach(d=>{if(d<=n)arr[d-1]++}));
+  return arr;
+}
+
+function renderCharts(per){
+  const n=dim(), H=habits.length||1, M=months[mkey()];
+  const lastDay=(view.y===now.getFullYear()&&view.m===now.getMonth())?now.getDate():(new Date(view.y,view.m,1)>now?0:n);
+  const elapsed=per.slice(0,lastDay);
+  const total=elapsed.reduce((a,b)=>a+b,0);
+  const avg=lastDay?total/lastDay:0;
+  const rate=lastDay?Math.round(total/(lastDay*H)*100):0;
+  // longest run of days where every habit was kept
+  let best=0,run=0; elapsed.forEach(c=>{run=(c===H&&H>0)?run+1:0;best=Math.max(best,run)});
+  const bestDay=elapsed.length?Math.max(...elapsed):0;
+  $('stats').innerHTML=`
+    <div class="stat"><b>${rate}%</b><span>이번 달 달성률</span></div>
+    <div class="stat"><b>${avg.toFixed(1)}<small style="font-size:.5em">/${H}</small></b><span>하루 평균</span></div>
+    <div class="stat"><b>${bestDay}</b><span>최고 기록</span></div>
+    <div class="stat"><b>${best}일</b><span>전부 지킨 연속</span></div>`;
+
+  // bar chart
+  const bw=22, padL=28, padB=26, padT=10, ch=170;
+  const W=padL+n*bw+6, Ht=padT+ch+padB;
+  const y=v=>padT+ch-(v/H)*ch;
+  let s=`<svg viewBox="0 0 ${W} ${Ht}" width="${W}" height="${Ht}" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<defs><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" style="stroke:var(--accent)" stroke-width="1.4"/></pattern></defs>`;
+  const step=H<=6?1:H<=12?2:Math.ceil(H/6);
+  for(let v=0;v<=H;v+=step){
+    s+=`<line x1="${padL}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-dasharray="${v?'2 3':'0'}"/>`;
+    s+=`<text x="${padL-6}" y="${y(v)+5}" text-anchor="end" font-size="14">${v}</text>`;
+  }
+  const cxOf=i=>padL+i*bw+bw/2;
+  const upto=lastDay||0, seen=per.slice(0,upto), peak=seen.length?Math.max(...seen):0;
+  const pts=seen.map((v,i)=>[cxOf(i),y(v)]);
+  if(pts.length){
+    const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+    s+=`<path d="${line} L${pts[pts.length-1][0]} ${y(0)} L${pts[0][0]} ${y(0)} Z" fill="url(#hatch)" style="opacity:.5"/>`;
+    s+=`<path d="${line}" fill="none" style="stroke:var(--accent)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+    pts.forEach((p,i)=>{
+      const v=seen[i], last=i===pts.length-1;
+      s+=`<circle cx="${p[0]}" cy="${p[1]}" r="${last?5:3.4}" style="fill:${last?'var(--accent)':'var(--paper)'};stroke:var(--accent)" stroke-width="1.8"><title>${i+1}일: ${v}개</title></circle>`;
+      if(last||(v===peak&&seen.indexOf(v)===i&&v>0)) s+=`<text x="${p[0]}" y="${p[1]-10}" text-anchor="middle" font-size="15" style="fill:var(--ink)">${v}개</text>`;
+    });
+  }
+  per.forEach((v,i)=>{
+    const d=i+1,x=padL+i*bw+3;
+    if(d===1||d%5===0||isToday(d)) s+=`<text x="${x+(bw-6)/2}" y="${Ht-6}" text-anchor="middle" font-size="14" ${isToday(d)?'style="fill:var(--accent);font-weight:700"':''}>${d}</text>`;
+  });
+  s+='</svg>';
+  $('dayChart').outerHTML=s.replace('<svg ','<svg id="dayChart" role="img" aria-label="날짜별 지킨 습관 개수 꺾은선 그래프" ');
+
+  // per-habit bars
+  const denom=lastDay||n;
+  $('habitBars').innerHTML=habits.map((hb,i)=>{
+    const c=(M.c[hb.id]||[]).filter(d=>d<=denom).length;
+    const p=denom?Math.round(c/denom*100):0;
+    return `<div class="hbar" style="--c:${color(i)}"><span class="nm" title="${esc(hb.name)}">${esc(hb.name)}</span><span class="track"><span class="fill" style="display:block;width:${p}%"></span></span><span class="pct">${p}%</span></div>`;
+  }).join('')||'<p class="hint">습관을 추가하면 여기에 달성률이 보여요.</p>';
+}
+
+function stepLabel(st){const m=Math.round(S0+st*30);const hh=((Math.floor(m/60)%24)+24)%24,mm=((m%60)+60)%60;return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`}
+
+function renderSleep(){
+  const M=months[mkey()], n=dim();
+  const padL=44, padT=14, ch=260, padB=24;
+  const W=Math.max(420,Math.floor($('sleepSvg').parentElement.clientWidth||760)),cw=(W-padL-8)/n,Ht=padT+ch+padB;
+  const records=Object.values(M.s).filter(r=>Array.isArray(r)&&r.length>=2);
+  const low=Math.floor(Math.min(0,...records.map(r=>r[0]))/2)*2;
+  const high=Math.ceil(Math.max(32,...records.map(r=>r[1]))/2)*2;
+  const y=st=>padT+(st-low)/(high-low)*ch;
+  let s=`<svg id="sleepSvg" role="img" aria-label="수면 기록" viewBox="0 0 ${W} ${Ht}" width="${W}" height="${Ht}" xmlns="http://www.w3.org/2000/svg">`;
+  for(let st=low;st<=high;st+=Math.max(2,Math.ceil((high-low)/32)*2)){
+    s+=`<line x1="${padL}" x2="${W}" y1="${y(st)}" y2="${y(st)}" stroke="var(--line)" stroke-dasharray="2 3"/>`;
+    const hh=((Math.floor((S0+st*30)/60))%24+24)%24;
+    s+=`<text x="${padL-8}" y="${y(st)+5}" text-anchor="end" font-size="14">${hh}시</text>`;
+  }
+  let sum=0,cnt=0;
+  for(let d=1;d<=n;d++){
+    const x=padL+(d-1)*cw, cx=x+cw/2, rec=M.s[d];
+    s+=`<g class="col" data-sd="${d}"><rect x="${x}" y="${padT}" width="${cw}" height="${ch}" fill="transparent"/>`;
+    if(rec){
+      const [b,w]=rec, y1=y(b), y2=y(w);
+      sum+=(w-b)*30;cnt++;
+      s+=`<line x1="${cx}" x2="${cx}" y1="${y1}" y2="${y2}" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>`;
+      const dates=recordDates(d,rec);
+      s+=`<title>${dates.bedDate} ${stepLabel(b)} ~ ${dates.wakeDate} ${stepLabel(w)} (${((w-b)/2).toFixed(1)}시간)</title>`;
+    }
+    s+=`</g>`;
+    if(d===1||d%5===0||isToday(d)) s+=`<text x="${cx}" y="${Ht-6}" text-anchor="middle" font-size="14" ${isToday(d)?'style="fill:var(--accent);font-weight:700"':''}>${d}</text>`;
+  }
+  s+='</svg>';
+  $('sleepSvg').outerHTML=s;
+  $('sAvg').textContent=cnt?`평균 ${(sum/cnt/60).toFixed(1)}시간 · ${cnt}일 기록`:'그래프의 날짜를 누르거나 날짜를 골라 기록하세요';
+  if(sleepFormMonth!==mkey()||!$('sBedDate').value){
+    sleepFormMonth=mkey();
+    syncSleepForm(isToday(now.getDate())?now.getDate():1);
+  }
+}
+
+let sleepFormMonth='';
+const dateText=d=>`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+function dateMs(value){
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(value))throw Error('잠든 날짜와 일어난 날짜를 모두 선택하세요.');
+ const ms=Date.parse(value+'T00:00:00Z');
+ if(!Number.isFinite(ms)||dateText(new Date(ms))!==value)throw Error('올바른 날짜를 선택하세요.');
+ return ms;
+}
+function nextDate(value){return dateText(new Date(dateMs(value)+86400000));}
+function recordDates(day,rec){
+ const wake=Date.UTC(view.y,view.m,+day),anchor=wake-86400000+S0*60000;
+ return {bedDate:dateText(new Date(anchor+rec[0]*30*60000)),wakeDate:dateText(new Date(anchor+rec[1]*30*60000))};
+}
+
+const sleepPeriods={sBed:'am',sWake:'am'};
+function setPeriod(id,ap){sleepPeriods[id]=ap;document.querySelectorAll('[data-ap-target="'+id+'"]').forEach(b=>{const selected=b.dataset.ap===ap;b.setAttribute('aria-pressed',String(selected));});}
+function setSleepTime(id,step){const m=Math.round(S0+step*30),h=((Math.floor(m/60)%24)+24)%24,min=((m%60)+60)%60;setPeriod(id,h>=12?'pm':'am');$(id).value=String(h%12||12).padStart(2,'0')+':'+String(min).padStart(2,'0');}
+function parseSleepTime(id){
+ const raw=$(id).value.trim();let h,m;
+ if(/^\d{1,2}:\d{2}$/.test(raw)){[h,m]=raw.split(':').map(Number);}
+ else if(/^\d{1,4}$/.test(raw)){if(raw.length<=2){h=Number(raw);m=0;}else{h=Number(raw.slice(0,-2));m=Number(raw.slice(-2));}}else throw Error('시각을 7:30 또는 730처럼 입력하세요.');
+ if(h<1||h>12||m<0||m>59)throw Error('시간은 1~12시, 분은 00~59로 입력하세요. 오전·오후는 버튼으로 선택하세요.');
+ const minutes=(h%12+(sleepPeriods[id]==='pm'?12:0))*60+m;
+ return minutes;
+}
+function fillDayChoices(id,selected){
+ const el=$(id), dates=new Set();
+ function addMonth(y,m){const count=new Date(Date.UTC(y,m+1,0)).getUTCDate();for(let d=1;d<=count;d++)dates.add(dateText(new Date(Date.UTC(y,m,d))));}
+ addMonth(view.y,view.m);
+ if(id==='sWakeDate'){
+  const bed=new Date(dateMs($('sBedDate').value));
+  addMonth(bed.getUTCFullYear(),bed.getUTCMonth());
+  addMonth(bed.getUTCFullYear(),bed.getUTCMonth()+1);
+ }
+ if(selected)dates.add(selected);
+ el.innerHTML=[...dates].sort().map(value=>{
+  const d=new Date(dateMs(value)),same=d.getUTCFullYear()===view.y&&d.getUTCMonth()===view.m;
+  const label=same?`${d.getUTCDate()}일`:`${d.getUTCMonth()+1}월 ${d.getUTCDate()}일${d.getUTCFullYear()===view.y?'':` (${d.getUTCFullYear()}년)`}`;
+  return `<option value="${value}">${label}</option>`;
+ }).join('');
+ el.value=selected;
+}
+function syncSleepForm(day){
+ const wakeDate=dateText(new Date(Date.UTC(view.y,view.m,+day)));
+ const rec=months[mkey()].s[day];
+ const bedDate=rec?recordDates(day,rec).bedDate:dateText(new Date(dateMs(wakeDate)-86400000));
+ fillDayChoices('sBedDate',bedDate);
+ fillDayChoices('sWakeDate',wakeDate);
+ setSleepTime('sBed',rec?rec[0]:6);
+ setSleepTime('sWake',rec?rec[1]:26);
+}
+function fillTimeSelects(){
+ document.querySelectorAll('[data-ap-target]').forEach(b=>b.addEventListener('click',()=>setPeriod(b.dataset.apTarget,b.dataset.ap)));
+ for(const id of ['sBed','sWake'])$(id).addEventListener('blur',()=>{try{const minutes=parseSleepTime(id);setSleepTime(id,(minutes-S0)/30);}catch{}});
+}
+
+/* ---------- undo / redo ---------- */
+const undoStack=[], redoStack=[];
+function snap(){return JSON.stringify({k:mkey(),h:habits,m:months[mkey()]})}
+function pushHistory(){undoStack.push(snap());if(undoStack.length>200)undoStack.shift();redoStack.length=0;updUndo()}
+function restore(str){
+  const o=JSON.parse(str);
+  habits=o.h; months[o.k]=o.m;
+  const [, y, m]=o.k.split('-'); view={y:+y,m:+m-1};
+  save('settings',{habits}); save(o.k,o.m); render(); updUndo();
+}
+function doUndo(){if(!undoStack.length)return;redoStack.push(snap());restore(undoStack.pop());setStatus('되돌렸어요')}
+function doRedo(){if(!redoStack.length)return;undoStack.push(snap());restore(redoStack.pop());setStatus('다시 실행했어요')}
+function updUndo(){}
+document.addEventListener('keydown',e=>{
+  if(!(e.ctrlKey||e.metaKey))return;
+  const t=e.target; if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return; // keep native undo while typing
+  const k=e.key.toLowerCase();
+  if(k==='z'&&!e.shiftKey){e.preventDefault();doUndo()}
+  else if((k==='z'&&e.shiftKey)||k==='y'){e.preventDefault();doRedo()}
+});
+
+/* ---------- drag to paint ---------- */
+let drag=null;
+function paint(cell){
+  const M=months[mkey()], hid=cell.dataset.h, d=+cell.dataset.d;
+  const set=new Set(M.c[hid]||[]);
+  if(set.has(d)===drag.on) return;
+  drag.on?set.add(d):set.delete(d);
+  M.c[hid]=[...set].sort((a,b)=>a-b);
+  cell.classList.toggle('on',drag.on); cell.setAttribute('aria-pressed',drag.on);
+  drag.changed=true;
+}
+$('tracker').addEventListener('pointerdown',e=>{
+  const cell=e.target.closest('.cell');
+  if(!cell||e.button!==0) return;
+  pushHistory();
+  drag={on:!cell.classList.contains('on'),changed:false,touch:e.pointerType==='touch'};
+  paint(cell);
+  if(!drag.touch) e.preventDefault();
+});
+document.addEventListener('pointermove',e=>{
+  if(!drag||drag.touch) return;
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  const cell=el&&el.closest&&el.closest('.cell');
+  if(cell) paint(cell);
+});
+function endDrag(){
+  if(!drag) return;
+  const changed=drag.changed; drag=null;
+  if(changed){save(mkey(),months[mkey()]);render()}
+  else {undoStack.pop();updUndo()}
+}
+document.addEventListener('pointerup',endDrag);
+document.addEventListener('pointercancel',endDrag);
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+  const cell=e.target.closest('.cell');
+  if(cell){
+    if(e.detail!==0) return; // mouse/touch handled by pointer events; this is keyboard
+    const M=months[mkey()], hid=cell.dataset.h, d=+cell.dataset.d;
+    pushHistory();
+    const set=new Set(M.c[hid]||[]);
+    set.has(d)?set.delete(d):set.add(d);
+    M.c[hid]=[...set].sort((a,b)=>a-b);
+    save(mkey(),M); render();
+    const again=document.querySelector(`.cell[data-h="${hid}"][data-d="${d}"]`); again&&again.focus();
+    return;
+  }
+  const del=e.target.closest('[data-del]');
+  if(del){pushHistory();habits=habits.filter(h=>h.id!==del.dataset.del);save('settings',{habits});render();return}
+  if(e.target.id==='addHabit'){pushHistory();const id=uid();habits.push({id,name:'새 습관'});save('settings',{habits});render();const inp=$('hn-'+id);inp&&(inp.focus(),inp.select());return}
+  const col=e.target.closest('[data-sd]');
+  if(col){syncSleepForm(+col.dataset.sd);$('sBed').focus()}
+});
+document.addEventListener('focusin',e=>{if(e.target.dataset&&e.target.dataset.hid)pushHistory()});
+document.addEventListener('input',e=>{
+  if(e.target.dataset&&e.target.dataset.hid){
+    const hb=habits.find(h=>h.id===e.target.dataset.hid); if(hb){hb.name=e.target.value.trim()||'이름 없음';save('settings',{habits})}
+  }
+});
+
+/* ---------- backup (standalone) ---------- */
+$('exportBtn').onclick=()=>{
+  const data={};
+  try{for(let i=0;i<habitStorage.length;i++){const k=habitStorage.key(i);if(k.startsWith('ht:'))data[k]=JSON.parse(habitStorage.getItem(k))}}catch(e){}
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
+  a.download=`habit-tracker-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+$('importFile').onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{
+    const data=JSON.parse(await f.text());
+    Object.entries(data).forEach(([k,v])=>{if(k.startsWith('ht:'))habitStorage.setItem(k,JSON.stringify(v))});
+    location.reload();
+  }catch(err){setStatus('백업 파일을 읽지 못했어요')}
+};
+
+$('editBtn').onclick=()=>{editing=!editing;render()};
+$('prev').onclick=async()=>{view.m--;if(view.m<0){view.m=11;view.y--}await ensureMonth();render()};
+$('next').onclick=async()=>{view.m++;if(view.m>11){view.m=0;view.y++}await ensureMonth();render()};
+$('sBedDate').onchange=()=>{
+ try{fillDayChoices('sWakeDate',nextDate($('sBedDate').value));}catch(e){$('sAvg').textContent=e.message;}
+};
+$('sleepForm').onsubmit=async e=>{
+ e.preventDefault();
+ try{
+  const bedDay=dateMs($('sBedDate').value),wakeDay=dateMs($('sWakeDate').value);
+  const bed=bedDay+parseSleepTime('sBed')*60000,wake=wakeDay+parseSleepTime('sWake')*60000;
+  if(wake<=bed)throw Error('일어난 날짜와 시각이 잠든 날짜와 시각보다 늦어야 해요.');
+  const target=new Date(wakeDay);
+  const newView={y:target.getUTCFullYear(),m:target.getUTCMonth()},day=target.getUTCDate();
+  const key=`m-${newView.y}-${String(newView.m+1).padStart(2,'0')}`;
+  // Load the target month before changing view so undo snapshots include existing records.
+  if(!months[key])months[key]=(await load(key))||{c:{},s:{}};
+  view=newView;await ensureMonth();pushHistory();
+  const anchor=wakeDay-86400000+S0*60000;
+  months[key].s[day]=[(bed-anchor)/1800000,(wake-anchor)/1800000];
+  save(key,months[key]);sleepFormMonth=key;render();syncSleepForm(day);
+ }catch(err){$('sAvg').textContent=err.message;}
+};
+$('sClear').onclick=async()=>{
+ try{
+  const target=new Date(dateMs($('sWakeDate').value));
+  const key=`m-${target.getUTCFullYear()}-${String(target.getUTCMonth()+1).padStart(2,'0')}`,day=target.getUTCDate();
+  if(!months[key])months[key]=(await load(key))||{c:{},s:{}};
+  view={y:target.getUTCFullYear(),m:target.getUTCMonth()};await ensureMonth();pushHistory();
+  delete months[key].s[day];save(key,months[key]);sleepFormMonth=key;render();syncSleepForm(day);
+ }catch(err){$('sAvg').textContent=err.message;}
+};
+
+/* ---------- boot ---------- */
+window.myPlanHabitActions={clearAll(){
+ pushHistory();
+ const all=habitStorage.read();
+ for(const k of Object.keys(all)){if(k.startsWith('ht:m-'))habitStorage.removeItem(k);}
+ for(const k of Object.keys(months))delete months[k];
+ months[mkey()]={c:{},s:{}};save(mkey(),months[mkey()]);render();
+}};
+async function boot(){
+  fillTimeSelects();
+  // quick first paint from this browser's copy
+  const local=lsGet('settings');
+  habits=(local&&local.habits)||DEFAULT_HABITS.map(n=>({id:uid(),name:n}));
+  months[mkey()]=lsGet(mkey())||{c:{},s:{}};
+  render();
+  await initStore();
+  if(store.kind==='db'){
+    for(const k in months) delete months[k];
+    const st=await load('settings');
+    if(st&&Array.isArray(st.habits)) habits=st.habits;
+    else save('settings',{habits});
+    await ensureMonth();
+    setStatus('내 계정에 저장돼요');
+  }else{
+    if(!local) lsSet('settings',{habits});
+    setStatus('');
+  }
+  render();
+}
+boot().then(()=>{let width=0;const parent=$('sleepSvg').parentElement;new ResizeObserver(entries=>{const next=Math.floor(entries[0].contentRect.width);if(next>0&&next!==width){width=next;renderSleep();}}).observe(parent);});
+})();
+</script>
+
+<script>
+(()=>{let last=0;const report=()=>{const h=Math.ceil(document.querySelector('.page').getBoundingClientRect().height)+24;if(h>60&&h!==last){last=h;parent.postMessage({type:'myplan-habits-height',height:h},location.origin);}};new ResizeObserver(report).observe(document.querySelector('.page'));window.addEventListener('load',report);})();
+</script>
+</body>
+</html>

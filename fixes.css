@@ -1,0 +1,125 @@
+/* fixes.css — 2026-11-05 수정분. 다른 CSS 뒤에 로드됩니다. */
+
+/* ---------- 식단: 칸 안 메뉴 ---------- */
+.meal-quantity{flex-wrap:wrap;gap:4px;}
+.meal-quantity input{width:58px;flex:0 0 58px;text-align:center;padding:6px 2px;-moz-appearance:textfield;appearance:textfield;}
+.meal-quantity input::-webkit-outer-spin-button,.meal-quantity input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.meal-quantity select{width:auto!important;flex:0 1 auto;margin-top:0!important;padding:6px 4px!important;}
+.qty-step{flex:0 0 28px;height:30px;border:1px solid #c6cede;border-radius:6px;background:#fff;color:#243970;font:inherit;font-size:16px;font-weight:700;line-height:1;cursor:pointer;padding:0;}
+.qty-step:hover{background:#eef1ff;}
+.qty-step:focus-visible{outline:2px solid #2340e8;outline-offset:1px;}
+.meal-remove{flex:0 0 auto;}
+.nut-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.nut-chip{font-size:11px;line-height:1.4;padding:2px 6px;border-radius:999px;background:#fff;color:#536077;white-space:nowrap;}
+.nut-chip b{color:#243970;font-weight:700;}
+.nut-missing{font-size:11px;color:#8a90a8;}
+
+/* ---------- 식단: 메뉴 카드 목록 (박스 안 스크롤 제거) ---------- */
+.food-grid{max-height:none!important;overflow:visible!important;}
+
+/* 담을 요일·끼니 바를 스크롤해도 위에 고정 */
+#food-picker .food-toolbar{position:sticky;top:0;z-index:5;background:#fff;padding:10px 0;margin:8px 0 12px;border-bottom:1px solid #edeef3;}
+.back-to-table{padding:7px 12px;font-size:13px;}
+
+/* ---------- 식단: 메뉴 등록 폼 ---------- */
+.menu-form select{width:100%;box-sizing:border-box;padding:12px;border:1px solid #cdd4e5;border-radius:8px;background:#fff;color:#263754;font:inherit;font-weight:400;}
+.form-error{grid-column:1/-1;margin:0;min-height:0;color:#c62f3a;font-size:13px;font-weight:600;}
+.form-error:empty{display:none;}
+
+/* ---------- 식단: 휴대폰은 하루씩 보기 ---------- */
+.meal-day-tabs{display:none;}
+@media(max-width:700px){
+  .meal-day-tabs{display:flex;flex-wrap:nowrap;justify-content:space-between;gap:4px;margin:0 0 10px;}
+  .meal-day-tabs .food-choice{flex:1 1 0;min-width:0;padding:7px 0;}
+  .meal-table{min-width:0!important;}
+  .meal-table.day-mode th[data-di]:not(.col-on),.meal-table.day-mode td[data-di]:not(.col-on){display:none;}
+  .meal-table th:first-child{width:56px!important;}
+  .nutrition-lines{flex-direction:row;flex-wrap:wrap;gap:6px 14px;}
+}
+
+/* ---------- 상단 도구: 삭제 버튼은 더보기 안으로 ---------- */
+.more-tools{position:relative;}
+.more-tools>summary{list-style:none;cursor:pointer;}
+.more-tools>summary::-webkit-details-marker{display:none;}
+.more-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:20;background:#fff;border:1px solid #dcdfea;border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(17,20,51,.12);}
+.more-pop .btn{white-space:nowrap;}
+#top-page-tools .page-tools{flex-wrap:wrap;}
+
+/* ---------- 탭: 옆으로 더 있으면 오른쪽 흐리게 ---------- */
+.app-tabs{scrollbar-width:none;}
+.app-tabs::-webkit-scrollbar{display:none;}
+.app-tabs.more-right{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent);}
+.app-tabs.more-left{-webkit-mask-image:linear-gradient(90deg,transparent,#000 44px);mask-image:linear-gradient(90deg,transparent,#000 44px);}
+.app-tabs.more-left.more-right{-webkit-mask-image:linear-gradient(90deg,transparent,#000 44px,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(90deg,transparent,#000 44px,#000 calc(100% - 44px),transparent);}
+
+/* ---------- 기록방 입력 안내 ---------- */
+.room-hint{margin:10px 0 0;font-size:13px;line-height:1.6;color:#4a5369;}
+
+/* ---------- 주간 계획: 휴대폰 폼 ---------- */
+.add-slot{margin:14px 0 0!important;}
+#panel-week .form-actions{margin-top:16px;}
+.mode-toggle label{white-space:nowrap;}
+@media(max-width:600px){
+  #panel-week .when-row{flex-wrap:wrap;align-items:flex-start;row-gap:6px;}
+  #panel-week .when-row>.label{flex:1 1 100%;flex-wrap:wrap;white-space:normal;}
+  #panel-week .when-row>.label small{margin-left:0;flex-basis:100%;}
+  #panel-week .slot-days{flex-wrap:wrap!important;width:100%!important;overflow:visible!important;row-gap:8px;}
+  #panel-week .slot-days .day-chips{flex:1 1 100%;justify-content:space-between;gap:4px;}
+  #panel-week .slot-days .chip{flex:1 1 0!important;}
+  #panel-week .slot-days .chip span{width:100%!important;}
+}
+
+/* ---------- 하단 저장 상태: 휴대폰에서 줄바꿈 ---------- */
+@media(max-width:700px){
+  .cloud-footer{flex-wrap:wrap;overflow-x:visible;}
+  .cloud-footer #cloud-status{flex:1 1 100%;max-width:none;}
+  .cloud-footer #room-access-note{white-space:normal;flex:1 1 100%;}
+  .cloud-footer .room-bottom-actions{margin-left:0;flex-wrap:wrap;}
+}
+
+/* 빈 미리보기 줄이 만드는 큰 여백 제거 */
+#panel-week .preview:empty{min-height:0;margin:0;}
+#panel-week .preview{margin:12px 0 0;}
+/* 표 왼쪽 머리글이 한 글자씩 끊기지 않게 */
+.meal-table th[scope=row]{word-break:keep-all;}
+
+/* 수량: 1줄 [− 수량 +], 2줄 [단위 ×] 로 정돈 */
+.meal-quantity{display:grid!important;grid-template-columns:28px minmax(0,1fr) 28px;gap:5px;align-items:center;}
+.meal-quantity .qty-step[data-step="-1"]{grid-column:1;grid-row:1;}
+.meal-quantity input{grid-column:2;grid-row:1;width:100%!important;flex:none;}
+.meal-quantity .qty-step[data-step="1"]{grid-column:3;grid-row:1;}
+.meal-quantity select{grid-column:1/3;grid-row:2;width:100%!important;}
+.meal-quantity .meal-remove{grid-column:3;grid-row:2;margin:0;justify-self:center;}
+@media(max-width:700px){
+  .meal-quantity{grid-template-columns:30px 64px 30px minmax(60px,90px) 1fr;}
+  .meal-quantity select{grid-column:4;grid-row:1;}
+  .meal-quantity .meal-remove{grid-column:5;grid-row:1;justify-self:end;}
+}
+
+/* 메뉴 등록 버튼 줄: 오른쪽 끝 한 줄 */
+.menu-form>.menu-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap;}
+.menu-form{margin-bottom:0;}
+
+/* 기초대사량 · 남은 칼로리 (한 줄) */
+.bmr-bar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 14px;padding:12px 14px;margin:0 0 16px;background:#f5f7ff;border:1px solid #e3e7f6;border-radius:12px;}
+.bmr-field{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:#34435b;}
+.bmr-unit{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:500;color:#536077;}
+.bmr-field input,.bmr-field select{font:inherit;font-size:14px;font-weight:500;height:38px;padding:0 8px;border:1px solid #cdd4e5;border-radius:8px;background:#fff;color:#263754;box-sizing:border-box;}
+#bmr-input{width:96px;}
+.bmr-small{width:62px;}
+.bmr-sex{display:flex;gap:4px;}
+.bmr-sex .food-choice{min-height:38px;}
+.bmr-or{align-self:center;padding:0 2px 0 6px;margin-top:18px;font-size:12px;color:#8a90a8;border-left:1px solid #d6dbea;padding-left:12px;}
+.bmr-goal{margin:0 0 0 auto;font-size:13px;color:#536077;align-self:center;margin-top:18px;}
+.bmr-goal b{color:#2340e8;font-size:16px;}
+.food-serving{color:#536077;}
+.food-card .food-pick-btn{margin-top:auto;}
+.kcal-left{padding:6px 8px;border-radius:8px;background:#e9f7ef;color:#1f7a45!important;}
+.kcal-left b{color:#156637!important;}
+.kcal-left.over{background:#fdecee;color:#b4232f!important;}
+.kcal-left.over b{color:#b4232f!important;}
+@media(max-width:700px){.bmr-or{flex-basis:100%;border-left:0;padding-left:0;margin-top:0;}.bmr-goal{margin:0;flex-basis:100%;}}
+.bmr-bar .bmr-small{width:64px!important;flex:0 0 64px;}
+.bmr-bar #bmr-input{width:96px!important;flex:0 0 96px;}
+.bmr-bar select{width:auto!important;}
+@media(max-width:700px){.bmr-bar{gap:10px 12px;}.bmr-bar .bmr-small{width:58px!important;flex-basis:58px;}}

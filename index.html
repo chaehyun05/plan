@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Plan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=controls17">
+  <link rel="stylesheet" href="meal.css?v=fix19">
+<meta name="apple-mobile-web-app-capable" content="yes"><style>body:not(.auth-ready) .app-tabs,body:not(.auth-ready) [role=tabpanel]{display:none!important}.cloud-bar{padding:18px;margin:16px 0;background:#eef1ff;border-radius:12px}.cloud-bar form{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.cloud-bar input{padding:12px;max-width:100%;box-sizing:border-box;border:1px solid #aaa;border-radius:8px;font:inherit}</style><link rel="stylesheet" href="cards.css?v=inline-status18"><link rel="stylesheet" href="fixes.css?v=fix23"></head>
+<body>
+  <main class="container">
+    <header class="app-header">
+      <h1>My Plan</h1>
+      <p class="subtitle">일정부터 식단, 할 일까지 한곳에서 관리하세요.</p>
+    </header>
+
+    <section class="cloud-bar"><form id="cloud-form"><input type="text" id="room-name" required minlength="2" maxlength="80" autocomplete="off" placeholder="예: 채현-주간플래너" aria-label="기록방 이름" aria-describedby="room-hint"><button class="btn primary" type="submit">기록방 열기</button></form><p class="room-hint" id="room-hint">이름이 곧 열쇠예요. 이름을 아는 사람은 누구나 기록을 보고 고칠 수 있으니, 남이 짐작하기 어려운 8자 이상의 이름(예: 숫자·기호 섞기)을 쓰세요.</p></section>
+    <div id="top-page-tools"><div class="page-tools" data-page-tools data-tools-for="week"><button type="button" class="btn" data-page-png="week">이미지 저장</button><button type="button" class="btn" data-page-pdf="week">PDF 저장</button><details class="more-tools"><summary class="btn">⋯ 더보기</summary><div class="more-pop"><button type="button" class="btn danger" data-page-clear="week">주간 계획 전체 삭제</button></div></details></div><div class="page-tools" data-page-tools data-tools-for="meal" hidden><button type="button" class="btn" data-page-png="meal">이미지 저장</button><button type="button" class="btn" data-page-pdf="meal">PDF 저장</button><details class="more-tools"><summary class="btn">⋯ 더보기</summary><div class="more-pop"><button type="button" class="btn danger" data-page-clear="meal">식단 전체 삭제 (메뉴 유지)</button></div></details></div><div class="page-tools" data-page-tools data-tools-for="todo" hidden><button type="button" class="btn" data-page-png="todo">이미지 저장</button><button type="button" class="btn" data-page-pdf="todo">PDF 저장</button><details class="more-tools"><summary class="btn">⋯ 더보기</summary><div class="more-pop"><button type="button" class="btn danger" data-page-clear="todo">할 일 전체 삭제</button></div></details></div><div class="page-tools" data-page-tools data-tools-for="mandal" hidden><button type="button" class="btn" data-page-png="mandal">이미지 저장</button><button type="button" class="btn" data-page-pdf="mandal">PDF 저장</button><details class="more-tools"><summary class="btn">⋯ 더보기</summary><div class="more-pop"><button type="button" class="btn danger" data-page-clear="mandal">만다라트 전체 삭제</button></div></details></div><div class="page-tools" data-page-tools data-tools-for="habits" hidden><button type="button" class="btn" data-page-png="habits">이미지 저장</button><button type="button" class="btn" data-page-pdf="habits">PDF 저장</button><details class="more-tools"><summary class="btn">⋯ 더보기</summary><div class="more-pop"><button type="button" class="btn danger" data-page-clear="habits">습관 기록 전체 삭제</button></div></details></div></div>
+    <nav class="app-tabs" role="tablist" aria-label="플래너 선택">
+      <button type="button" role="tab" id="tab-week" aria-controls="panel-week" aria-selected="true" tabindex="0">주간 계획</button>
+      <button type="button" role="tab" id="tab-meal" aria-controls="panel-meal" aria-selected="false" tabindex="-1">주간 식단표</button>
+      <button type="button" role="tab" id="tab-todo" aria-controls="panel-todo" aria-selected="false" tabindex="-1">투두리스트</button>
+      <button type="button" role="tab" id="tab-mandal" aria-controls="panel-mandal" aria-selected="false" tabindex="-1">만다라트</button>
+<button type="button" role="tab" id="tab-habits" aria-controls="panel-habits" aria-selected="false" tabindex="-1">습관 트래커</button>
+</nav>
+    <div id="panel-week" role="tabpanel" aria-labelledby="tab-week">
+    <!-- 입력 폼 -->
+    <section class="card">
+      <h2 id="form-title">할 일 추가</h2>
+      <form id="plan-form" autocomplete="off">
+        <label class="field">
+          <span class="label">할 일</span>
+          <input type="text" id="task" maxlength="40" placeholder="예: 전공 수업">
+        </label>
+
+        <div class="label-row when-row">
+          <span class="label">언제 <small>요일마다 시간이 다르면 '시간 추가'로 더 넣을 수 있어요</small></span>
+          <div class="mode-toggle">
+            <label><input type="radio" name="mode" value="end" checked> 종료 시간</label>
+            <label><input type="radio" name="mode" value="duration"> 유지 시간</label>
+          </div>
+        </div>
+        <div class="slots" id="slots"></div>
+        
+
+        <div class="preview" id="preview"></div>
+
+        <button type="button" class="add-slot" id="add-slot">+ 시간 추가</button>
+        <div class="form-actions">
+          <button type="submit" class="btn primary" id="submit-btn">추가하기</button>
+          <button type="button" class="btn hidden" id="cancel-edit">수정 취소</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 계획표 -->
+    <section class="card">
+      <div class="table-header">
+        <h2>내 계획표</h2>
+        <div class="actions">
+          <button class="btn" id="save-png" hidden>이미지 저장</button>
+          <button class="btn" id="save-pdf" hidden>PDF 저장</button>
+          <button class="btn" id="backup">백업 파일 저장</button><button class="btn primary" id="preset-open">내 시간표 불러오기</button>
+          <button class="btn" id="restore">백업 불러오기</button>
+          <button class="btn danger" id="clear-all" hidden>전체 삭제</button>
+          <input type="file" id="restore-file" accept="application/json,.json" hidden>
+        </div>
+      </div>
+
+      <div class="sheet-wrap" id="sheet-wrap">
+        <div class="sheet" id="sheet">
+          <div class="sheet-inner">
+            <aside class="side">
+              <label class="month-big">
+                <input id="month" maxlength="2" inputmode="numeric" aria-label="월">
+                <span class="month-unit">월</span>
+              </label>
+              <h3 class="sheet-title">주간 계획</h3>
+            </aside>
+            <div class="grid" id="grid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    </div>
+    <div id="panel-meal" role="tabpanel" aria-labelledby="tab-meal" hidden>
+      <section class="card">
+        <div class="table-header"><h2>주간 식단표</h2><div class="actions"><button class="btn" id="meal-backup">식단 백업</button><button class="btn" id="meal-restore">식단 불러오기</button><input id="meal-file" type="file" accept=".json,application/json" hidden></div></div>
+        <p class="meal-note">각 칸의 ＋ 메뉴 담기를 누르면 해당 요일·끼니가 선택됩니다. 아래 메뉴 카드에서 바로 담으세요. 한 끼에 여러 메뉴를 담거나 수량을 조절할 수 있어요. 1개는 등록한 1회 제공량 기준입니다.</p>
+        <div class="bmr-bar"><label class="bmr-field">기초대사량<span class="bmr-unit"><input id="bmr-input" type="number" inputmode="numeric" min="1" max="10000" step="1" placeholder="직접 입력"><span>kcal</span></span></label><span class="bmr-or">또는 자동 계산</span><div class="bmr-field"><span>성별</span><span class="bmr-sex" role="group" aria-label="성별"><button type="button" class="food-choice" data-sex="f" aria-pressed="false">여</button><button type="button" class="food-choice" data-sex="m" aria-pressed="false">남</button></span></div><label class="bmr-field">나이<span class="bmr-unit"><input id="bmr-age" class="bmr-small" type="number" inputmode="numeric" min="10" max="120" step="1"><span>세</span></span></label><label class="bmr-field">키<span class="bmr-unit"><input id="bmr-height" class="bmr-small" type="number" inputmode="decimal" min="100" max="250" step="any"><span>cm</span></span></label><label class="bmr-field">몸무게<span class="bmr-unit"><input id="bmr-weight" class="bmr-small" type="number" inputmode="decimal" min="20" max="300" step="any"><span>kg</span></span></label><label class="bmr-field">활동량<select id="bmr-activity"><option value="1">기초대사량만</option><option value="1.2">거의 안 움직임 ×1.2</option><option value="1.375">가벼운 활동 ×1.375</option><option value="1.55">보통 활동 ×1.55</option><option value="1.725">많은 활동 ×1.725</option></select></label><p class="bmr-goal" id="bmr-goal" role="status"></p></div><div class="meal-day-tabs food-choice-buttons" id="meal-day-tabs" role="group" aria-label="표시할 요일"></div><div class="meal-scroll"><table class="meal-table" id="meal-table"></table></div>
+        <h3>주간 영양 합계</h3><div id="meal-total" class="nutrition-cards"></div>
+        <p class="meal-note">입력된 영양정보만 합산합니다. ‘정보 없음’은 0이 아니며 합계에서 제외됩니다. 미입력 항목이 있으면 합계는 일부 값입니다.</p>
+      </section>
+<section class="card" id="food-picker"><h2>메뉴 골라 담기</h2><p>담을 요일·끼니를 고른 뒤 메뉴 카드의 <b>＋ 담기</b>를 누르세요. 같은 메뉴를 또 누르면 수량이 늘어납니다.</p><div class="food-toolbar"><div class="food-pick-group"><span class="food-pick-label">요일</span><div class="food-choice-buttons" role="group" aria-label="식단 요일 선택"><button type="button" class="food-choice" data-food-day="0" aria-pressed="false">일</button><button type="button" class="food-choice" data-food-day="1" aria-pressed="true">월</button><button type="button" class="food-choice" data-food-day="2" aria-pressed="false">화</button><button type="button" class="food-choice" data-food-day="3" aria-pressed="false">수</button><button type="button" class="food-choice" data-food-day="4" aria-pressed="false">목</button><button type="button" class="food-choice" data-food-day="5" aria-pressed="false">금</button><button type="button" class="food-choice" data-food-day="6" aria-pressed="false">토</button></div><select id="pick-day" hidden aria-label="선택한 요일"><option value="0" >일</option><option value="1" selected>월</option><option value="2" >화</option><option value="3" >수</option><option value="4" >목</option><option value="5" >금</option><option value="6" >토</option></select></div><div class="food-pick-group"><span class="food-pick-label">끼니</span><div class="food-choice-buttons" role="group" aria-label="식단 끼니 선택"><button type="button" class="food-choice" data-food-meal="0" aria-pressed="true">아침</button><button type="button" class="food-choice" data-food-meal="1" aria-pressed="false">점심</button><button type="button" class="food-choice" data-food-meal="2" aria-pressed="false">저녁</button></div><select id="pick-meal" hidden aria-label="선택한 끼니"><option value="0">아침</option><option value="1">점심</option><option value="2">저녁</option></select></div><p id="pick-status" role="status">월요일 아침에 담습니다.</p><button type="button" class="btn back-to-table" id="back-to-table">↑ 식단표 보기</button><label class="food-search-field">검색 <input id="food-search" type="search" placeholder="계란, 밥, 두유…"></label></div><div id="food-categories" class="food-categories"></div><div id="menu-library" class="food-grid"></div></section>
+      <section class="card">
+        <h2 id="menu-heading">메뉴 등록</h2>
+        <p class="meal-note">메뉴명만 입력해도 등록할 수 있어요. 영양정보는 등록한 1회 제공량 기준으로 입력하세요. 직접 등록하는 메뉴는 영양정보를 생략할 수 있습니다. 제품 또는 조리 상태와 중량을 확인한 영양정보를 입력하세요.</p>
+        <form id="menu-form" class="menu-form">
+          <label>메뉴명<input id="menu-name" maxlength="80" required placeholder="예: 닭가슴살 샐러드"></label>
+          <label>카테고리<select id="menu-category"><option>밥·면·곡물</option><option>고기·생선·계란</option><option>콩·두부</option><option>유제품·음료</option><option>채소·과일</option><option>외식·간편식</option><option>견과·기타</option></select></label><label>1회 제공량 (선택)<input id="menu-serving" maxlength="40" placeholder="예: 1접시 / 200g"></label>
+          <label>기준 제공량의 무게 (g)<input id="menu-grams" type="number" min="0.001" step="any" placeholder="예: 1개 20g이면 20"></label><label>개수 단위<input id="menu-count-unit" maxlength="10" placeholder="개 / 팩 / 그릇 / 회"></label><label>칼로리 (kcal)<input id="menu-kcal" type="number" min="0" max="100000" step="any" placeholder="정보 없음"></label>
+          <label>단백질 (g)<input id="menu-protein" type="number" min="0" max="100000" step="any" placeholder="정보 없음"></label>
+          <label>지방 (g)<input id="menu-fat" type="number" min="0" max="100000" step="any" placeholder="정보 없음"></label>
+          <label>탄수화물 (g)<input id="menu-carbs" type="number" min="0" max="100000" step="any" placeholder="정보 없음"></label>
+          <p id="menu-error" class="form-error" role="alert"></p><div class="actions menu-actions"><button class="btn" type="button" id="menu-cancel" hidden>수정 취소</button><button class="btn" type="button" id="menu-defaults">빠진 기본 메뉴 다시 추가</button><button class="btn primary" type="submit" id="menu-submit">메뉴 등록</button></div>
+        </form>
+      </section>
+
+    </div>
+    <div id="panel-todo" role="tabpanel" aria-labelledby="tab-todo" hidden>
+    <!-- 할 일 목록 (저장할 때 2번째 장) -->
+    <section class="card">
+      <div class="table-header">
+        <h2>할 일 목록</h2>
+        <form class="todo-add" id="todo-form" autocomplete="off">
+          <input type="text" id="todo-input" maxlength="60" placeholder="할 일을 입력하고 Enter" aria-label="새 할 일">
+          <button type="submit" class="btn primary">추가</button>
+        </form>
+      </div>
+      <div class="sheet-wrap">
+        <div class="sheet" id="todo-sheet">
+          <div class="sheet-inner">
+            <aside class="side">
+              <div class="month-big"><span class="month-value js-month"></span><span class="month-unit">월</span></div>
+              <h3 class="sheet-title">할 일</h3>
+              <p class="side-sub" id="todo-progress"></p>
+            </aside>
+            <div class="todo-list" id="todo-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    </div>
+    <div id="panel-mandal" role="tabpanel" aria-labelledby="tab-mandal" hidden>
+    <!-- 만다라트 (하나 추가할 때마다 저장할 때 한 장씩 늘어남) -->
+    <section class="card">
+      <div class="table-header">
+        <h2>만다라트</h2>
+        <div class="actions"><button type="button" class="btn danger" id="del-mandal-top" hidden>이 만다라트 삭제</button><button type="button" class="btn primary" id="add-mandal">+ 만다라트 추가</button></div>
+      </div>
+      <p class="empty-note" id="mandal-empty">만다라트를 추가하면 저장할 때 한 장씩 같이 저장돼요.</p>
+      <div id="mandal-list"></div>
+    </section>
+    </div>
+<div id="panel-habits" role="tabpanel" aria-labelledby="tab-habits" hidden><section class="card"><div class="habit-heading-row"><h2>나의 습관 트래커</h2><div class="habit-heading-actions"><button type="button" class="btn" data-habit-control="exportBtn">백업</button><button type="button" class="btn" data-habit-control="importFile">복원</button><button type="button" class="btn primary" id="habit-edit-proxy" data-habit-control="editBtn">습관 편집</button></div></div><p>체크·수면·월별 기록은 이 기록방에 함께 저장됩니다. 하단의 클라우드 저장 완료를 확인하세요.</p><iframe id="habit-frame" title="습관 트래커" style="width:100%;height:1100px;border:0;border-radius:14px" loading="lazy"></iframe></section></div>
+<footer class="cloud-footer" aria-label="클라우드 저장 상태 및 기록방 관리"><p id="cloud-status" role="status">기록방 이름을 입력하세요.</p><p class="room-help" id="room-access-note">이름을 아는 사람은 기록을 읽고 수정할 수 있습니다.</p><div class="room-bottom-actions"><button class="btn" id="cloud-logout" hidden>기록방 나가기</button><button class="btn danger" id="cloud-delete" hidden>완전삭제</button><button class="btn" id="cloud-reload" hidden>최신 기록 불러오기</button></div></footer></main>
+<dialog id="preset-dialog" class="picker-dialog"><button type="button" class="btn" id="preset-close">닫기</button><section><h2>내 시간표 불러오기</h2><p>사진을 옮긴 기본안입니다. 특히 수요일 근로, 오후 수업 종료 시각, 사진 아래로 잘린 근로는 정확하지 않을 수 있으니 아래에서 확인·수정하세요. 복싱은 저녁 19:45~21:00으로 설정했습니다.</p><p>근로는 아래 시작·종료 시각 그대로 표시하며 이동은 이 시간 안에 포함합니다. 이동을 별도 일정으로 만들거나 근로 시간을 늘리지 않습니다. 수업과 근로 사이의 빈칸은 화면에서만 중간 지점까지 채우고 원래 시각은 그대로 표시합니다. 시간표 재적용 시 이전에 불러온 기본 시간표·이동 블록만 교체하고 직접 추가한 일정은 유지합니다.</p><p class="meal-note">근로 이동시간 포함 · 별도 일정이나 앞뒤 시간 확장 없음</p><div class="meal-scroll"><table class="meal-table"><thead><tr><th>요일</th><th>일정 / 장소</th><th>시작</th><th>종료</th><th>포함</th></tr></thead><tbody id="preset-rows"></tbody></table></div><button class="btn primary" id="preset-import" type="button">확인한 시간표를 주간 계획에 추가</button><p id="preset-result" role="status"></p><p>이전에 불러온 기본 시간표는 교체합니다. 직접 추가한 일정은 유지합니다. 겹치는 일정은 안내하며, 추가 후 주간 계획에서 수정·삭제할 수 있습니다.</p></section></dialog>
+
+<dialog id="delete-dialog" style="max-width:380px;width:85%;border:1px solid #dce1ee;border-radius:16px;padding:24px">
+<form id="delete-form"><h2>기록방 완전 삭제</h2><p>현재 방의 계획·식단·메뉴·투두·만다라트를 모두 지웁니다. 복구할 수 없으니 필요한 내용은 먼저 백업하세요.</p><label>삭제 비밀번호<input id="delete-password" type="password" inputmode="numeric" autocomplete="off" required aria-label="삭제 비밀번호" style="display:block;padding:12px;margin:12px 0"></label><p id="delete-error" role="alert"></p><button type="submit" class="btn danger">삭제 확인</button> <button type="button" id="delete-cancel" class="btn">취소</button></form></dialog>
+
+  <!-- 팝업 -->
+  <div class="modal-backdrop hidden" id="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h3 id="modal-title"></h3>
+      <div id="modal-body"></div>
+      <div class="modal-buttons" id="modal-buttons"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- 이미지/PDF 저장용 라이브러리 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <script>
+window.setTimeout(function(){if(!window.myPlanCloudBooted)document.getElementById('cloud-status').textContent='연결 코드를 불러오지 못했습니다. GitHub에 cloud.js와 supabase-config.js가 함께 올라갔는지 확인하고 페이지를 새로고침하세요.';},6000);
+</script>
+<script src="supabase-config.js?v=20261104days13"></script>
+<script src="cloud.js?v=20261105fix23"></script>
+<script>window.addEventListener('message',function(e){const frame=document.getElementById('habit-frame');if(frame&&e.origin===location.origin&&e.source===frame.contentWindow&&e.data?.type==='myplan-habits-height'&&Number.isFinite(e.data.height)){frame.style.height=Math.min(20000,Math.max(300,e.data.height))+'px';}});</script>
+</body>
+</html>
