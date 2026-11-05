@@ -40,6 +40,22 @@ table.tracker{width:100%;table-layout:fixed}.tracker th.name{width:165px;min-wid
 @media(max-width:900px){.sleep-layout{grid-template-columns:1fr}.sleep-layout>.sleepform{width:100%}}
 .sleep-layout .sleep-ap{flex:0 0 auto}.sleep-layout .sleep-ap button{white-space:nowrap}
 @media(max-width:600px){.sleep-layout .sleep-entry{grid-template-columns:1fr}}
+
+/* 휴대폰 (아이폰 15 Pro 기준) */
+@media(max-width:600px){
+body{-webkit-text-size-adjust:100%}
+input,select,textarea{font-size:16px!important}
+.tracker{min-width:calc(104px + 31 * 30px)!important;border-spacing:2px}
+.tracker th.name{width:104px!important;min-width:104px!important;max-width:104px!important;font-size:13px!important;padding-right:6px}
+.tracker th.name .dot{margin-right:5px}
+.tracker thead th{font-size:11px}
+.card{padding:16px 12px!important}
+h2{font-size:17px}
+.stats{gap:14px 20px}
+.btn{min-height:40px}
+#sleepSvg{min-width:0!important;width:100%!important;height:auto!important}
+.sleep-layout>.scroll{overflow-x:hidden}
+}
 </style>
 
 <div class="page">
@@ -264,7 +280,7 @@ function stepLabel(st){const m=Math.round(S0+st*30);const hh=((Math.floor(m/60)%
 function renderSleep(){
   const M=months[mkey()], n=dim();
   const padL=44, padT=14, ch=260, padB=24;
-  const W=Math.max(420,Math.floor($('sleepSvg').parentElement.clientWidth||760)),cw=(W-padL-8)/n,Ht=padT+ch+padB;
+  const W=Math.max(300,Math.floor($('sleepSvg').parentElement.clientWidth||760)),cw=(W-padL-8)/n,Ht=padT+ch+padB;
   const records=Object.values(M.s).filter(r=>Array.isArray(r)&&r.length>=2);
   const low=Math.floor(Math.min(0,...records.map(r=>r[0]))/2)*2;
   const high=Math.ceil(Math.max(32,...records.map(r=>r[1]))/2)*2;

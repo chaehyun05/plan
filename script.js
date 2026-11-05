@@ -1042,7 +1042,29 @@ function drawSelection() {
 }
 
 const gridEl = $('grid');
+// 휴대폰(터치): 손가락으로 끌면 화면이 스크롤되고, 빈 칸을 톡 누르면 1시간 추가
+let touchTap = null, lastPointerType = 'mouse';
+gridEl.addEventListener('pointerdown', (e) => { lastPointerType = e.pointerType || 'mouse'; }, true);
 gridEl.addEventListener('pointerdown', (e) => {
+  if (e.pointerType !== 'touch' || e.target.closest('.block') || !e.target.closest('.g-day')) return;
+  touchTap = { x: e.clientX, y: e.clientY, t: Date.now() };
+});
+gridEl.addEventListener('pointerup', (e) => {
+  if (e.pointerType !== 'touch' || !touchTap) return;
+  const t = touchTap; touchTap = null;
+  if (Math.hypot(e.clientX - t.x, e.clientY - t.y) > 10 || Date.now() - t.t > 600) return;
+  if (!e.target.closest('.g-day') || e.target.closest('.block')) return;
+  const rects = [...gridEl.querySelectorAll('.g-day')].map((c) => c.getBoundingClientRect());
+  const cell = cellAt(e, rects);
+  drag = { rects, a: cell, b: cell, moved: false };
+  drawSelection();
+  drag = null;
+  const start = cell.slot * SLOT;
+  quickAdd([cell.day], start, Math.min(DAY_MIN, start + 60)).finally(clearSelection);
+});
+gridEl.addEventListener('pointercancel', () => { touchTap = null; });
+gridEl.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'touch') return;
   if (e.button !== 0 || e.target.closest('.block') || !e.target.closest('.g-day')) return;
   e.preventDefault();
   if (!e.shiftKey) clearPicked();
@@ -1060,8 +1082,8 @@ gridEl.addEventListener('pointermove', (e) => {
   drag.moved = true;
   drawSelection();
 });
-gridEl.addEventListener('pointerup', () => {
-  if (!drag) return;
+gridEl.addEventListener('pointerup', (e) => {
+  if (e.pointerType === 'touch' || !drag) return;
   const d = drag;
   drag = null;
   const range = dragRange(d);
@@ -1077,6 +1099,7 @@ gridEl.addEventListener('click', (e) => {
   const block = e.target.closest('.block');
   if (!block) return;
   const id = block.dataset.id;
+  if (lastPointerType === 'touch') { picked = new Set([id]); showPicked(); onBlock(id); return; }
   if (e.shiftKey) {
     if (picked.has(id)) picked.delete(id);
     else picked.add(id);

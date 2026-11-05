@@ -1,0 +1,61 @@
+/* 자동 생성: /mplan/ 을 PC에서 열 때도 휴대폰 규칙 적용 (genforced.py) */
+html.m-forced .card{padding: 20px;}
+html.m-forced .chip span{width: 42px; height: 42px;}
+html.m-forced .container{width:calc(100% - 40px);padding-top:28px;}
+html.m-forced .card{padding:22px;}
+html.m-forced .container{width:calc(100% - 24px);padding:22px 0 40px;}
+html.m-forced .card{padding:18px 14px;}
+html.m-forced .app-header h1{font-size:27px;}
+html.m-forced .tfield{gap:8px;}
+html.m-forced .slot-times{column-gap:8px;}
+html.m-forced .slot-times > .dash{display:none;}
+html.m-forced .slot-times > .s-start,html.m-forced .slot-times > .s-end{max-width:100%;}
+html.m-forced .tbox .time-input{width:76px;padding-inline:8px;}
+html.m-forced .slot-times{width:100%;margin-left:auto;justify-content:flex-end;}
+html.m-forced .slot-times{gap:8px;}
+html.m-forced .slot-times .tfield{gap:5px;}
+html.m-forced .slot-times .ap button{padding-inline:6px;}
+html.m-forced .slot-times .tbox .time-input{width:64px;padding-inline:6px;}
+html.m-forced #panel-week .slot-days .chip{flex-basis:36px;}
+html.m-forced #panel-week .slot-days .chip span{width:36px;}
+html.m-forced #panel-week .slot-days{gap:10px;}
+html.m-forced #panel-week .slot-days .chip-btn{padding:6px 9px;}
+html.m-forced .cloud-footer{padding:14px;gap:12px;}
+html.m-forced .cloud-footer .room-bottom-actions .btn{padding:8px 10px;}
+html.m-forced .app-tabs button{padding:12px;font-size:14px}
+html.m-forced .nutrition-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+html.m-forced .nutrition-cards strong{font-size:18px}
+html.m-forced .menu-form{grid-template-columns:repeat(2,minmax(0,1fr))}
+html.m-forced .menu-card{align-items:flex-start;flex-direction:column}
+html.m-forced .food-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+html.m-forced .food-card{padding:10px}
+html.m-forced .food-card strong{font-size:15px}
+html.m-forced .food-toolbar input{width:150px}
+html.m-forced .food-toolbar{gap:12px;}
+html.m-forced .food-toolbar .food-search-field{margin-left:auto;}
+html.m-forced .food-choice{padding:7px 9px;min-width:32px;}
+html.m-forced .habit-heading-actions .btn{padding:8px 10px;}
+html.m-forced .meal-day-tabs{display:flex;flex-wrap:nowrap;justify-content:space-between;gap:4px;margin:0 0 10px;}
+html.m-forced .meal-day-tabs .food-choice{flex:1 1 0;min-width:0;padding:7px 0;}
+html.m-forced .meal-table{min-width:0!important;}
+html.m-forced .meal-table.day-mode th[data-di]:not(.col-on),html.m-forced .meal-table.day-mode td[data-di]:not(.col-on){display:none;}
+html.m-forced .meal-table th:first-child{width:56px!important;}
+html.m-forced .nutrition-lines{flex-direction:row;flex-wrap:wrap;gap:6px 14px;}
+html.m-forced #panel-week .when-row{flex-wrap:wrap;align-items:flex-start;row-gap:6px;}
+html.m-forced #panel-week .when-row>.label{flex:1 1 100%;flex-wrap:wrap;white-space:normal;}
+html.m-forced #panel-week .when-row>.label small{margin-left:0;flex-basis:100%;}
+html.m-forced #panel-week .slot-days{flex-wrap:wrap!important;width:100%!important;overflow:visible!important;row-gap:8px;}
+html.m-forced #panel-week .slot-days .day-chips{flex:1 1 100%;justify-content:space-between;gap:4px;}
+html.m-forced #panel-week .slot-days .chip{flex:1 1 0!important;}
+html.m-forced #panel-week .slot-days .chip span{width:100%!important;}
+html.m-forced .cloud-footer{flex-wrap:wrap;overflow-x:visible;}
+html.m-forced .cloud-footer #cloud-status{flex:1 1 100%;max-width:none;}
+html.m-forced .cloud-footer #room-access-note{white-space:normal;flex:1 1 100%;}
+html.m-forced .cloud-footer .room-bottom-actions{margin-left:0;flex-wrap:wrap;}
+html.m-forced .meal-quantity{grid-template-columns:30px 64px 30px minmax(60px,90px) 1fr;}
+html.m-forced .meal-quantity select{grid-column:4;grid-row:1;}
+html.m-forced .meal-quantity .meal-remove{grid-column:5;grid-row:1;justify-self:end;}
+html.m-forced .bmr-or{flex-basis:100%;border-left:0;padding-left:0;margin-top:0;}
+html.m-forced .bmr-goal{margin:0;flex-basis:100%;}
+html.m-forced .bmr-bar{gap:10px 12px;}
+html.m-forced .bmr-bar .bmr-small{width:58px!important;flex-basis:58px;}

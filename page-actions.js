@@ -24,7 +24,7 @@ if(tabBar){tabBar.addEventListener('scroll',syncTabHint,{passive:true});window.a
  tabBar.addEventListener('click',e=>{const t=e.target.closest('[role=tab]');if(t)t.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'});});syncTabHint();}
 // 더보기 메뉴: 바깥을 누르면 닫기
 document.addEventListener('click',e=>{document.querySelectorAll('.more-tools[open]').forEach(d=>{if(!d.contains(e.target))d.open=false;});});
-document.querySelectorAll('.more-tools [data-page-clear]').forEach(b=>b.addEventListener('click',()=>{b.closest('details').open=false;}));
+document.querySelectorAll('.more-tools .more-pop .btn').forEach(b=>b.addEventListener('click',()=>{b.closest('details').open=false;}));
 
 const $=id=>document.getElementById(id);
 const names={week:'주간계획',meal:'주간식단',todo:'할일',mandal:'만다라트',habits:'습관트래커'};
@@ -40,7 +40,7 @@ async function capture(el){
  if(el.ownerDocument.fonts?.ready)await el.ownerDocument.fonts.ready;
  const width=Math.max(el.scrollWidth,el.clientWidth);const height=Math.max(el.scrollHeight,el.clientHeight);
  return window.html2canvas(el,{backgroundColor:'#fff',scale:Math.min(2,Math.sqrt(14000000/Math.max(1,width*height))),width,height,windowWidth:Math.max(1280,width+80),windowHeight:height+80,onclone(doc){
- doc.querySelectorAll('[role=tabpanel]').forEach(p=>p.hidden=false);
+ doc.documentElement.classList.remove('m','m-forced');doc.querySelectorAll('[role=tabpanel]').forEach(p=>p.hidden=false);
  doc.querySelectorAll('[data-page-tools],.tools,.sleepform,.meal-remove,.qty-step,.meal-day-tabs,[data-target]').forEach(n=>n.style.display='none');
  doc.querySelectorAll('.meal-table [data-di]').forEach(n=>n.style.display='');
  doc.querySelectorAll('.meal-table').forEach(n=>n.style.minWidth='1100px');

@@ -1,0 +1,147 @@
+/* mobile.css — 휴대폰 화면 (아이폰 15 Pro 393×852 기준)
+   html.m        : 폭 640px 이하 기기에서 자동으로 켜짐
+   html.m-forced : 주소가 /mplan/ 이면 PC에서도 항상 켜짐 */
+
+/* PC에서는 숨기는 모바일 전용 요소 */
+.tab-ico,.tab-short,.m-only{display:none;}
+
+html.m{--tabbar-h:58px;--safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);}
+html.m body{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overscroll-behavior-y:none;}
+
+/* ---------- 전체 틀 ---------- */
+html.m .container{width:auto;max-width:none;position:relative;padding:calc(var(--safe-t) + 14px) 12px calc(var(--tabbar-h) + var(--safe-b) + 28px);}
+html.m-forced .container{max-width:430px;margin:0 auto;}
+html.m .app-header{display:flex;align-items:center;min-height:44px;margin:0 0 12px;padding:0 56px 0 4px;}
+html.m .app-header h1{font-size:25px;}
+html.m .app-header .subtitle{display:none;}
+html.m .card{padding:16px 14px;border-radius:18px;margin-bottom:12px;}
+html.m .card h2{font-size:18px;margin-bottom:14px;}
+html.m .table-header{margin-bottom:14px;gap:10px;}
+
+/* 입력칸을 누를 때 아이폰이 화면을 확대하지 않도록 16px 이상 */
+html.m input,html.m select,html.m textarea{font-size:16px!important;}
+html.m .btn{min-height:40px;}
+
+/* ---------- 상단 ⋯ 메뉴 (이미지·PDF 저장, 전체 삭제) ---------- */
+html.m #top-page-tools{position:absolute;top:calc(var(--safe-t) + 16px);right:12px;z-index:30;}
+html.m #top-page-tools .page-tools{margin:0;}
+html.m #top-page-tools .page-tools>.btn{display:none;}
+html.m .more-tools>summary{width:40px;height:40px;min-height:40px;padding:0;border-radius:50%;font-size:20px;line-height:1;}
+html.m .more-tools .more-text{display:none;}
+html.m .more-pop{display:flex;flex-direction:column;gap:6px;min-width:200px;padding:8px;border-radius:14px;}
+html.m .more-pop .btn{width:100%;justify-content:flex-start;min-height:44px;}
+html.m .more-pop .m-only{display:flex;}
+
+/* ---------- 하단 탭바 ---------- */
+html.m .app-tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;margin:0;padding:6px 4px calc(6px + var(--safe-b));display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-radius:0;overflow:visible;background:rgba(255,255,255,.94);-webkit-backdrop-filter:saturate(1.6) blur(14px);backdrop-filter:saturate(1.6) blur(14px);border-top:1px solid #e3e6f0;-webkit-mask-image:none!important;mask-image:none!important;}
+html.m-forced .app-tabs{max-width:430px;margin:0 auto;border-left:1px solid #e3e6f0;border-right:1px solid #e3e6f0;}
+html.m .app-tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:var(--tabbar-h);padding:4px 0;font-size:11px;font-weight:600;color:#8a90a8;background:transparent!important;box-shadow:none!important;border-radius:12px;}
+html.m .app-tabs button[aria-selected=true]{color:#2340e8;font-weight:800;}
+html.m .app-tabs .tab-ico{display:block;width:24px;height:24px;}
+html.m .app-tabs .tab-full{display:none;}
+html.m .app-tabs .tab-short{display:inline;}
+html.m .app-tabs button:focus-visible{outline:2px solid #2340e8;outline-offset:-2px;}
+
+/* ---------- 알림 · 팝업 ---------- */
+html.m .toast{bottom:calc(var(--tabbar-h) + var(--safe-b) + 18px);}
+html.m .modal-backdrop{align-items:flex-end;padding:0;z-index:100;}
+html.m .modal{max-width:none;border-radius:22px 22px 0 0;padding:22px 18px calc(18px + var(--safe-b));max-height:88vh;}
+html.m-forced .modal{max-width:430px;}
+html.m .modal h3{font-size:19px;}
+html.m .modal-buttons{gap:8px;}
+html.m .modal-buttons:not(.stacked) .btn{flex:1 1 0;min-height:46px;}
+html.m .modal-buttons.stacked .btn{min-height:46px;}
+html.m dialog{width:calc(100% - 20px)!important;max-width:430px!important;max-height:86vh;padding:18px!important;border-radius:18px!important;}
+
+/* ---------- 로그인 · 하단 저장 상태 ---------- */
+html.m .cloud-bar{padding:16px;margin:0 0 12px;border-radius:16px;}
+html.m .cloud-bar form{flex-direction:column;}
+html.m .cloud-bar input{width:100%;}
+html.m .cloud-bar .btn{width:100%;min-height:46px;}
+html.m .cloud-footer{flex-wrap:wrap;gap:8px 10px;padding:12px 14px;margin-top:4px;border-radius:16px;overflow:visible;}
+html.m .cloud-footer #cloud-status{flex:1 1 100%;max-width:none;font-size:13px;}
+html.m .cloud-footer #room-access-note{flex:1 1 100%;white-space:normal;}
+html.m .cloud-footer .room-bottom-actions{margin:0;flex-wrap:wrap;}
+html.m .cloud-footer .room-bottom-actions .btn{min-height:36px;padding:6px 12px;font-size:13px;}
+
+/* ---------- 시트 공통 (주간 계획 · 할 일 · 만다라트) ---------- */
+html.m .sheet-wrap{display:block;overflow:visible;}
+html.m .sheet{min-width:0!important;width:100%!important;aspect-ratio:auto;border-radius:14px;}
+html.m .sheet-inner{flex-direction:column;gap:10px;height:auto;padding:12px 8px 10px 6px;}
+html.m .side{width:auto;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;padding:0 4px;}
+html.m .month-big{gap:2px;}
+html.m .month-big input,html.m .month-big .month-value,html.m .month-big .month-measure{font-size:32px!important;}
+html.m .month-unit{font-size:14px;}
+html.m .sheet-title{margin:0;font-size:17px;}
+html.m .side-sub{margin:0 0 0 auto;font-size:12px;}
+html.m .side .side-goal{flex-basis:100%;margin:2px 0 0;font-size:13px;}
+
+/* ---------- 주간 계획 ---------- */
+html.m #panel-week .table-header .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;}
+html.m #panel-week .table-header .actions .btn{width:100%;padding-inline:6px;font-size:13px;}
+html.m #panel-week .table-header .actions #preset-open{grid-column:1/-1;order:-1;}
+html.m .grid{flex:none;grid-template-columns:30px repeat(7,minmax(0,1fr));height:860px;}
+html.m .g-head{height:28px;padding:0;justify-content:center;font-size:13px;border-bottom-width:2px;}
+html.m .g-hour{font-size:9px;padding-top:2px;}
+html.m .g-day{touch-action:pan-y;}
+html.m .g-slot:hover{background:transparent;}
+html.m .block{left:1px;right:1px;padding:3px 3px;border-radius:6px;font-size:10px;line-height:1.2;}
+html.m .block b{white-space:normal;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;}
+html.m .block small{font-size:8px;white-space:normal;}
+html.m .block.tiny{padding:0 3px;border-radius:4px;font-size:9px;}
+html.m .block.tiny b{display:block;-webkit-line-clamp:1;white-space:nowrap;}
+html.m .block.tiny small{display:none;}
+html.m .drag-sel{left:1px;right:1px;font-size:9px;border-radius:6px;padding:2px;}
+html.m .when-row{flex-wrap:wrap;align-items:flex-start;row-gap:6px;}
+html.m .when-row>.label{flex:1 1 100%;flex-wrap:wrap;}
+html.m .when-row>.label small{margin-left:0;flex-basis:100%;}
+html.m #panel-week .slot{flex-wrap:wrap;}
+html.m #panel-week .slot-days{flex-wrap:wrap!important;width:100%!important;overflow:visible!important;row-gap:8px;gap:8px;}
+html.m #panel-week .slot-days .day-chips{flex:1 1 100%;justify-content:space-between;gap:4px;}
+html.m #panel-week .slot-days .chip{flex:1 1 0!important;}
+html.m #panel-week .slot-days .chip span{width:100%!important;}
+html.m #panel-week .slot-times{width:100%;margin-left:0;justify-content:flex-start;gap:8px;}
+html.m #panel-week .slot-times>.dash{display:none;}
+html.m #panel-week .form-actions .btn{min-height:46px;flex:1;}
+html.m #panel-week .form-actions{display:flex;gap:8px;}
+
+/* ---------- 할 일 ---------- */
+html.m .todo-add{max-width:none;width:100%;flex:1 1 100%;}
+html.m .mandal{flex:none;}
+html.m .todo-add .btn{min-width:64px;}
+html.m .todo-list{display:flex!important;flex-direction:column;border-top-width:2px;padding-top:0;}
+html.m .todo-item,html.m .todo-list.dense .todo-item{min-height:48px;font-size:15px;gap:12px;padding:0 40px 0 2px;}
+html.m .todo-check{width:22px;height:22px;border-width:2px;border-radius:6px;}
+html.m .todo-check::after{width:11px;height:6px;border-left-width:2px;border-bottom-width:2px;transform:translateY(-1px) rotate(-45deg);}
+html.m .todo-text{white-space:normal;overflow-wrap:anywhere;padding:12px 0;}
+html.m .todo-del{opacity:1;font-size:22px;width:40px;height:40px;right:0;}
+html.m .todo-item.blank~.todo-item.blank{display:none;}
+
+/* ---------- 만다라트 ---------- */
+html.m #panel-mandal .table-header .actions{display:flex;gap:8px;}
+html.m .mandal{height:auto;width:100%;gap:4px;}
+html.m .m-block{border-width:1.5px;border-radius:6px;}
+html.m .m-cell{padding:2px;font-size:9px;line-height:1.2;}
+html.m .m-cell.main{font-size:11px;}
+html.m .m-cell.small{font-size:8px;}
+html.m .m-cell.tiny{font-size:7.5px;}
+html.m .m-cell:focus{box-shadow:inset 0 0 0 2px #2340e8;}
+html.m .mandal-bar .btn{min-height:36px;font-size:13px;}
+
+/* ---------- 식단 ---------- */
+html.m .meal-note{font-size:13px;margin:8px 0 14px;}
+html.m #panel-meal .table-header .actions{display:flex;gap:6px;}
+html.m #panel-meal .table-header .actions .btn{padding:6px 10px;font-size:13px;}
+html.m #food-picker .food-toolbar{top:calc(var(--safe-t) + 0px);}
+html.m .food-pick-btn{min-height:42px;}
+html.m .food-card details .actions .btn{min-height:38px;}
+html.m .menu-form{gap:12px;}
+html.m .menu-form>.menu-actions{justify-content:stretch;}
+html.m .menu-form>.menu-actions .btn{flex:1 1 auto;min-height:46px;}
+
+/* ---------- 습관 ---------- */
+html.m #panel-habits .card{padding:12px 6px;}
+html.m #panel-habits .habit-heading-row{padding:4px 8px 0;}
+html.m #panel-habits .card>p{padding:0 8px;font-size:13px;}
+html.m #habit-frame{border-radius:12px!important;}
+html.m .more-tools>summary{display:flex;align-items:center;justify-content:center;padding-bottom:6px;}
