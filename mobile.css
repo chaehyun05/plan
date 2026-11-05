@@ -145,3 +145,8 @@ html.m #panel-habits .habit-heading-row{padding:4px 8px 0;}
 html.m #panel-habits .card>p{padding:0 8px;font-size:13px;}
 html.m #habit-frame{border-radius:12px!important;}
 html.m .more-tools>summary{display:flex;align-items:center;justify-content:center;padding-bottom:6px;}
+html.m .app-header h1{gap:8px;flex:1 1 auto;}
+html.m .title-meta{font-size:13px;}
+html.m .title-room{max-width:none;}
+html.m .app-header h1{white-space:nowrap;min-width:0;}
+html.m .title-meta{flex:1 1 auto;overflow:hidden;}

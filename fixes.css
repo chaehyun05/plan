@@ -123,3 +123,13 @@
 .bmr-bar #bmr-input{width:96px!important;flex:0 0 96px;}
 .bmr-bar select{width:auto!important;}
 @media(max-width:700px){.bmr-bar{gap:10px 12px;}.bmr-bar .bmr-small{width:58px!important;flex-basis:58px;}}
+
+/* 제목 옆: 사이트 이름 · 기록방 이름 */
+.app-header h1{display:flex;align-items:baseline;gap:12px;min-width:0;}
+.title-meta{display:inline-flex;align-items:center;gap:6px;min-width:0;font-size:14px;font-weight:600;letter-spacing:0;color:#6A6F8E;}
+.title-meta>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.title-site{flex:0 0 auto;padding:2px 8px;border-radius:999px;background:#E8ECFF;color:#2340E8;font-weight:700;font-size:12px;}
+.title-room{min-width:0;max-width:340px;}
+.title-site:not([hidden])+.title-room:not([hidden])::before{content:"· ";color:#9DA1B8;}
+.app-header h1{white-space:nowrap;}
+.title-meta{overflow:hidden;}
