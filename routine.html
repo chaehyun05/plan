@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>My Plan 루틴</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Poppins:wght@500;600&display=swap">
+<style>
+/* Matches My Plan's habits page: ink #111433, accent #2340E8, soft #EEF1FF, light only */
+:root{--ink:#111433;--muted:#6A6F8E;--line:#DCDFEA;--soft:#EEF1FF;--accent:#2340E8;--bg:#fff;--track:#F0F2F7;--done:#FFF4B8;--warn:#C62828;
+  --body:"Noto Sans KR",-apple-system,"Apple SD Gothic Neo",sans-serif;--num:Poppins,var(--body);color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.5;font-size:15px}
+[hidden]{display:none!important}
+.page{display:flex;flex-direction:column;gap:18px;padding:0 2px 12px}
+button,input,select,textarea{font:inherit;color:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 13px;cursor:pointer;font-size:13px;font-weight:700;line-height:1.4}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.sm{padding:4px 9px;font-size:12px;border-radius:8px}
+.btn.danger{color:var(--warn)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+input,select,textarea{border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:#fff;min-width:0}
+h2{font-size:19px;font-weight:900;margin:0;letter-spacing:-.02em}
+h3{font-size:15px;font-weight:700;margin:0}
+.muted{color:var(--muted)}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums}
+.card{background:#fff;border:1px solid #EDEEF3;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.between{justify-content:space-between}
+.note{font-size:13px;color:var(--muted);margin:0}
+
+/* top */
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid #EDEEF3}
+.top h1{margin:0;font-size:26px;font-weight:900;letter-spacing:-.02em}
+.streak{font-size:13px;color:var(--muted);text-align:right}
+.streak b{display:block;font-family:var(--num);font-size:26px;color:var(--accent);line-height:1.1}
+.ddays{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.dd{flex:0 0 auto;min-width:128px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:1px;cursor:pointer;background:#fff;text-align:left}
+.dd b{font-family:var(--num);font-size:20px;color:var(--accent)}
+.dd span{font-size:13px;font-weight:700}
+.dd small{font-size:12px;color:var(--muted)}
+
+/* view tabs */
+.vtabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+.vtabs button{border:0;background:none;padding:9px 12px;font-weight:700;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+.vtabs button[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+
+/* nav */
+.nav{display:flex;align-items:center;gap:8px}
+.nav .label{font-weight:900;font-size:18px;min-width:0}
+.nav button{width:34px;height:34px;padding:0}
+
+/* progress */
+.prog{display:flex;flex-direction:column;gap:6px}
+.track{height:8px;background:var(--track);border-radius:4px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);border-radius:4px;transition:width .2s}
+
+/* items */
+.area-h{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--muted);margin-top:4px}
+.sw{width:10px;height:10px;border-radius:3px;background:var(--c);flex:none}
+.item{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:#fff}
+.item input[type=checkbox]{width:19px;height:19px;accent-color:var(--accent);margin:0;cursor:pointer}
+.item .t{min-width:0;overflow-wrap:anywhere;font-weight:500}
+.item .sub{font-size:12px;color:var(--muted);display:block;font-weight:400}
+.item .r{font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
+.item.done{background:var(--done);border-color:#F0DE7A}
+.item.done .t{text-decoration:line-through;text-decoration-color:#B9A23A}
+.list{display:flex;flex-direction:column;gap:6px}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--soft);color:var(--accent);white-space:nowrap}
+.pill.gray{background:var(--track);color:var(--muted)}
+a.link{color:var(--accent);font-size:12px;font-weight:700;text-decoration:none;margin-left:6px}
+.empty{font-size:14px;color:var(--muted);padding:6px 0}
+
+/* week grid */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.wk{border-collapse:separate;border-spacing:4px;width:100%;min-width:560px}
+.wk th{font-size:12px;font-weight:500;color:var(--muted);text-align:center;padding-bottom:4px}
+.wk th.nm,.wk td.nm{text-align:left;font-size:14px;font-weight:500;color:var(--ink);width:38%}
+.wk th.today{color:var(--accent);font-weight:700}
+.wk td.nm .sw{display:inline-block;margin-right:6px;vertical-align:1px}
+.wk td.cnt{font-family:var(--num);font-size:12px;color:var(--muted);text-align:right;white-space:nowrap;width:60px}
+.cell{display:block;width:100%;aspect-ratio:1/1;max-height:34px;min-width:24px;border:1px solid #E3E6EF;border-radius:7px;background:#F4F5F9;cursor:pointer;padding:0}
+.cell.on{background:var(--c,var(--accent));border-color:var(--c,var(--accent))}
+
+/* month */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal .h{font-size:12px;color:var(--muted);text-align:center;padding-bottom:2px}
+.cal .h.sun{color:var(--warn)}
+.day{border:1px solid #EDEEF3;border-radius:8px;min-height:62px;padding:4px 5px;display:flex;flex-direction:column;gap:2px;cursor:pointer;background:#fff;text-align:left;min-width:0}
+.day.out{visibility:hidden}
+.day .dn{font-family:var(--num);font-size:12px;color:var(--muted)}
+.day.today{border-color:var(--accent)}
+.day.today .dn{color:var(--accent);font-weight:600}
+.day .bar{height:4px;border-radius:2px;background:var(--track);overflow:hidden;margin-top:auto}
+.day .bar i{display:block;height:100%;background:var(--accent)}
+.day .ev{font-size:11px;font-weight:700;color:#fff;background:var(--c,var(--accent));border-radius:4px;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day .pl{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* year */
+.months{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px;align-items:end;height:120px}
+.mo{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;cursor:pointer;border:0;background:none;padding:0}
+.mo .b{width:100%;max-width:26px;flex:1;background:var(--track);border-radius:4px;display:flex;align-items:flex-end;overflow:hidden}
+.mo .b i{display:block;width:100%;background:var(--accent)}
+.mo span{font-size:11px;color:var(--muted)}
+.mo.cur span{color:var(--accent);font-weight:700}
+.goal{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:10px}
+.goal .track{grid-column:1/-1}
+.goal .logs{grid-column:1/-1;font-size:12px;color:var(--muted)}
+
+/* events */
+.ev-card{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ev-card .dday{font-family:var(--num);font-size:22px;color:var(--accent);font-weight:600}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700}
+.form .full{grid-column:1/-1}
+.modes{display:flex;gap:6px;flex-wrap:wrap}
+.modes label{flex-direction:row;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-weight:500;cursor:pointer}
+.modes input{accent-color:var(--accent)}
+.modes label:has(input:checked){border-color:var(--accent);background:var(--soft);color:var(--accent);font-weight:700}
+.subj{display:grid;grid-template-columns:minmax(0,1fr) 80px 70px auto;gap:6px}
+.wkplan{display:flex;flex-direction:column;gap:6px}
+.wkplan .w{display:grid;grid-template-columns:22px 92px minmax(0,1fr);gap:8px;align-items:center}
+.wkplan .w input[type=text]{width:100%}
+.wkplan .w.cur .wd{color:var(--accent);font-weight:700}
+.wkplan .wd{font-size:12px;color:var(--muted);font-family:var(--num)}
+details.plan summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--accent)}
+.planlist{display:flex;flex-direction:column;gap:2px;margin-top:8px;max-height:360px;overflow:auto;font-size:13px}
+.planlist .pd{display:grid;grid-template-columns:72px minmax(0,1fr);gap:8px;padding:4px 0;border-top:1px dashed #EDEEF3}
+.planlist .pd.today{background:var(--soft);border-radius:6px}
+.planlist .pd .d{font-family:var(--num);color:var(--muted);font-size:12px;padding-top:1px}
+.planlist .pd s{color:var(--muted)}
+.phase{font-size:11px;font-weight:700;color:var(--muted)}
+
+/* manage */
+.mrow{display:grid;grid-template-columns:130px minmax(0,1fr) 110px 70px auto;gap:6px;align-items:center}
+.mrow input,.mrow select{width:100%}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+
+@media(max-width:640px){
+  .card{padding:14px}
+  .top h1{font-size:22px}
+  .form{grid-template-columns:1fr}
+  .subj{grid-template-columns:minmax(0,1fr) 64px 56px auto}
+  .mrow{grid-template-columns:1fr 1fr;padding:8px;border:1px solid #EDEEF3;border-radius:10px}
+  .mrow .mt{grid-column:1/-1}
+  .day{min-height:48px;padding:3px}
+  .day .pl{display:none}
+  .months{height:96px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="page" id="page">
+  <div class="top">
+    <div>
+      <div class="muted" id="today-label" style="font-size:13px"></div>
+      <h1>인생 루틴</h1>
+    </div>
+    <div class="streak">일간 루틴 연속<b id="streak">0일</b></div>
+  </div>
+
+  <div class="ddays" id="ddays" aria-label="다가오는 일정"></div>
+
+  <div class="vtabs" role="tablist" id="vtabs">
+    <button role="tab" data-v="day" aria-selected="true">일간</button>
+    <button role="tab" data-v="week" aria-selected="false">주간</button>
+    <button role="tab" data-v="month" aria-selected="false">월간</button>
+    <button role="tab" data-v="year" aria-selected="false">연간</button>
+    <button role="tab" data-v="events" aria-selected="false">일정·공부계획</button>
+    <button role="tab" data-v="manage" aria-selected="false">루틴 관리</button>
+  </div>
+
+  <section id="v-day"></section>
+  <section id="v-week" hidden></section>
+  <section id="v-month" hidden></section>
+  <section id="v-year" hidden></section>
+  <section id="v-events" hidden></section>
+  <section id="v-manage" hidden></section>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(()=>{
+'use strict';
+const KEY='myplan-routine-v1';
+const ENGLISH_URL='https://chaehyun05.github.io/english/';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const addDays=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return ymd(d)};
+const diff=(a,b)=>Math.round((parse(b)-parse(a))/864e5);
+const monday=s=>{const d=parse(s);d.setDate(d.getDate()-((d.getDay()+6)%7));return ymd(d)};
+const WD=['일','월','화','수','목','금','토'];
+const fmtMD=s=>{const d=parse(s);return `${d.getMonth()+1}/${d.getDate()}(${WD[d.getDay()]})`};
+let TODAY=ymd(new Date());
+const uid=()=>Math.random().toString(36).slice(2,9);
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('on'),1800)}
+
+/* ---------- storage: parent's localStorage so the cloud room saves it ---------- */
+const STORE=(()=>{try{if(parent!==window&&parent.localStorage)return parent.localStorage}catch(e){}return localStorage})();
+function read(){try{return JSON.parse(STORE.getItem(KEY)||'null')}catch(e){return null}}
+function write(){try{STORE.setItem(KEY,JSON.stringify(S))}catch(e){toast('저장에 실패했어요. 저장 공간을 확인해 주세요.')}}
+
+/* ---------- defaults ---------- */
+const FREQ={daily:'매일',weekly:'주',monthly:'월',yearly:'연'};
+function seed(){
+  const A=[{id:'study',name:'공부·자격증',c:'#2340E8'},{id:'career',name:'커리어·코딩',c:'#7A3FE0'},{id:'health',name:'건강·운동',c:'#13996A'},{id:'life',name:'돈·생활',c:'#D9771E'}];
+  const R=(area,title,freq,target,extra)=>({id:uid(),area,title,freq,target,...(extra||{})});
+  const s={v:1,areas:A,routines:[
+    R('study','영어 할당량 채우기','daily',1,{link:ENGLISH_URL}),
+    R('study','한능검 강의 1강 + 기출','daily',1),
+    R('study','컴퓨터일반 전공 복습','weekly',3),
+    R('career','코딩테스트 1문제','daily',1),
+    R('career','개인 프로젝트 작업','weekly',2),
+    R('career','공부 기록·회고 글 쓰기','monthly',2),
+    R('health','7시간 이상 자기','daily',1),
+    R('health','스트레칭 10분','daily',1),
+    R('health','복싱','weekly',5),
+    R('life','가계부 기록','daily',1),
+    R('life','방 정리','weekly',1),
+    R('life','한 달 지출 결산','monthly',1),
+    R('life','책 한 권 읽기','monthly',1),
+    R('study','자격증 취득 (한능검 3급·토익 470+)','yearly',2),
+    R('life','저축하기 (한 달에 한 번 기록)','yearly',12)
+  ],checks:{},events:[],memo:{}};
+  s.events.push(makeEvent({name:'한능검 82회 원서 접수',date:'2027-01-12',area:'study',mode:'none'}));
+  s.events.push(makeEvent({name:'한능검 82회 시험',date:'2027-02-13',area:'study',mode:'auto',start:TODAY,dailyMin:60,subjects:[{name:'한국사 강의',units:40,unit:'강'}]}));
+  return s;
+}
+let S=read();
+if(!S||!S.routines){S=seed();write()}
+S.checks=S.checks||{};S.events=S.events||[];S.memo=S.memo||{};
+
+/* ---------- helpers ---------- */
+const area=id=>S.areas.find(a=>a.id===id)||S.areas[0];
+const isOn=(d,id)=>(S.checks[d]||[]).includes(id);
+function toggle(d,id,force){const a=S.checks[d]||(S.checks[d]=[]);const i=a.indexOf(id);const on=force!==undefined?force:i<0;
+  if(on&&i<0)a.push(id);if(!on&&i>=0)a.splice(i,1);if(!a.length)delete S.checks[d];write()}
+function periodRange(freq,d){
+  if(freq==='weekly'){const s=monday(d);return [s,addDays(s,6)]}
+  const x=parse(d);
+  if(freq==='monthly'){return [ymd(new Date(x.getFullYear(),x.getMonth(),1)),ymd(new Date(x.getFullYear(),x.getMonth()+1,0))]}
+  if(freq==='yearly'){return [`${x.getFullYear()}-01-01`,`${x.getFullYear()}-12-31`]}
+  return [d,d]}
+function countIn(id,from,to){let n=0;for(const k in S.checks){if(k>=from&&k<=to&&S.checks[k].includes(id))n++}return n}
+function logDates(id,from,to){return Object.keys(S.checks).filter(k=>k>=from&&k<=to&&S.checks[k].includes(id)).sort()}
+const daily=()=>S.routines.filter(r=>r.freq==='daily');
+function dayRate(d){const ds=daily();if(!ds.length)return 0;return ds.filter(r=>isOn(d,r.id)).length/ds.length}
+function streak(){let n=0,d=TODAY;if(dayRate(d)<.8)d=addDays(d,-1);while(dayRate(d)>=.8&&n<3650){n++;d=addDays(d,-1)}return n}
+const ddLabel=n=>n===0?'D-DAY':n>0?'D-'+n:'D+'+(-n);
+
+/* ---------- study plan generation ---------- */
+function makeEvent(o){
+  const ev={id:uid(),name:o.name,date:o.date,area:o.area||'study',mode:o.mode||'none',start:o.start||TODAY,dailyMin:+o.dailyMin||60,subjects:o.subjects||[],plan:[],weeks:[]};
+  buildPlan(ev);return ev}
+function phases(n,weeks){ // split n study days (or weeks) into concept / past exams / mock / final
+  if(n<=0)return {concept:0,past:0,mock:0,final:0};
+  const final=weeks?(n>=3?1:0):(n>=10?2:n>=4?1:0),rest=n-final;
+  let concept=Math.max(1,Math.round(rest*.5)),past=Math.round(rest*.3);let mock=rest-concept-past;
+  if(mock<0){past+=mock;mock=0}
+  return {concept,past,mock,final}}
+// unit k (1-based) goes to slot floor((k-1)*count/units); returns the units that land in slot i
+function unitRange(units,i,count){const a=Math.ceil(i*units/count)+1,b=Math.ceil((i+1)*units/count);return b>=a?[a,Math.min(b,units)]:null}
+function rangeText(sub,r){if(!r)return null;return r[0]===r[1]?`${sub.name} ${r[0]}${sub.unit||''}`:`${sub.name} ${r[0]}~${r[1]}${sub.unit||''}`}
+function buildPlan(ev){
+  if(ev.mode==='auto')buildAuto(ev);
+  else if(ev.mode==='weekly')buildWeeks(ev);
+}
+function buildAuto(ev){
+  const old={};(ev.plan||[]).forEach(p=>{if(p.done)old[p.d+'|'+p.t]=true});
+  const from=ev.start, n=diff(from,ev.date); // study days = start .. day before the exam
+  const P=phases(n),subs=ev.subjects.length?ev.subjects:[{name:ev.name,units:0,unit:''}];
+  const per=Math.max(10,Math.round(ev.dailyMin/subs.length/5)*5);
+  const out=[];let i=0;
+  const push=(d,t,ph)=>out.push({d,t,ph,done:!!old[d+'|'+t]});
+  for(let k=0;k<P.concept;k++,i++){const d=addDays(from,i);
+    subs.forEach(s=>{const r=s.units>0?unitRange(s.units,k,P.concept):null;
+      const t=s.units>0?(r?`개념 · ${rangeText(s,r)}`:`복습 · ${s.name} 지난 내용 다시 보기 + 문제 풀기`):`개념 · ${s.name} 공부`;push(d,`${t} (약 ${per}분)`,'개념')})}
+  for(let k=0;k<P.past;k++,i++){const d=addDays(from,i);
+    subs.forEach(s=>push(d,`기출 · ${s.name} 기출 풀이 ${k+1}/${P.past}일차 + 오답 표시 (약 ${per}분)`,'기출'))}
+  for(let k=0;k<P.mock;k++,i++){const d=addDays(from,i);
+    push(d,k%2===0?`실전 · 모의고사 1회 시간 재고 풀기 (약 ${ev.dailyMin}분)`:`실전 · 오답 노트 정리 + 약점 단원 다시 보기 (약 ${ev.dailyMin}분)`,'실전')}
+  for(let k=0;k<P.final;k++,i++){const d=addDays(from,i);
+    push(d,k===P.final-1?'최종 · 핵심 요약만 가볍게 훑기, 수험표·신분증 챙기고 일찍 자기':'최종 · 오답 노트와 요약본 한 번 더 보기','최종')}
+  ev.plan=out}
+function buildWeeks(ev){
+  const oldW={};(ev.weeks||[]).forEach(w=>oldW[w.s]=w);
+  const first=monday(ev.start),last=monday(addDays(ev.date,-1)>=ev.start?addDays(ev.date,-1):ev.start);
+  const starts=[];for(let s=first;s<=last;s=addDays(s,7))starts.push(s);
+  const n=starts.length,P=phases(n,true);const subs=ev.subjects;
+  ev.weeks=starts.map((s,i)=>{
+    let g;
+    if(i<P.concept){g=subs.length?'개념 · '+subs.map(x=>x.units>0?(rangeText(x,unitRange(x.units,i,P.concept))||x.name+' 복습'):x.name+' 진도').join(', '):'개념 진도 나가기'}
+    else if(i<P.concept+P.past)g='기출 · '+(subs.length?subs.map(x=>x.name).join(', '):'기출')+' 기출 회독';
+    else if(i<P.concept+P.past+P.mock)g='실전 · 모의고사 2회 + 오답 정리';
+    else g='최종 점검 · 요약본, 오답 노트, 컨디션 관리';
+    const o=oldW[s];return {s,goal:o&&o.edited?o.goal:g,edited:!!(o&&o.edited),done:!!(o&&o.done)}})}
+function planFor(d){const items=[];
+  S.events.forEach(ev=>{
+    if(ev.mode==='auto')ev.plan.forEach((p,idx)=>{if(p.d===d)items.push({ev,p,idx})});
+  });return items}
+function weekGoalsFor(d){const m=monday(d),r=[];S.events.forEach(ev=>{if(ev.mode==='weekly'){const w=ev.weeks.find(w=>w.s===m);if(w)r.push({ev,w})}});return r}
+
+/* ---------- header ---------- */
+function renderTop(){
+  $('today-label').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+  $('streak').textContent=streak()+'일';
+  const up=S.events.filter(e=>e.date>=TODAY).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,6);
+  $('ddays').innerHTML=up.length?up.map(e=>`<button class="dd" data-goev="${e.id}" style="border-left:4px solid ${area(e.area).c}"><b>${ddLabel(diff(TODAY,e.date))}</b><span>${esc(e.name)}</span><small>${e.date.replace(/-/g,'.')}</small></button>`).join('')
+    :`<span class="note">다가오는 일정이 없어요. 일정·공부계획 탭에서 추가해 보세요.</span>`;
+}
+
+/* ---------- DAY ---------- */
+let dSel=TODAY;
+function itemHTML(r,d){
+  const on=isOn(d,r.id),a=area(r.area);
+  let right='';
+  if(r.freq!=='daily'){const [f,t]=periodRange(r.freq,d);const c=countIn(r.id,f,t);right=`<span class="r num">${FREQ[r.freq]} ${c}/${r.target}</span>`}
+  return `<label class="item${on?' done':''}"><input type="checkbox" data-chk="${r.id}" data-d="${d}"${on?' checked':''}>
+   <span class="t">${esc(r.title)}${r.link?`<a class="link" href="${esc(r.link)}" target="_blank" rel="noopener">열기 ↗</a>`:''}${r.freq!=='daily'?`<span class="sub">${r.freq==='weekly'?'이번 주':r.freq==='monthly'?'이번 달':'올해'} 목표 ${r.target}회 · 오늘 했으면 체크</span>`:''}</span>${right}</label>`}
+function renderDay(){
+  const d=dSel,ds=daily(),done=ds.filter(r=>isOn(d,r.id)).length,pct=ds.length?Math.round(done/ds.length*100):0;
+  const plans=planFor(d),wg=weekGoalsFor(d);
+  const pending=S.routines.filter(r=>r.freq==='weekly'||r.freq==='monthly').filter(r=>{const [f,t]=periodRange(r.freq,d);return countIn(r.id,f,t)<r.target||isOn(d,r.id)});
+  const byArea=S.areas.map(a=>{const rs=ds.filter(r=>r.area===a.id);if(!rs.length)return '';
+    return `<div class="area-h" style="--c:${a.c}"><span class="sw"></span>${esc(a.name)}</div><div class="list">${rs.map(r=>itemHTML(r,d)).join('')}</div>`}).join('');
+  $('v-day').innerHTML=`<div class="page" style="padding:0">
+   <div class="card">
+    <div class="row between">
+      <div class="nav"><button class="btn" data-dnav="-1" aria-label="이전 날">‹</button><span class="label">${d===TODAY?'오늘':fmtMD(d)}</span><button class="btn" data-dnav="1" aria-label="다음 날">›</button>${d!==TODAY?'<button class="btn sm" data-dnav="0">오늘로</button>':''}</div>
+      <span class="num muted">${done}/${ds.length}</span>
+    </div>
+    <div class="prog"><div class="track"><i style="width:${pct}%"></i></div><span class="note">${pct>=100?'오늘 일간 루틴을 모두 채웠어요.':pct>=80?'80%를 넘겼어요. 연속 기록이 이어져요.':`일간 루틴 ${pct}% · 80% 이상이면 연속 기록이 이어져요.`}</span></div>
+    ${byArea||'<p class="empty">일간 루틴이 없어요. 루틴 관리에서 추가해 주세요.</p>'}
+   </div>
+   <div class="card">
+    <div class="row between"><h3>오늘 공부 계획</h3><span class="pill">${plans.length?plans.filter(x=>x.p.done).length+'/'+plans.length:'일정 기반'}</span></div>
+    ${plans.length||wg.length?`<div class="list">${plans.map(({ev,p,idx})=>`<label class="item${p.done?' done':''}"><input type="checkbox" data-plan="${ev.id}" data-idx="${idx}"${p.done?' checked':''}><span class="t">${esc(p.t)}<span class="sub">${esc(ev.name)} · ${ddLabel(diff(d,ev.date))}</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}
+      ${wg.map(({ev,w})=>`<label class="item${w.done?' done':''}"><input type="checkbox" data-wgoal="${ev.id}" data-ws="${w.s}"${w.done?' checked':''}><span class="t">${esc(w.goal||'이번 주 목표를 적어 주세요')}<span class="sub">${esc(ev.name)} · 이번 주 목표 · ${ddLabel(diff(d,ev.date))}</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}</div>`
+      :`<p class="empty">이 날짜에 잡힌 공부 계획이 없어요. 일정·공부계획 탭에서 시험을 추가하면 날짜별 할 일이 여기에 나타나요.</p>`}
+   </div>
+   <div class="card">
+    <h3>이번 주·이번 달 루틴</h3>
+    ${pending.length?`<div class="list">${pending.map(r=>itemHTML(r,d)).join('')}</div>`:'<p class="empty">이번 주·이번 달 목표를 모두 채웠어요.</p>'}
+   </div>
+   <div class="card"><h3>오늘 한 줄</h3><input id="memo" placeholder="오늘 잘한 것, 내일 바꿀 것 한 줄" value="${esc(S.memo[d]||'')}" aria-label="오늘 한 줄 회고"></div>
+  </div>`;
+}
+
+/* ---------- WEEK ---------- */
+let wSel=monday(TODAY);
+function renderWeek(){
+  const days=[...Array(7)].map((_,i)=>addDays(wSel,i));
+  const rs=S.routines.filter(r=>r.freq==='daily'||r.freq==='weekly');
+  const rowsHTML=S.areas.map(a=>rs.filter(r=>r.area===a.id).map(r=>{
+    const cnt=days.filter(d=>isOn(d,r.id)).length,tgt=r.freq==='daily'?7:r.target;
+    return `<tr><td class="nm"><span class="sw" style="--c:${a.c}"></span>${esc(r.title)}${r.freq==='weekly'?` <span class="pill gray">주 ${r.target}회</span>`:''}</td>${days.map(d=>`<td><button class="cell${isOn(d,r.id)?' on':''}" style="--c:${a.c}" data-chk="${r.id}" data-d="${d}" aria-label="${fmtMD(d)} ${esc(r.title)}" aria-pressed="${isOn(d,r.id)}"></button></td>`).join('')}<td class="cnt">${cnt}/${tgt}</td></tr>`}).join('')).join('');
+  const plans=days.map(d=>({d,items:planFor(d),wg:weekGoalsFor(d)}));
+  const allP=plans.flatMap(x=>x.items);const doneP=allP.filter(x=>x.p.done).length;
+  const wg=weekGoalsFor(wSel);
+  const rate=Math.round(days.reduce((s,d)=>s+dayRate(d),0)/7*100);
+  $('v-week').innerHTML=`<div class="page" style="padding:0">
+   <div class="card">
+    <div class="row between"><div class="nav"><button class="btn" data-wnav="-1" aria-label="이전 주">‹</button><span class="label">${fmtMD(days[0])} – ${fmtMD(days[6])}</span><button class="btn" data-wnav="1" aria-label="다음 주">›</button>${wSel!==monday(TODAY)?'<button class="btn sm" data-wnav="0">이번 주</button>':''}</div><span class="pill">일간 평균 ${rate}%</span></div>
+    <div class="scroll"><table class="wk"><thead><tr><th class="nm">루틴</th>${days.map(d=>`<th class="${d===TODAY?'today':''}">${WD[parse(d).getDay()]}<br><span class="num">${parse(d).getDate()}</span></th>`).join('')}<th></th></tr></thead><tbody>${rowsHTML||'<tr><td class="empty">일간·주간 루틴이 없어요.</td></tr>'}</tbody></table></div>
+    <p class="note">칸을 누르면 그날 한 것으로 체크돼요.</p>
+   </div>
+   <div class="card">
+    <div class="row between"><h3>이번 주 공부 계획</h3><span class="pill">${allP.length?doneP+'/'+allP.length:'일정 기반'}</span></div>
+    ${wg.length?`<div class="list">${wg.map(({ev,w})=>`<label class="item${w.done?' done':''}"><input type="checkbox" data-wgoal="${ev.id}" data-ws="${w.s}"${w.done?' checked':''}><span class="t">${esc(w.goal)}<span class="sub">${esc(ev.name)} · 주별 목표</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}</div>`:''}
+    ${allP.length?plans.filter(x=>x.items.length).map(x=>`<div class="area-h">${fmtMD(x.d)}${x.d===TODAY?' · 오늘':''}</div><div class="list">${x.items.map(({ev,p,idx})=>`<label class="item${p.done?' done':''}"><input type="checkbox" data-plan="${ev.id}" data-idx="${idx}"${p.done?' checked':''}><span class="t">${esc(p.t)}<span class="sub">${esc(ev.name)}</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}</div>`).join(''):(!wg.length?'<p class="empty">이번 주에 잡힌 공부 계획이 없어요.</p>':'')}
+   </div></div>`;
+}
+
+/* ---------- MONTH ---------- */
+let mSel=TODAY.slice(0,7);
+function renderMonth(){
+  const [y,m]=mSel.split('-').map(Number),first=new Date(y,m-1,1),days=new Date(y,m,0).getDate(),lead=first.getDay();
+  const cells=[];for(let i=0;i<lead;i++)cells.push('<div class="day out"></div>');
+  const evs=S.events.filter(e=>e.date.startsWith(mSel));
+  for(let k=1;k<=days;k++){const d=`${mSel}-${pad(k)}`,r=dayRate(d),e=evs.filter(x=>x.date===d),pl=planFor(d);
+    cells.push(`<button class="day${d===TODAY?' today':''}" data-goday="${d}" aria-label="${m}월 ${k}일, 일간 루틴 ${Math.round(r*100)}%"><span class="dn">${k}</span>${e.map(x=>`<span class="ev" style="--c:${area(x.area).c}">${esc(x.name)}</span>`).join('')}${pl.length?`<span class="pl">공부 ${pl.filter(x=>x.p.done).length}/${pl.length}</span>`:''}<span class="bar"><i style="width:${Math.round(r*100)}%"></i></span></button>`)}
+  const mr=S.routines.filter(r=>r.freq==='monthly'),[f,t]=[`${mSel}-01`,`${mSel}-${pad(days)}`];
+  const mdays=[...Array(days)].map((_,i)=>`${mSel}-${pad(i+1)}`).filter(d=>d<=TODAY);
+  const avg=mdays.length?Math.round(mdays.reduce((s,d)=>s+dayRate(d),0)/mdays.length*100):0;
+  $('v-month').innerHTML=`<div class="page" style="padding:0">
+   <div class="card">
+    <div class="row between"><div class="nav"><button class="btn" data-mnav="-1" aria-label="이전 달">‹</button><span class="label">${y}년 ${m}월</span><button class="btn" data-mnav="1" aria-label="다음 달">›</button>${mSel!==TODAY.slice(0,7)?'<button class="btn sm" data-mnav="0">이번 달</button>':''}</div><span class="pill">일간 평균 ${avg}%</span></div>
+    <div class="cal">${WD.map((w,i)=>`<div class="h${i===0?' sun':''}">${w}</div>`).join('')}${cells.join('')}</div>
+    <p class="note">날짜를 누르면 그날의 일간 화면으로 가요. 아래 막대는 그날 일간 루틴 달성률이에요.</p>
+   </div>
+   <div class="card"><h3>이번 달 루틴</h3>
+    ${mr.length?mr.map(r=>{const c=countIn(r.id,f,t),a=area(r.area),ds=logDates(r.id,f,t);
+      return `<div class="goal"><span><span class="sw" style="--c:${a.c};display:inline-block;margin-right:6px"></span><b>${esc(r.title)}</b></span><span class="row"><span class="num muted">${c}/${r.target}</span><button class="btn sm" data-log="${r.id}">+1 오늘 기록</button></span><div class="track"><i style="width:${Math.min(100,c/r.target*100)}%;background:${a.c}"></i></div>${ds.length?`<div class="logs">기록한 날: ${ds.map(fmtMD).join(', ')}</div>`:''}</div>`}).join(''):'<p class="empty">월간 루틴이 없어요.</p>'}
+   </div></div>`;
+}
+
+/* ---------- YEAR ---------- */
+let ySel=+TODAY.slice(0,4);
+function renderYear(){
+  const yr=S.routines.filter(r=>r.freq==='yearly'),f=`${ySel}-01-01`,t=`${ySel}-12-31`;
+  const mons=[...Array(12)].map((_,i)=>{const n=new Date(ySel,i+1,0).getDate();const ds=[...Array(n)].map((_,k)=>`${ySel}-${pad(i+1)}-${pad(k+1)}`).filter(d=>d<=TODAY);
+    return ds.length?ds.reduce((s,d)=>s+dayRate(d),0)/ds.length:0});
+  const evs=S.events.filter(e=>e.date.startsWith(String(ySel))).sort((a,b)=>a.date.localeCompare(b.date));
+  $('v-year').innerHTML=`<div class="page" style="padding:0">
+   <div class="card">
+    <div class="row between"><div class="nav"><button class="btn" data-ynav="-1" aria-label="이전 해">‹</button><span class="label">${ySel}년</span><button class="btn" data-ynav="1" aria-label="다음 해">›</button></div></div>
+    <h3>연간 목표</h3>
+    ${yr.length?yr.map(r=>{const c=countIn(r.id,f,t),a=area(r.area),ds=logDates(r.id,f,t);
+      return `<div class="goal"><span><span class="sw" style="--c:${a.c};display:inline-block;margin-right:6px"></span><b>${esc(r.title)}</b></span><span class="row"><span class="num muted">${c}/${r.target}</span><button class="btn sm" data-log="${r.id}">+1 오늘 기록</button></span><div class="track"><i style="width:${Math.min(100,c/r.target*100)}%;background:${a.c}"></i></div>${ds.length?`<div class="logs">기록한 날: ${ds.map(fmtMD).join(', ')} <button class="btn sm" data-unlog="${r.id}">마지막 기록 취소</button></div>`:''}</div>`}).join(''):'<p class="empty">연간 목표가 없어요. 루틴 관리에서 주기를 "연"으로 추가해 보세요.</p>'}
+   </div>
+   <div class="card"><h3>월별 일간 루틴 달성률</h3>
+    <div class="months">${mons.map((v,i)=>`<button class="mo${ySel===+TODAY.slice(0,4)&&i===+TODAY.slice(5,7)-1?' cur':''}" data-gomonth="${ySel}-${pad(i+1)}" aria-label="${i+1}월 ${Math.round(v*100)}%"><span class="num">${v?Math.round(v*100):''}</span><span class="b"><i style="height:${v*100}%"></i></span><span>${i+1}월</span></button>`).join('')}</div>
+   </div>
+   <div class="card"><h3>${ySel}년 일정</h3>
+    ${evs.length?`<div class="list">${evs.map(e=>`<div class="item" data-goev="${e.id}" style="grid-template-columns:auto minmax(0,1fr) auto"><span class="sw" style="--c:${area(e.area).c}"></span><span class="t">${esc(e.name)}<span class="sub">${e.date.replace(/-/g,'.')}</span></span><span class="r num">${ddLabel(diff(TODAY,e.date))}</span></div>`).join('')}</div>`:'<p class="empty">이 해에 등록된 일정이 없어요.</p>'}
+   </div></div>`;
+}
+
+/* ---------- EVENTS ---------- */
+let openEv=null,editEv=null;
+function subjRows(list){return (list.length?list:[{name:'',units:'',unit:'강'}]).map((s,i)=>`<div class="subj"><input data-sf="name" placeholder="과목·교재 (예: 한국사 강의)" value="${esc(s.name)}" aria-label="과목 이름"><input data-sf="units" type="number" min="0" inputmode="numeric" placeholder="분량" value="${s.units||''}" aria-label="분량"><input data-sf="unit" placeholder="단위" value="${esc(s.unit||'강')}" aria-label="단위"><button type="button" class="btn sm" data-subrm="${i}" aria-label="과목 삭제">삭제</button></div>`).join('')}
+function evForm(ev){const e=ev||{name:'',date:addDays(TODAY,30),area:'study',mode:'auto',start:TODAY,dailyMin:60,subjects:[]};
+  return `<form id="evform" class="card" data-id="${ev?ev.id:''}">
+    <h3>${ev?'일정 수정':'일정 추가'}</h3>
+    <div class="form">
+      <label class="full">일정 이름<input id="ef-name" required maxlength="40" placeholder="예: 토익 시험, 정처기 필기" value="${esc(e.name)}"></label>
+      <label>날짜<input id="ef-date" type="date" required value="${e.date}"></label>
+      <label>영역<select id="ef-area">${S.areas.map(a=>`<option value="${a.id}"${a.id===e.area?' selected':''}>${esc(a.name)}</option>`).join('')}</select></label>
+      <div class="full" style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:700">공부 계획 짜는 방식</span>
+        <div class="modes">
+          <label><input type="radio" name="ef-mode" value="auto"${e.mode==='auto'?' checked':''}>역산해서 날짜별 자동 배분</label>
+          <label><input type="radio" name="ef-mode" value="weekly"${e.mode==='weekly'?' checked':''}>주별 목표만</label>
+          <label><input type="radio" name="ef-mode" value="none"${e.mode==='none'?' checked':''}>디데이만</label>
+        </div>
+        <p class="note" id="ef-modehelp"></p>
+      </div>
+      <div class="full plan-only" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+        <label>공부 시작일<input id="ef-start" type="date" value="${e.start}"></label>
+        <label>하루 공부 시간 (분)<input id="ef-min" type="number" min="10" step="10" inputmode="numeric" value="${e.dailyMin}"></label>
+      </div>
+      <div class="full plan-only" style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:700">과목과 분량</span>
+        <div id="ef-subs" style="display:flex;flex-direction:column;gap:6px">${subjRows(e.subjects)}</div>
+        <div><button type="button" class="btn sm" id="ef-addsub">+ 과목 추가</button></div>
+        <p class="note">분량에 강의 수나 단원 수를 넣으면 개념 기간 동안 날짜별로 나눠 줘요. 비워 두면 과목 이름만으로 계획을 잡아요.</p>
+      </div>
+    </div>
+    <div class="row"><button class="btn primary" type="submit">${ev?'저장하고 계획 다시 짜기':'추가하고 계획 짜기'}</button><button class="btn" type="button" id="ef-cancel">취소</button></div>
+  </form>`}
+const MODE_HELP={auto:'시작일부터 시험 전날까지를 개념 50% → 기출 30% → 실전 모의고사 20% → 마지막 1~2일 최종 점검으로 나눠 날짜별 할 일을 만들어요. 일간 화면에 그날 할 일이 떠요.',
+  weekly:'시험까지 남은 주마다 목표 칸을 만들고 단계별 추천 목표를 채워 둬요. 내용은 직접 고칠 수 있어요.',none:'공부 계획 없이 디데이만 표시해요.'};
+function evCard(e){
+  const a=area(e.area),n=diff(TODAY,e.date),open=openEv===e.id;
+  let body='',prog='';
+  if(e.mode==='auto'){const done=e.plan.filter(p=>p.done).length;prog=`${done}/${e.plan.length}`;
+    const P=phases(diff(e.start,e.date));
+    body=`<p class="note">개념 ${P.concept}일 · 기출 ${P.past}일 · 실전 ${P.mock}일 · 최종 ${P.final}일, 하루 약 ${e.dailyMin}분</p>
+      <details class="plan"${open?' open':''} data-evdet="${e.id}"><summary>날짜별 계획 보기 (${e.plan.length}개)</summary><div class="planlist">${e.plan.map(p=>`<div class="pd${p.d===TODAY?' today':''}"><span class="d">${fmtMD(p.d)}</span><span>${p.done?`<s>${esc(p.t)}</s>`:esc(p.t)}</span></div>`).join('')||'<span class="empty">시작일이 시험일보다 늦어서 계획을 만들지 못했어요.</span>'}</div></details>`}
+  else if(e.mode==='weekly'){const done=e.weeks.filter(w=>w.done).length;prog=`${done}/${e.weeks.length}주`;const cm=monday(TODAY);
+    body=`<div class="wkplan">${e.weeks.map((w,i)=>`<div class="w${w.s===cm?' cur':''}"><input type="checkbox" data-wgoal="${e.id}" data-ws="${w.s}"${w.done?' checked':''} aria-label="${fmtMD(w.s)} 주 완료"><span class="wd">${fmtMD(w.s)}~</span><input type="text" data-wedit="${e.id}" data-ws="${w.s}" value="${esc(w.goal)}" aria-label="${fmtMD(w.s)} 주 목표"></div>`).join('')||'<span class="empty">남은 주가 없어요.</span>'}</div>`}
+  return `<div class="ev-card" style="border-left:4px solid ${a.c}" id="ev-${e.id}">
+    <div class="row between"><div><b style="font-size:16px">${esc(e.name)}</b><div class="note">${e.date.replace(/-/g,'.')} · ${esc(a.name)} · ${e.mode==='auto'?'날짜별 자동 배분':e.mode==='weekly'?'주별 목표':'디데이만'}</div></div><div style="text-align:right"><div class="dday">${ddLabel(n)}</div>${prog?`<span class="pill">${prog}</span>`:''}</div></div>
+    ${body}
+    <div class="row"><button class="btn sm" data-evedit="${e.id}">수정</button>${e.mode!=='none'?`<button class="btn sm" data-evregen="${e.id}">계획 다시 짜기</button>`:''}<button class="btn sm danger" data-evdel="${e.id}">삭제</button></div>
+  </div>`}
+let delArm=null;
+function renderEvents(){
+  const list=[...S.events].sort((a,b)=>a.date.localeCompare(b.date));
+  const up=list.filter(e=>e.date>=TODAY),past=list.filter(e=>e.date<TODAY);
+  $('v-events').innerHTML=`<div class="page" style="padding:0">
+    ${editEv!==null?evForm(editEv?S.events.find(e=>e.id===editEv):null):`<div class="row"><button class="btn primary" id="ev-new">+ 일정 추가</button><span class="note">시험이나 마감일을 넣으면 공부 계획을 짜 줘요.</span></div>`}
+    <div class="card"><h3>다가오는 일정</h3>${up.length?up.map(evCard).join(''):'<p class="empty">다가오는 일정이 없어요.</p>'}</div>
+    ${past.length?`<div class="card"><h3>지난 일정</h3>${past.map(evCard).join('')}</div>`:''}
+  </div>`;
+  if(editEv!==null)syncModeHelp();
+}
+function syncModeHelp(){const m=(document.querySelector('input[name=ef-mode]:checked')||{}).value||'auto';$('ef-modehelp').textContent=MODE_HELP[m];
+  document.querySelectorAll('#evform .plan-only').forEach(el=>el.hidden=m==='none')}
+function readSubs(){return [...document.querySelectorAll('#ef-subs .subj')].map(r=>({name:r.querySelector('[data-sf=name]').value.trim(),units:Math.max(0,parseInt(r.querySelector('[data-sf=units]').value)||0),unit:r.querySelector('[data-sf=unit]').value.trim()})).filter(s=>s.name)}
+
+/* ---------- MANAGE ---------- */
+function renderManage(){
+  const freqOpt=r=>Object.entries({daily:'매일',weekly:'주 n회',monthly:'월 n회',yearly:'연 n회'}).map(([k,v])=>`<option value="${k}"${r.freq===k?' selected':''}>${v}</option>`).join('');
+  $('v-manage').innerHTML=`<div class="page" style="padding:0">
+   <div class="card"><div class="row between"><h3>루틴 목록</h3><button class="btn primary" id="r-add">+ 루틴 추가</button></div>
+    <p class="note">주기를 고르고 횟수를 넣으면 일간·주간·월간·연간 화면에 나눠서 보여요. 매일 루틴은 횟수가 필요 없어요.</p>
+    ${S.areas.map(a=>{const rs=S.routines.filter(r=>r.area===a.id);return `<div class="area-h" style="--c:${a.c}"><span class="sw"></span>${esc(a.name)} <span class="num">${rs.length}</span></div>
+      <div class="list">${rs.map(r=>`<div class="mrow" data-rid="${r.id}">
+        <select data-rf="area" aria-label="영역">${S.areas.map(x=>`<option value="${x.id}"${x.id===r.area?' selected':''}>${esc(x.name)}</option>`).join('')}</select>
+        <input class="mt" data-rf="title" value="${esc(r.title)}" aria-label="루틴 이름">
+        <select data-rf="freq" aria-label="주기">${freqOpt(r)}</select>
+        <input data-rf="target" type="number" min="1" inputmode="numeric" value="${r.target}" aria-label="횟수"${r.freq==='daily'?' disabled':''}>
+        <button class="btn sm danger" data-rdel="${r.id}">삭제</button></div>`).join('')||'<p class="empty">이 영역에 루틴이 없어요.</p>'}</div>`}).join('')}
+   </div>
+   <div class="card"><h3>영역 이름</h3><div class="list">${S.areas.map(a=>`<div class="row"><span class="sw" style="--c:${a.c}"></span><input data-aname="${a.id}" value="${esc(a.name)}" aria-label="영역 이름" style="flex:1"></div>`).join('')}</div></div>
+  </div>`;
+}
+
+/* ---------- views ---------- */
+let view='day';
+const R={day:renderDay,week:renderWeek,month:renderMonth,year:renderYear,events:renderEvents,manage:renderManage};
+function show(v){view=v;document.querySelectorAll('#vtabs [role=tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.v===v)));
+  Object.keys(R).forEach(k=>$('v-'+k).hidden=k!==v);render()}
+function render(){renderTop();R[view]();report()}
+$('vtabs').addEventListener('click',e=>{const b=e.target.closest('[role=tab]');if(b)show(b.dataset.v)});
+
+/* ---------- events (delegated) ---------- */
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.dataset.chk){const on=t.type==='checkbox'?t.checked:undefined;toggle(t.dataset.d,t.dataset.chk,on);render();return}
+  if(t.dataset.plan){const ev=S.events.find(x=>x.id===t.dataset.plan);ev.plan[+t.dataset.idx].done=t.checked;write();render();return}
+  if(t.dataset.wgoal){const ev=S.events.find(x=>x.id===t.dataset.wgoal);const w=ev.weeks.find(w=>w.s===t.dataset.ws);w.done=t.checked;write();render();return}
+  if(t.dataset.wedit){const ev=S.events.find(x=>x.id===t.dataset.wedit);const w=ev.weeks.find(w=>w.s===t.dataset.ws);w.goal=t.value;w.edited=true;write();toast('주 목표를 저장했어요');return}
+  if(t.name==='ef-mode'){syncModeHelp();report();return}
+  const row=t.closest('.mrow');if(row){const r=S.routines.find(x=>x.id===row.dataset.rid),f=t.dataset.rf;
+    r[f]=f==='target'?Math.max(1,parseInt(t.value)||1):t.value;if(f==='freq'&&r.freq==='daily')r.target=1;write();renderTop();if(f==='area'||f==='freq')renderManage();report();return}
+  if(t.dataset.aname){const a=S.areas.find(x=>x.id===t.dataset.aname);a.name=t.value.trim()||a.name;write();return}
+});
+document.addEventListener('input',e=>{if(e.target.id==='memo'){const v=e.target.value;if(v)S.memo[dSel]=v;else delete S.memo[dSel];clearTimeout(window.__m);window.__m=setTimeout(write,500)}});
+document.addEventListener('click',e=>{const t=e.target.closest('button,[data-goev],[data-goday]');if(!t)return;
+  const d=t.dataset;
+  if(d.chk&&t.classList.contains('cell')){toggle(d.d,d.chk);render();return}
+  if(d.dnav!==undefined){dSel=d.dnav==='0'?TODAY:addDays(dSel,+d.dnav);render();return}
+  if(d.wnav!==undefined){wSel=d.wnav==='0'?monday(TODAY):addDays(wSel,7*d.wnav);render();return}
+  if(d.mnav!==undefined){if(d.mnav==='0')mSel=TODAY.slice(0,7);else{const [y,m]=mSel.split('-').map(Number);const x=new Date(y,m-1+(+d.mnav),1);mSel=`${x.getFullYear()}-${pad(x.getMonth()+1)}`}render();return}
+  if(d.ynav!==undefined){ySel+=+d.ynav;render();return}
+  if(d.goday){dSel=d.goday;show('day');return}
+  if(d.gomonth){mSel=d.gomonth;show('month');return}
+  if(d.goev){openEv=d.goev;editEv=null;show('events');const el=$('ev-'+d.goev);if(el)el.scrollIntoView({block:'start'});return}
+  if(d.log){toggle(TODAY,d.log,true);toast('오늘 날짜로 기록했어요');render();return}
+  if(d.unlog){const ds=logDates(d.unlog,`${ySel}-01-01`,`${ySel}-12-31`);if(ds.length){toggle(ds[ds.length-1],d.unlog,false);render()}return}
+  if(t.id==='ev-new'){editEv='';render();$('ef-name').focus();return}
+  if(t.id==='ef-cancel'){editEv=null;render();return}
+  if(t.id==='ef-addsub'){const box=$('ef-subs');const subs=readSubs();box.innerHTML=subjRows([...subs,{name:'',units:'',unit:'강'}]);report();return}
+  if(d.subrm!==undefined){const rows=[...document.querySelectorAll('#ef-subs .subj')];rows[+d.subrm]?.remove();if(!$('ef-subs').children.length)$('ef-subs').innerHTML=subjRows([]);
+    document.querySelectorAll('#ef-subs [data-subrm]').forEach((b,i)=>b.dataset.subrm=i);report();return}
+  if(d.evedit){editEv=d.evedit;render();$('evform').scrollIntoView({block:'start'});return}
+  if(d.evregen){const ev=S.events.find(x=>x.id===d.evregen);if(ev.mode==='weekly')ev.weeks.forEach(w=>w.edited=false);buildPlan(ev);write();openEv=ev.id;render();toast('계획을 다시 짰어요. 이미 체크한 항목은 유지돼요.');return}
+  if(d.evdel){if(delArm!==d.evdel){delArm=d.evdel;t.textContent='한 번 더 누르면 삭제';setTimeout(()=>{if(delArm===d.evdel){delArm=null;if(t.isConnected)t.textContent='삭제'}},3000);return}
+    S.events=S.events.filter(x=>x.id!==d.evdel);delArm=null;write();render();toast('일정을 삭제했어요');return}
+  if(t.id==='r-add'){S.routines.push({id:uid(),area:S.areas[0].id,title:'새 루틴',freq:'daily',target:1});write();renderManage();report();const ins=document.querySelectorAll('.mrow [data-rf=title]');const last=[...ins].find(i=>i.value==='새 루틴');if(last){last.focus();last.select()}return}
+  if(d.rdel){if(delArm!==d.rdel){delArm=d.rdel;t.textContent='한 번 더';setTimeout(()=>{if(delArm===d.rdel){delArm=null;if(t.isConnected)t.textContent='삭제'}},3000);return}
+    S.routines=S.routines.filter(x=>x.id!==d.rdel);delArm=null;write();renderManage();renderTop();report();return}
+});
+document.addEventListener('toggle',e=>{if(e.target.dataset&&e.target.dataset.evdet)openEv=e.target.open?e.target.dataset.evdet:null;report()},true);
+document.addEventListener('submit',e=>{if(e.target.id!=='evform')return;e.preventDefault();
+  const name=$('ef-name').value.trim(),date=$('ef-date').value;if(!name||!date)return;
+  const mode=document.querySelector('input[name=ef-mode]:checked').value;
+  const start=$('ef-start').value||TODAY;if(mode!=='none'&&start>=date){toast('공부 시작일은 일정 날짜보다 앞이어야 해요');$('ef-start').focus();return}
+  const o={name,date,area:$('ef-area').value,mode,start,dailyMin:Math.max(10,parseInt($('ef-min').value)||60),subjects:readSubs()};
+  const id=e.target.dataset.id;let ev;
+  if(id){ev=S.events.find(x=>x.id===id);const keepEdits=ev.mode===mode;Object.assign(ev,o);if(!keepEdits){ev.plan=[];ev.weeks=[]}buildPlan(ev)}
+  else{ev=makeEvent(o);S.events.push(ev)}
+  write();editEv=null;openEv=ev.id;render();toast(mode==='none'?'일정을 추가했어요':'공부 계획을 짰어요. 일간 화면에 날짜별로 나타나요.');
+});
+
+/* ---------- iframe height + day rollover ---------- */
+function report(){try{if(parent!==window){const h=Math.ceil($('page').getBoundingClientRect().height)+40;parent.postMessage({type:'myplan-routine-height',height:h},location.origin)}}catch(e){}}
+new ResizeObserver(report).observe($('page'));
+setInterval(()=>{const t=ymd(new Date());if(t!==TODAY){if(dSel===TODAY)dSel=t;TODAY=t;render()}},60000);
+window.myPlanRoutineActions={clearChecks(){S.checks={};S.memo={};S.events.forEach(e=>{e.plan.forEach(p=>p.done=false);e.weeks.forEach(w=>w.done=false)});write();render()}};
+show('day');
+})();
+</script>
+</body>
+</html>

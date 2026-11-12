@@ -27,12 +27,13 @@ document.addEventListener('click',e=>{document.querySelectorAll('.more-tools[ope
 document.querySelectorAll('.more-tools .more-pop .btn').forEach(b=>b.addEventListener('click',()=>{b.closest('details').open=false;}));
 
 const $=id=>document.getElementById(id);
-const names={week:'주간계획',meal:'주간식단',todo:'할일',mandal:'만다라트',habits:'습관트래커'};
+const names={week:'주간계획',meal:'주간식단',todo:'할일',mandal:'만다라트',habits:'습관트래커',routine:'인생루틴'};
 function targets(kind){
  if(kind==='week')return [$('sheet')];
  if(kind==='meal')return [$('meal-table').closest('section')];
  if(kind==='todo')return [$('todo-sheet')];
  if(kind==='mandal')return [...$('mandal-list').querySelectorAll('.sheet')];
+ if(kind==='routine'){const rd=$('routine-frame').contentDocument;const rp=rd?.querySelector('.page');if(!rp)throw Error('루틴 탭을 먼저 열고 로딩을 기다려주세요.');return [rp];}
  const doc=$('habit-frame').contentDocument;const page=doc?.querySelector('.page');if(!page)throw Error('습관 트래커를 먼저 열고 로딩을 기다려주세요.');return [page];
 }
 async function capture(el){
@@ -69,8 +70,8 @@ document.querySelectorAll('[data-page-png]').forEach(b=>b.addEventListener('clic
 document.querySelectorAll('[data-page-pdf]').forEach(b=>b.addEventListener('click',()=>exportPage(b.dataset.pagePdf,'pdf',b)));
 document.querySelectorAll('[data-page-clear]').forEach(b=>b.addEventListener('click',()=>{
  const kind=b.dataset.pageClear;
- const desc=kind==='meal'?'이번 주 식단을 모두 지울까요? 등록된 메뉴는 유지됩니다.':kind==='habits'?'모든 월의 습관 체크와 수면 기록을 지울까요? 습관 목록은 유지됩니다.':names[kind]+' 내용을 모두 지울까요? 다른 페이지는 유지됩니다.';
+ const desc=kind==='meal'?'이번 주 식단을 모두 지울까요? 등록된 메뉴는 유지됩니다.':kind==='habits'?'모든 월의 습관 체크와 수면 기록을 지울까요? 습관 목록은 유지됩니다.':kind==='routine'?'루틴 체크, 한 줄 회고, 공부 계획 체크를 모두 지울까요? 루틴 목록과 일정은 유지됩니다.':names[kind]+' 내용을 모두 지울까요? 다른 페이지는 유지됩니다.';
  if(!confirm(desc))return;
- try{if(kind==='meal')window.myPlanMeals.clearWeek();else if(kind==='habits'){const api=$('habit-frame').contentWindow.myPlanHabitActions;if(!api)throw Error('습관 트래커 로딩을 기다려주세요.');api.clearAll();}else window.myPlanPageData.clear(kind);}catch(e){alert('삭제하지 못했습니다: '+e.message);}
+ try{if(kind==='meal')window.myPlanMeals.clearWeek();else if(kind==='routine'){const api=$('routine-frame').contentWindow.myPlanRoutineActions;if(!api)throw Error('루틴 탭 로딩을 기다려주세요.');api.clearChecks();}else if(kind==='habits'){const api=$('habit-frame').contentWindow.myPlanHabitActions;if(!api)throw Error('습관 트래커 로딩을 기다려주세요.');api.clearAll();}else window.myPlanPageData.clear(kind);}catch(e){alert('삭제하지 못했습니다: '+e.message);}
 }));
 })();
