@@ -694,20 +694,59 @@ async function commitEntries(items, task) {
 
 // ===== 블록 색 직접 고르기 (고르지 않으면 자동) =====
 let pickedColor = null, pickAuto = true;
-const COLOR_NAMES = ['코발트','주황','핑크','초록','노랑','보라','남색','하늘','빨강','연두','인디고','귤색'];
+const COLOR_NAMES = ['코발트','주황','핑크','초록','노랑','보라','남색','하늘','빨강','연두','인디고','귤색','라즈베리','민트','갈색','레몬','파랑','연어','숲','라벤더','회청','청록','벽돌','연보라','진청록','연분홍','진보라','연초록','와인','살구','바다','올리브'];
+// 팔레트는 색 계열별로 한 줄씩: 빨강·분홍 / 주황·노랑·초록 / 청록·파랑 / 보라·무채색
+const COLOR_ORDER = [8,22,17,12,28,2,25,29, 1,11,4,15,31,9,27,18, 3,13,24,21,7,30,16,0, 10,23,5,26,19,14,20,6];
+const cpBox = $('color-pick');
+if (cpBox) {
+  cpBox.innerHTML =
+    `<button type="button" class="cp-trigger" id="cp-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="cp-pop">` +
+      `<span class="cp-chip" id="cp-chip"></span><span class="cp-name" id="cp-name"></span>` +
+      `<svg class="cp-caret" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>` +
+    `</button>` +
+    `<div class="cp-pop" id="cp-pop" hidden>` +
+      `<button type="button" class="cp-auto" data-cp="auto" role="radio"><span class="cp-auto-dot"></span><span><b>자동</b><small>새 할 일마다 겹치지 않는 색을 골라 줘요</small></span></button>` +
+      `<div class="cp-grid" role="radiogroup" aria-label="블록 색">` +
+        COLOR_ORDER.map((i) => `<button type="button" class="cp-sw" data-cp="${i}" role="radio" title="${COLOR_NAMES[i]}" aria-label="${COLOR_NAMES[i]}" style="--bg:${COLORS[i][0]};--fg:${COLORS[i][1]}"></button>`).join('') +
+      `</div>` +
+    `</div>`;
+}
 function renderColorPick() {
-  const box = $('color-pick'); if (!box) return;
+  if (!cpBox) return;
   const cur = taskIn.value.trim();
   const autoIdx = cur && cur in colorMap && !colorPinned[cur] ? colorMap[cur] : null;
-  box.innerHTML = `<button type="button" class="cp-auto${pickedColor == null ? ' on' : ''}" data-cp="auto" role="radio" aria-checked="${pickedColor == null}">자동${autoIdx != null ? `<i style="background:${COLORS[autoIdx][0]}"></i>` : ''}</button>` +
-    COLORS.map((c, i) => `<button type="button" class="cp${pickedColor === i ? ' on' : ''}" data-cp="${i}" role="radio" aria-checked="${pickedColor === i}" aria-label="${COLOR_NAMES[i] || '색 ' + (i + 1)}" style="background:${c[0]}"></button>`).join('');
+  const shown = pickedColor != null ? pickedColor : autoIdx;
+  const chip = $('cp-chip');
+  chip.textContent = cur || '할 일';
+  if (shown != null) { chip.style.background = COLORS[shown][0]; chip.style.color = COLORS[shown][1]; chip.classList.remove('cp-chip-auto'); }
+  else { chip.style.background = ''; chip.style.color = ''; chip.classList.add('cp-chip-auto'); }
+  $('cp-name').textContent = pickedColor != null ? COLOR_NAMES[pickedColor] : shown != null ? `자동 · ${COLOR_NAMES[shown]}` : '자동';
+  cpBox.querySelectorAll('[data-cp]').forEach((b) => {
+    const on = b.dataset.cp === 'auto' ? pickedColor == null : +b.dataset.cp === pickedColor;
+    b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on));
+  });
 }
 function setPicked(i) { pickedColor = i == null || !(i >= 0 && i < COLORS.length) ? null : i; pickAuto = pickedColor == null; renderColorPick(); }
-$('color-pick')?.addEventListener('click', (e) => {
+function openColorPop(open) {
+  const pop = $('cp-pop'), trig = $('cp-trigger'); if (!pop) return;
+  pop.hidden = !open; trig.setAttribute('aria-expanded', String(open));
+  if (open) (pop.querySelector('.on') || pop.querySelector('[data-cp]')).focus();
+}
+cpBox?.addEventListener('click', (e) => {
+  if (e.target.closest('#cp-trigger')) { openColorPop($('cp-pop').hidden); return; }
   const b = e.target.closest('[data-cp]'); if (!b) return;
   setPicked(b.dataset.cp === 'auto' ? null : +b.dataset.cp);
+  openColorPop(false); $('cp-trigger').focus();
 });
-taskIn.addEventListener('input', () => { if (pickedColor == null) renderColorPick(); });
+cpBox?.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !$('cp-pop').hidden) { e.preventDefault(); openColorPop(false); $('cp-trigger').focus(); return; }
+  const sw = e.target.closest('.cp-sw'); if (!sw) return;
+  const list = [...cpBox.querySelectorAll('.cp-sw')], i = list.indexOf(sw);
+  const step = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 8, ArrowUp: -8 }[e.key];
+  if (step) { e.preventDefault(); const n = list[i + step]; if (n) n.focus(); }
+});
+document.addEventListener('click', (e) => { if (cpBox && !cpBox.contains(e.target) && !$('cp-pop').hidden) openColorPop(false); });
+taskIn.addEventListener('input', renderColorPick);
 renderColorPick();
 
 // ===== 폼으로 추가 / 수정 =====
