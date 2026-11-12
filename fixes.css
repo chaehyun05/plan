@@ -150,3 +150,16 @@
 .recent-del:hover{color:#E5484D;background:#FDECEE}
 .recent-open:focus-visible,.recent-del:focus-visible{outline:2px solid #2340E8;outline-offset:-2px}
 @media(max-width:640px){.recent-list{grid-template-columns:1fr}.recent-open{padding:12px}.recent-del{flex-basis:48px}}
+
+/* 블록 색 고르기 */
+.color-field{min-width:0}
+.color-pick{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.color-pick button{cursor:pointer;border:2px solid #fff;box-shadow:0 0 0 1px #DCDFEA;border-radius:50%;width:26px;height:26px;padding:0}
+.color-pick button.on{box-shadow:0 0 0 2px #111433}
+.color-pick .cp-auto{width:auto;height:26px;border-radius:999px;padding:0 10px;background:#fff;font:inherit;font-size:12px;font-weight:700;color:#111433;display:inline-flex;align-items:center;gap:6px}
+.color-pick .cp-auto i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.color-pick button:focus-visible{outline:2px solid #2340E8;outline-offset:2px}
+/* YEAR 링크 */
+.site-links{display:flex;gap:8px;margin:6px 0 2px}
+.site-links a{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:999px;border:1px solid #DCDFEA;background:#fff;color:#2340E8;font-size:13px;font-weight:700;text-decoration:none}
+.site-links a:hover{border-color:#2340E8;background:#EEF1FF}

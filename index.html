@@ -14,12 +14,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Poppins:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=controls17">
   <link rel="stylesheet" href="meal.css?v=fix19">
-<meta name="apple-mobile-web-app-capable" content="yes"><style>body:not(.auth-ready) .app-tabs,body:not(.auth-ready) [role=tabpanel]{display:none!important}.cloud-bar{padding:18px;margin:16px 0;background:#eef1ff;border-radius:12px}.cloud-bar form{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.cloud-bar input{padding:12px;max-width:100%;box-sizing:border-box;border:1px solid #aaa;border-radius:8px;font:inherit}</style><link rel="stylesheet" href="cards.css?v=inline-status18"><link rel="stylesheet" href="fixes.css?v=fix25"><link rel="stylesheet" href="mobile-forced.css?v=m1"><link rel="stylesheet" href="mobile.css?v=m2"></head>
+<meta name="apple-mobile-web-app-capable" content="yes"><style>body:not(.auth-ready) .app-tabs,body:not(.auth-ready) [role=tabpanel]{display:none!important}.cloud-bar{padding:18px;margin:16px 0;background:#eef1ff;border-radius:12px}.cloud-bar form{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.cloud-bar input{padding:12px;max-width:100%;box-sizing:border-box;border:1px solid #aaa;border-radius:8px;font:inherit}</style><link rel="stylesheet" href="cards.css?v=inline-status18"><link rel="stylesheet" href="fixes.css?v=fix26"><link rel="stylesheet" href="mobile-forced.css?v=m1"><link rel="stylesheet" href="mobile.css?v=m2"></head>
 <body>
   <main class="container">
     <header class="app-header">
       <h1>My Plan <span class="title-meta" id="title-meta"><span class="title-site" id="title-site"></span><span class="title-room" id="title-room" hidden></span></span></h1>
       <script>(function(){var seg=(location.pathname.split('/').filter(Boolean)[0]||'').toLowerCase();var site=seg==='mplan'?'mplan':seg==='plan'?'plan':'';var el=document.getElementById('title-site');if(site)el.textContent=site;else el.hidden=true;})();</script>
+      <nav class="site-links" aria-label="다른 사이트"><a href="https://chaehyun05.github.io/year/" target="_blank" rel="noopener">YEAR 연간 계획 ↗</a></nav>
       <p class="subtitle">일정부터 식단, 할 일까지 한곳에서 관리하세요.</p>
     </header>
 
@@ -42,6 +43,10 @@
           <span class="label">할 일</span>
           <input type="text" id="task" maxlength="40" placeholder="예: 전공 수업">
         </label>
+        <div class="field color-field">
+          <span class="label">블록 색 <small>고르지 않으면 자동으로 정해져요. 같은 할 일은 모두 같은 색이에요</small></span>
+          <div class="color-pick" id="color-pick" role="radiogroup" aria-label="블록 색"></div>
+        </div>
 
         <div class="label-row when-row">
           <span class="label">언제 <small>요일마다 시간이 다르면 '시간 추가'로 더 넣을 수 있어요</small></span>
@@ -182,7 +187,7 @@ window.setTimeout(function(){if(!window.myPlanCloudBooted)document.getElementByI
 </script>
 <script src="supabase-config.js?v=20261104days13"></script>
 <script src="rooms.js?v=2"></script>
-<script src="cloud.js?v=20261112routine2"></script>
+<script src="cloud.js?v=20261112color1"></script>
 <script>window.addEventListener('message',function(e){const frame=document.getElementById('habit-frame');if(frame&&e.origin===location.origin&&e.source===frame.contentWindow&&e.data?.type==='myplan-habits-height'&&Number.isFinite(e.data.height)){frame.style.height=Math.min(20000,Math.max(300,e.data.height))+'px';}});
 window.addEventListener('message',function(e){const frame=document.getElementById('routine-frame');if(frame&&e.origin===location.origin&&e.source===frame.contentWindow&&e.data?.type==='myplan-routine-height'&&Number.isFinite(e.data.height)){frame.style.height=Math.min(20000,Math.max(300,e.data.height))+'px';}});</script>
 </body>

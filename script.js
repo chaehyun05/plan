@@ -127,21 +127,22 @@ function loadData() {
         plans: (Array.isArray(d.plans) ? d.plans : []).filter(isValidPlan),
         month: typeof d.month === 'string' ? d.month.replace(/\D/g, '').slice(0, 2) : '',
         colorMap: d.colors && typeof d.colors === 'object' ? d.colors : {},
+        colorPinned: d.pinned && typeof d.pinned === 'object' ? d.pinned : {},
         todos: (Array.isArray(d.todos) ? d.todos : []).filter(isValidTodo),
         mandals: (Array.isArray(d.mandals) ? d.mandals : []).filter(isValidMandal),
       };
     }
     const old = JSON.parse(localStorage.getItem(OLD_STORAGE_KEY));
-    if (Array.isArray(old)) return { plans: migrateV1(old), month: '', colorMap: {}, todos: [], mandals: [] };
+    if (Array.isArray(old)) return { plans: migrateV1(old), month: '', colorMap: {}, colorPinned: {}, todos: [], mandals: [] };
   } catch { /* 저장된 값이 없거나 읽을 수 없음 */ }
-  return { plans: [], month: '', colorMap: {}, todos: [], mandals: [] };
+  return { plans: [], month: '', colorMap: {}, colorPinned: {}, todos: [], mandals: [] };
 }
 function saveData() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 2, month, plans, colors: colorMap, todos, mandals })); }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 2, month, plans, colors: colorMap, pinned: colorPinned, todos, mandals })); }
   catch { toast('브라우저에 저장하지 못했어요. 백업 파일 저장을 이용해주세요.'); }
 }
 
-let { plans, month, colorMap, todos, mandals } = loadData();
+let { plans, month, colorMap, colorPinned, todos, mandals } = loadData();
 // Restore prior generated commute expansion without changing manually entered work.
 function cleanGeneratedCommutes(){
  let changed=false;
@@ -161,6 +162,7 @@ let editing = null; // 수정 중인 일정 정보 { ids, groupId, old }
 // 새로운 할 일이 나올 때마다 다음 색을 순서대로 배정하고 기억해둠 (같은 할 일은 항상 같은 색)
 function isClassTask(task){return /C\+\+프로그래밍|정역학|기계제도|프로그래밍언어론|캡스톤디자인/.test(task);}
 function colorFor(task) {
+  if (colorPinned[task] && colorMap[task] >= 0 && colorMap[task] < COLORS.length) return COLORS[colorMap[task]];
   if(isClassTask(task))return COLORS[0];
   if (!(task in colorMap)) {
     const used = new Set(plans.map((p) => colorMap[p.task]).filter((i) => i != null));
@@ -178,8 +180,8 @@ function colorFor(task) {
 
 // 계획표에 있는 할 일끼리 색이 겹치면 안 쓰인 색으로 바꿔줌 (색이 32개를 넘기 전까지는 모두 다른 색)
 function dedupeColors() {
-  const tasks = [...new Set(plans.map((p) => p.task))].filter((t) => t in colorMap && !isClassTask(t));
-  const used = new Set();
+  const tasks = [...new Set(plans.map((p) => p.task))].filter((t) => t in colorMap && !isClassTask(t) && !colorPinned[t]);
+  const used = new Set(Object.keys(colorPinned).filter((t) => colorPinned[t] && plans.some((p) => p.task === t)).map((t) => colorMap[t]));
   let changed = false;
   for (const t of tasks) {
     let idx = colorMap[t];
@@ -198,7 +200,7 @@ dedupeColors();
 // ===== 되돌리기 / 다시 실행 (⌘Z, Ctrl+Z) =====
 const undoStack = [];
 const redoStack = [];
-const snapshot = () => JSON.stringify({ plans, colorMap, todos, mandals });
+const snapshot = () => JSON.stringify({ plans, colorMap, colorPinned, todos, mandals });
 
 // 일정을 바꾸기 직전에 부름
 function remember() {
@@ -210,6 +212,7 @@ function restoreSnapshot(json) {
   const d = JSON.parse(json);
   plans = d.plans;
   colorMap = d.colorMap || {};
+  colorPinned = d.colorPinned || {};
   todos = d.todos || [];
   mandals = d.mandals || [];
   if (editing && !editing.ids.every((id) => plans.some((p) => p.id === id))) resetForm();
@@ -689,6 +692,24 @@ async function commitEntries(items, task) {
   return entries.filter((x) => result.includes(x)).length;
 }
 
+// ===== 블록 색 직접 고르기 (고르지 않으면 자동) =====
+let pickedColor = null, pickAuto = true;
+const COLOR_NAMES = ['코발트','주황','핑크','초록','노랑','보라','남색','하늘','빨강','연두','인디고','귤색'];
+function renderColorPick() {
+  const box = $('color-pick'); if (!box) return;
+  const cur = taskIn.value.trim();
+  const autoIdx = cur && cur in colorMap && !colorPinned[cur] ? colorMap[cur] : null;
+  box.innerHTML = `<button type="button" class="cp-auto${pickedColor == null ? ' on' : ''}" data-cp="auto" role="radio" aria-checked="${pickedColor == null}">자동${autoIdx != null ? `<i style="background:${COLORS[autoIdx][0]}"></i>` : ''}</button>` +
+    COLORS.map((c, i) => `<button type="button" class="cp${pickedColor === i ? ' on' : ''}" data-cp="${i}" role="radio" aria-checked="${pickedColor === i}" aria-label="${COLOR_NAMES[i] || '색 ' + (i + 1)}" style="background:${c[0]}"></button>`).join('');
+}
+function setPicked(i) { pickedColor = i == null || !(i >= 0 && i < COLORS.length) ? null : i; pickAuto = pickedColor == null; renderColorPick(); }
+$('color-pick')?.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-cp]'); if (!b) return;
+  setPicked(b.dataset.cp === 'auto' ? null : +b.dataset.cp);
+});
+taskIn.addEventListener('input', () => { if (pickedColor == null) renderColorPick(); });
+renderColorPick();
+
 // ===== 폼으로 추가 / 수정 =====
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -721,8 +742,12 @@ form.addEventListener('submit', async (e) => {
     if (!ok) return;
   }
 
+  const prevColor = [colorMap[task], colorPinned[task]];
+  if (pickedColor != null) { colorMap[task] = pickedColor; colorPinned[task] = true; }
+  else if (editing && colorPinned[task] && pickedColor === null && pickAuto) { delete colorPinned[task]; delete colorMap[task]; }
   const added = await commitEntries(items, task);
-  if (!added) return;
+  if (!added) { if (prevColor[0] === undefined) delete colorMap[task]; else colorMap[task] = prevColor[0]; if (prevColor[1]) colorPinned[task] = true; else delete colorPinned[task]; return; }
+  saveData(); render();
 
   const wasEdit = !!editing;
   resetForm();
@@ -733,6 +758,7 @@ form.addEventListener('submit', async (e) => {
 function startEdit(members, groupId) {
   editing = { ids: members.map((m) => m.id), groupId, old: members };
   taskIn.value = members[0].task;
+  setPicked(colorPinned[members[0].task] ? colorMap[members[0].task] : null);
   form.querySelector('input[name="mode"][value="end"]').checked = true;
 
   // 같은 시간끼리 한 줄로 묶어서 보여줌 (예: 월·수 10:00–11:30 / 금 13:00–14:00)
@@ -756,6 +782,7 @@ function startEdit(members, groupId) {
 function resetForm() {
   editing = null;
   taskIn.value = '';
+  setPicked(null);
   clearSlots();
   addSlot();
   $('form-title').textContent = '할 일 추가';
@@ -1252,7 +1279,7 @@ $('save-pdf').addEventListener('click', async () => {
 
 // ===== 백업 / 불러오기 =====
 $('backup').addEventListener('click', () => {
-  const data = JSON.stringify({ version: 2, month, plans, colors: colorMap, todos, mandals, meals: window.myPlanMeals?.getData() }, null, 2);
+  const data = JSON.stringify({ version: 2, month, plans, colors: colorMap, pinned: colorPinned, todos, mandals, meals: window.myPlanMeals?.getData() }, null, 2);
   download(new Blob([data], { type: 'application/json' }), 'myplan-backup.json');
   toast('백업 파일을 저장했어요.');
 });
@@ -1265,7 +1292,7 @@ $('restore-file').addEventListener('change', async (e) => {
   if (!file) return;
   try {
     const raw = JSON.parse(await file.text());
-    let data, m = '', colors = {}, tds = [], mds = [];
+    let data, m = '', colors = {}, pins = {}, tds = [], mds = [];
     if (Array.isArray(raw)) {                 // 예전 버전 백업
       if (!raw.every((p) => isValidPlan({ ...p, day: (p.day + 1) % 7, groupId: null }))) throw new Error();
       data = migrateV1(raw);
@@ -1273,6 +1300,7 @@ $('restore-file').addEventListener('change', async (e) => {
       data = raw.plans;
       m = typeof raw.month === 'string' ? raw.month.replace(/\D/g, '').slice(0, 2) : '';
       if (raw.colors && typeof raw.colors === 'object') colors = raw.colors;
+      if (raw.pinned && typeof raw.pinned === 'object') pins = raw.pinned;
       if (Array.isArray(raw.todos)) tds = raw.todos.filter(isValidTodo);
       if (Array.isArray(raw.mandals)) mds = raw.mandals.filter(isValidMandal);
     } else {
@@ -1293,6 +1321,7 @@ $('restore-file').addEventListener('change', async (e) => {
     plans = data;
     month = m;
     colorMap = colors;
+    colorPinned = pins;
     todos = tds;
     mandals = mds;
     monthIn.value = m;
@@ -1541,7 +1570,7 @@ window.myPlanSchedule = {add(rows,replaceManaged=false){
 
 window.myPlanPageData={clear(kind){
  remember();
- if(kind==='week'){plans=[];colorMap={};render();}
+ if(kind==='week'){plans=[];colorMap={};colorPinned={};render();}
  else if(kind==='todo'){todos=[];renderTodos();}
  else if(kind==='mandal'){mandals=[];renderMandals();}
  saveData();
