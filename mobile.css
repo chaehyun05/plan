@@ -150,3 +150,6 @@ html.m .title-meta{font-size:13px;}
 html.m .title-room{max-width:none;}
 html.m .app-header h1{white-space:nowrap;min-width:0;}
 html.m .title-meta{flex:1 1 auto;overflow:hidden;}
+html.m .recent-list{grid-template-columns:1fr}
+html.m .recent-open{padding:12px}
+html.m .recent-del{flex-basis:48px}
