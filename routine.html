@@ -136,6 +136,15 @@ details.plan summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--a
 /* manage */
 .mrow{display:grid;grid-template-columns:130px minmax(0,1fr) 110px 70px auto;gap:6px;align-items:center}
 .mrow input,.mrow select{width:100%}
+.arow{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:8px 0;border-top:1px dashed #EDEEF3}
+.arow:first-child{border-top:0}
+.arow input{width:100%}
+.arow .full-w{grid-column:2/-1}
+.colors{display:flex;gap:4px;flex-wrap:wrap}
+.cdot{width:22px;height:22px;border-radius:50%;border:2px solid #fff;background:var(--c);box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0}
+.cdot.on{box-shadow:0 0 0 2px var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:640px){.arow{grid-template-columns:auto minmax(0,1fr) auto}.arow .colors{grid-column:2/-1;grid-row:2}.arow .full-w{grid-row:3}}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
 
@@ -498,9 +507,17 @@ function renderManage(){
         <input data-rf="target" type="number" min="1" inputmode="numeric" value="${r.target}" aria-label="횟수"${r.freq==='daily'?' disabled':''}>
         <button class="btn sm danger" data-rdel="${r.id}">삭제</button></div>`).join('')||'<p class="empty">이 영역에 루틴이 없어요.</p>'}</div>`}).join('')}
    </div>
-   <div class="card"><h3>영역 이름</h3><div class="list">${S.areas.map(a=>`<div class="row"><span class="sw" style="--c:${a.c}"></span><input data-aname="${a.id}" value="${esc(a.name)}" aria-label="영역 이름" style="flex:1"></div>`).join('')}</div></div>
+   <div class="card"><div class="row between"><h3>영역</h3><span class="note">${S.areas.length}개</span></div>
+    <div class="list">${S.areas.map(a=>{const n=S.routines.filter(r=>r.area===a.id).length+S.events.filter(e=>e.area===a.id).length;
+      return `<div class="arow"><span class="sw" style="--c:${a.c};width:14px;height:14px"></span><input data-aname="${a.id}" value="${esc(a.name)}" aria-label="영역 이름">
+      <div class="colors" role="group" aria-label="${esc(a.name)} 색">${COLORS.map(c=>`<button type="button" class="cdot${c===a.c?' on':''}" style="--c:${c}" data-acolor="${a.id}" data-c="${c}" aria-label="색 ${c}" aria-pressed="${c===a.c}"></button>`).join('')}</div>
+      <button class="btn sm danger" data-adel="${a.id}"${S.areas.length<2?' disabled title="영역은 하나 이상 있어야 해요"':''}>삭제</button>
+      ${n?`<span class="note full-w">루틴·일정 ${n}개 · 삭제하면 다른 영역으로 옮겨져요</span>`:''}</div>`}).join('')}</div>
+    <form id="aform" class="row"><input id="a-name" maxlength="20" placeholder="새 영역 이름 (예: 관계·가족, 취미)" aria-label="새 영역 이름" style="flex:1 1 180px" required><button class="btn primary" type="submit">+ 영역 추가</button></form>
+   </div>
   </div>`;
 }
+const COLORS=['#2340E8','#7A3FE0','#13996A','#D9771E','#D6336C','#0E8FA3','#8A6D1F','#5C6178'];
 
 /* ---------- views ---------- */
 let view='day';
@@ -543,11 +560,22 @@ document.addEventListener('click',e=>{const t=e.target.closest('button,[data-goe
   if(d.evregen){const ev=S.events.find(x=>x.id===d.evregen);if(ev.mode==='weekly')ev.weeks.forEach(w=>w.edited=false);buildPlan(ev);write();openEv=ev.id;render();toast('계획을 다시 짰어요. 이미 체크한 항목은 유지돼요.');return}
   if(d.evdel){if(delArm!==d.evdel){delArm=d.evdel;t.textContent='한 번 더 누르면 삭제';setTimeout(()=>{if(delArm===d.evdel){delArm=null;if(t.isConnected)t.textContent='삭제'}},3000);return}
     S.events=S.events.filter(x=>x.id!==d.evdel);delArm=null;write();render();toast('일정을 삭제했어요');return}
+  if(d.acolor){const a=S.areas.find(x=>x.id===d.acolor);a.c=d.c;write();render();return}
+  if(d.adel){if(S.areas.length<2)return;
+    if(delArm!==d.adel){delArm=d.adel;t.textContent='한 번 더 누르면 삭제';setTimeout(()=>{if(delArm===d.adel){delArm=null;if(t.isConnected)t.textContent='삭제'}},3000);return}
+    const rest=S.areas.filter(x=>x.id!==d.adel),to=rest[0];
+    S.routines.forEach(r=>{if(r.area===d.adel)r.area=to.id});S.events.forEach(e=>{if(e.area===d.adel)e.area=to.id});
+    S.areas=rest;delArm=null;write();render();toast(`영역을 삭제했어요. 남은 루틴·일정은 ${to.name}(으)로 옮겼어요.`);return}
   if(t.id==='r-add'){S.routines.push({id:uid(),area:S.areas[0].id,title:'새 루틴',freq:'daily',target:1});write();renderManage();report();const ins=document.querySelectorAll('.mrow [data-rf=title]');const last=[...ins].find(i=>i.value==='새 루틴');if(last){last.focus();last.select()}return}
   if(d.rdel){if(delArm!==d.rdel){delArm=d.rdel;t.textContent='한 번 더';setTimeout(()=>{if(delArm===d.rdel){delArm=null;if(t.isConnected)t.textContent='삭제'}},3000);return}
     S.routines=S.routines.filter(x=>x.id!==d.rdel);delArm=null;write();renderManage();renderTop();report();return}
 });
 document.addEventListener('toggle',e=>{if(e.target.dataset&&e.target.dataset.evdet)openEv=e.target.open?e.target.dataset.evdet:null;report()},true);
+document.addEventListener('submit',e=>{if(e.target.id!=='aform')return;e.preventDefault();
+  const name=$('a-name').value.trim();if(!name)return;
+  if(S.areas.some(a=>a.name===name)){toast('같은 이름의 영역이 이미 있어요');return}
+  const used=S.areas.map(a=>a.c),c=COLORS.find(x=>!used.includes(x))||COLORS[S.areas.length%COLORS.length];
+  S.areas.push({id:'a'+uid(),name,c});write();render();toast(`"${name}" 영역을 추가했어요. 위 루틴 목록에서 루틴을 넣어 보세요.`)});
 document.addEventListener('submit',e=>{if(e.target.id!=='evform')return;e.preventDefault();
   const name=$('ef-name').value.trim(),date=$('ef-date').value;if(!name||!date)return;
   const mode=document.querySelector('input[name=ef-mode]:checked').value;

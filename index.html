@@ -182,7 +182,7 @@ window.setTimeout(function(){if(!window.myPlanCloudBooted)document.getElementByI
 </script>
 <script src="supabase-config.js?v=20261104days13"></script>
 <script src="rooms.js?v=2"></script>
-<script src="cloud.js?v=20261112routine1"></script>
+<script src="cloud.js?v=20261112routine2"></script>
 <script>window.addEventListener('message',function(e){const frame=document.getElementById('habit-frame');if(frame&&e.origin===location.origin&&e.source===frame.contentWindow&&e.data?.type==='myplan-habits-height'&&Number.isFinite(e.data.height)){frame.style.height=Math.min(20000,Math.max(300,e.data.height))+'px';}});
 window.addEventListener('message',function(e){const frame=document.getElementById('routine-frame');if(frame&&e.origin===location.origin&&e.source===frame.contentWindow&&e.data?.type==='myplan-routine-height'&&Number.isFinite(e.data.height)){frame.style.height=Math.min(20000,Math.max(300,e.data.height))+'px';}});</script>
 </body>
