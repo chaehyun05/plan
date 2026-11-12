@@ -134,7 +134,7 @@ details.plan summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--a
 .phase{font-size:11px;font-weight:700;color:var(--muted)}
 
 /* manage */
-.mrow{display:grid;grid-template-columns:130px minmax(0,1fr) 110px 70px auto;gap:6px;align-items:center}
+.mrow{display:grid;grid-template-columns:120px minmax(0,1.3fr) minmax(0,1fr) 100px 60px auto;gap:6px;align-items:center}
 .mrow input,.mrow select{width:100%}
 .arow{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:8px 0;border-top:1px dashed #EDEEF3}
 .arow:first-child{border-top:0}
@@ -145,6 +145,38 @@ details.plan summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--a
 .cdot.on{box-shadow:0 0 0 2px var(--ink)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:640px){.arow{grid-template-columns:auto minmax(0,1fr) auto}.arow .colors{grid-column:2/-1;grid-row:2}.arow .full-w{grid-row:3}}
+.mats{display:flex;flex-direction:column;gap:10px}
+.mat{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;background:#FAFBFD}
+.mat-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.mat-top input{width:100%;font-weight:700}
+.seg{display:inline-flex;background:var(--track);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap;width:max-content;max-width:100%}
+.seg label{display:inline-flex;align-items:center;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(17,20,51,.12)}
+.seg label:has(input:focus-visible){outline:2px solid var(--accent)}
+.mat-kind{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;font-weight:700}
+.form .mat-kind label,.form .mat-due label{display:inline-flex;flex-direction:row;align-items:center;gap:6px}
+.mat-kind input[type=number]{width:90px}
+.mat-kind textarea{width:100%;font-size:14px;line-height:1.6}
+.mat-due{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;font-weight:700}
+
+.pace{font-size:13px;font-weight:700;color:var(--accent)}
+.pace.warn{color:var(--warn)}
+.matprog{display:flex;flex-direction:column;gap:10px}
+.mp{display:flex;flex-direction:column;gap:6px}
+.mp .pill{align-self:flex-start}
+.pill.warn{background:#FDECEC;color:var(--warn)}
+.behind{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:#FFF6E5;border:1px solid #F3D9A4;border-radius:10px;padding:10px 12px;font-size:13px}
+.mins{font-size:12px;color:var(--muted);font-weight:400;white-space:nowrap}
+.guide{background:var(--soft);border:1px solid #DCE2FB;border-radius:14px;padding:16px 18px}
+.guide summary{cursor:pointer;font-weight:900;font-size:15px}
+.guide ol{margin:12px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.guide ol b{color:var(--ink)}
+.guide .ex{display:block;color:var(--muted);font-size:13px}
+.sets{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.set{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;background:#fff}
+.set ul{margin:0;padding-left:16px;font-size:13px;color:var(--muted)}
+.set .btn{align-self:flex-start}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
 
@@ -154,7 +186,7 @@ details.plan summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--a
   .form{grid-template-columns:1fr}
   .subj{grid-template-columns:minmax(0,1fr) 64px 56px auto}
   .mrow{grid-template-columns:1fr 1fr;padding:8px;border:1px solid #EDEEF3;border-radius:10px}
-  .mrow .mt{grid-column:1/-1}
+  .mrow .mt,.mrow .mw{grid-column:1/-1}
   .day{min-height:48px;padding:3px}
   .day .pl{display:none}
   .months{height:96px}
@@ -218,6 +250,7 @@ function write(){try{STORE.setItem(KEY,JSON.stringify(S))}catch(e){toast('저장
 
 /* ---------- defaults ---------- */
 const FREQ={daily:'매일',weekly:'주',monthly:'월',yearly:'연'};
+const KIND={lecture:'강의 수',pages:'페이지',toc:'목차(차례)'};
 function seed(){
   const A=[{id:'study',name:'공부·자격증',c:'#2340E8'},{id:'career',name:'커리어·코딩',c:'#7A3FE0'},{id:'health',name:'건강·운동',c:'#13996A'},{id:'life',name:'돈·생활',c:'#D9771E'}];
   const R=(area,title,freq,target,extra)=>({id:uid(),area,title,freq,target,...(extra||{})});
@@ -239,12 +272,14 @@ function seed(){
     R('life','저축하기 (한 달에 한 번 기록)','yearly',12)
   ],checks:{},events:[],memo:{}};
   s.events.push(makeEvent({name:'한능검 82회 원서 접수',date:'2027-01-12',area:'study',mode:'none'}));
-  s.events.push(makeEvent({name:'한능검 82회 시험',date:'2027-02-13',area:'study',mode:'auto',start:TODAY,dailyMin:60,subjects:[{name:'한국사 강의',units:40,unit:'강'}]}));
+  s.events.push(makeEvent({name:'한능검 82회 시험',date:'2027-02-13',area:'study',mode:'auto',start:TODAY,dailyMin:60,materials:[{name:'한국사 강의',kind:'lecture',total:40,unit:'강',due:'2027-01-24'},{name:'한능검 기출문제집',kind:'pages',from:1,to:240,due:'2027-02-07'}]}));
   return s;
 }
 let S=read();
 if(!S||!S.routines){S=seed();write()}
 S.checks=S.checks||{};S.events=S.events||[];S.memo=S.memo||{};
+// earlier versions stored subjects:[{name,units,unit}] — turn them into materials once
+{let mig=false;S.events.forEach(ev=>{if(!ev.materials){ev.materials=(ev.subjects||[]).map(x=>normMat({name:x.name,kind:'lecture',total:x.units,unit:x.unit,due:defaultDue(ev.start,ev.date)}));delete ev.subjects;mig=true}});if(mig)write()}
 
 /* ---------- helpers ---------- */
 const area=id=>S.areas.find(a=>a.id===id)||S.areas[0];
@@ -264,52 +299,99 @@ function dayRate(d){const ds=daily();if(!ds.length)return 0;return ds.filter(r=>
 function streak(){let n=0,d=TODAY;if(dayRate(d)<.8)d=addDays(d,-1);while(dayRate(d)>=.8&&n<3650){n++;d=addDays(d,-1)}return n}
 const ddLabel=n=>n===0?'D-DAY':n>0?'D-'+n:'D+'+(-n);
 
-/* ---------- study plan generation ---------- */
+/* ---------- study plan generation ----------
+   An event has materials (교재·강의). Each material is a list of units:
+   lecture = 1..N강, pages = p.from..to, toc = chapter names. Units are spread
+   evenly from the start (or today, on a re-plan) to that material's due date.
+   Days after the last due date go to 기출 → 실전 → 최종 before the exam. */
 function makeEvent(o){
-  const ev={id:uid(),name:o.name,date:o.date,area:o.area||'study',mode:o.mode||'none',start:o.start||TODAY,dailyMin:+o.dailyMin||60,subjects:o.subjects||[],plan:[],weeks:[]};
+  const ev={id:uid(),name:o.name,date:o.date,area:o.area||'study',mode:o.mode||'none',start:o.start||TODAY,dailyMin:+o.dailyMin||60,materials:(o.materials||[]).map(normMat),plan:[],weeks:[]};
   buildPlan(ev);return ev}
+function normMat(m){return {id:m.id||uid(),name:String(m.name||'').trim()||'교재',kind:KIND[m.kind]?m.kind:'lecture',
+  total:Math.max(0,parseInt(m.total)||0),unit:m.unit||'강',from:Math.max(1,parseInt(m.from)||1),to:Math.max(0,parseInt(m.to)||0),
+  toc:Array.isArray(m.toc)?m.toc.map(x=>String(x).trim()).filter(Boolean):[],due:m.due||''}}
+function defaultDue(start,date){const n=diff(start,date);return addDays(start,Math.max(0,Math.min(n-1,Math.round(n*.6))))}
+function unitCount(m){return m.kind==='pages'?Math.max(0,m.to-m.from+1):m.kind==='toc'?m.toc.length:m.total}
+function unitText(m,a,b){ // a,b are 0-based unit indices (inclusive)
+  if(m.kind==='pages'){const x=m.from+a,y=m.from+b;return x===y?`p.${x}`:`p.${x}~${y}`}
+  if(m.kind==='toc'){const n=m.toc.slice(a,b+1);return n.length>3?`${n[0]} ~ ${n[n.length-1]} (${n.length}개)`:n.join(' · ')}
+  return a===b?`${a+1}${m.unit||'강'}`:`${a+1}~${b+1}${m.unit||'강'}`}
+const unitWord=m=>m.kind==='pages'?'쪽':m.kind==='toc'?'개':(m.unit||'강');
+function dueOf(ev,m){const last=addDays(ev.date,-1);let d=m.due||defaultDue(ev.start,ev.date);return d>last?last:d}
+function doneUnits(ev,mid){const set=new Set();(ev.plan||[]).forEach(p=>{if(p.done&&p.mid===mid&&p.u)p.u.forEach(i=>set.add(i))});return set}
 function phases(n,weeks){ // split n study days (or weeks) into concept / past exams / mock / final
   if(n<=0)return {concept:0,past:0,mock:0,final:0};
   const final=weeks?(n>=3?1:0):(n>=10?2:n>=4?1:0),rest=n-final;
   let concept=Math.max(1,Math.round(rest*.5)),past=Math.round(rest*.3);let mock=rest-concept-past;
   if(mock<0){past+=mock;mock=0}
   return {concept,past,mock,final}}
-// unit k (1-based) goes to slot floor((k-1)*count/units); returns the units that land in slot i
-function unitRange(units,i,count){const a=Math.ceil(i*units/count)+1,b=Math.ceil((i+1)*units/count);return b>=a?[a,Math.min(b,units)]:null}
-function rangeText(sub,r){if(!r)return null;return r[0]===r[1]?`${sub.name} ${r[0]}${sub.unit||''}`:`${sub.name} ${r[0]}~${r[1]}${sub.unit||''}`}
-function buildPlan(ev){
-  if(ev.mode==='auto')buildAuto(ev);
+function tail(n,weeks){ // days/weeks left after all materials are finished: 기출 → 실전 → 최종
+  if(n<=0)return {past:0,mock:0,final:0};
+  const final=weeks?(n>=3?1:0):(n>=10?2:n>=4?1:0),rest=n-final,past=Math.ceil(rest*.6);return {past,mock:rest-past,final}}
+// slot i of count gets units [ceil(i*U/count), ceil((i+1)*U/count)-1]
+function slot(U,i,count){const a=Math.ceil(i*U/count),b=Math.ceil((i+1)*U/count)-1;return b>=a?[a,b]:null}
+function buildPlan(ev,opts){
+  ev.materials=(ev.materials||[]).map(normMat);
+  if(ev.mode==='auto')buildAuto(ev,opts);
   else if(ev.mode==='weekly')buildWeeks(ev);
 }
-function buildAuto(ev){
-  const old={};(ev.plan||[]).forEach(p=>{if(p.done)old[p.d+'|'+p.t]=true});
-  const from=ev.start, n=diff(from,ev.date); // study days = start .. day before the exam
-  const P=phases(n),subs=ev.subjects.length?ev.subjects:[{name:ev.name,units:0,unit:''}];
-  const per=Math.max(10,Math.round(ev.dailyMin/subs.length/5)*5);
-  const out=[];let i=0;
-  const push=(d,t,ph)=>out.push({d,t,ph,done:!!old[d+'|'+t]});
-  for(let k=0;k<P.concept;k++,i++){const d=addDays(from,i);
-    subs.forEach(s=>{const r=s.units>0?unitRange(s.units,k,P.concept):null;
-      const t=s.units>0?(r?`개념 · ${rangeText(s,r)}`:`복습 · ${s.name} 지난 내용 다시 보기 + 문제 풀기`):`개념 · ${s.name} 공부`;push(d,`${t} (약 ${per}분)`,'개념')})}
-  for(let k=0;k<P.past;k++,i++){const d=addDays(from,i);
-    subs.forEach(s=>push(d,`기출 · ${s.name} 기출 풀이 ${k+1}/${P.past}일차 + 오답 표시 (약 ${per}분)`,'기출'))}
-  for(let k=0;k<P.mock;k++,i++){const d=addDays(from,i);
-    push(d,k%2===0?`실전 · 모의고사 1회 시간 재고 풀기 (약 ${ev.dailyMin}분)`:`실전 · 오답 노트 정리 + 약점 단원 다시 보기 (약 ${ev.dailyMin}분)`,'실전')}
-  for(let k=0;k<P.final;k++,i++){const d=addDays(from,i);
-    push(d,k===P.final-1?'최종 · 핵심 요약만 가볍게 훑기, 수험표·신분증 챙기고 일찍 자기':'최종 · 오답 노트와 요약본 한 번 더 보기','최종')}
-  ev.plan=out}
+function buildAuto(ev,opts){
+  const fresh=!(ev.plan&&ev.plan.length)||(opts&&opts.fresh);
+  const start=fresh?ev.start:(ev.start>TODAY?ev.start:TODAY);
+  // past items that weren't done stay as history, but their units go back into the pool
+  const keep=fresh?[]:ev.plan.filter(p=>p.d<start||p.done).map(p=>p.done||!(p.u&&p.u.length)?p:{...p,u:[],moved:true});
+  const last=addDays(ev.date,-1);
+  if(start>last){ev.plan=keep;return}
+  const out=[],dayLoad={};
+  const push=(d,o)=>{out.push({d,done:false,...o});dayLoad[d]=(dayLoad[d]||0)+1};
+  const mats=ev.materials.filter(m=>unitCount(m)>0);
+  let lastDue=start;
+  mats.forEach(m=>{
+    const done=fresh?new Set():doneUnits(ev,m.id);
+    const rem=[...Array(unitCount(m)).keys()].filter(i=>!done.has(i));
+    let due=dueOf(ev,m);if(due<start)due=start;if(due>lastDue)lastDue=due;
+    if(!rem.length)return;
+    const D=diff(start,due)+1,U=rem.length;
+    if(m.kind==='toc'&&U<D){ // a chapter can take several days
+      for(let i=0;i<D;i++){const k=Math.floor(i*U/D),first=Math.ceil(k*D/U),lastI=Math.ceil((k+1)*D/U)-1,span=lastI-first+1,part=i-first+1;
+        push(addDays(start,i),{t:`${m.name} · ${m.toc[rem[k]]}${span>1?` (${part}/${span}일차)`:''}`,ph:'진도',mid:m.id,u:i===lastI?[rem[k]]:[]})}
+    }else{
+      for(let i=0;i<D;i++){const r=slot(U,i,D),d=addDays(start,i);
+        if(r){const us=rem.slice(r[0],r[1]+1);push(d,{t:`${m.name} · ${unitText(m,us[0],us[us.length-1])}`,ph:'진도',mid:m.id,u:us})}
+        else push(d,{t:`${m.name} · 지난 부분 복습 + 문제 풀기`,ph:'복습',mid:m.id,u:[]})}
+    }
+  });
+  const label=mats.length?mats.map(m=>m.name).join(', '):ev.name;
+  let from=mats.length?addDays(lastDue,1):start;
+  if(!mats.length){ // no materials: plain concept phase first
+    const P=phases(diff(start,ev.date));for(let k=0;k<P.concept;k++)push(addDays(start,k),{t:`개념 · ${ev.name} 공부`,ph:'개념'});
+    from=addDays(start,P.concept)}
+  const L=from<=last?diff(from,last)+1:0,T=tail(L);let i=0;
+  for(let k=0;k<T.past;k++,i++)push(addDays(from,i),{t:`기출 · ${label} 기출 풀이 ${k+1}/${T.past}일차 + 오답 표시`,ph:'기출'});
+  for(let k=0;k<T.mock;k++,i++)push(addDays(from,i),{t:k%2===0?'실전 · 모의고사 1회 시간 재고 풀기':'실전 · 오답 노트 정리 + 약점 단원 다시 보기',ph:'실전'});
+  for(let k=0;k<T.final;k++,i++)push(addDays(from,i),{t:k===T.final-1?'최종 · 핵심 요약만 가볍게, 수험표·신분증 챙기고 일찍 자기':'최종 · 오답 노트와 요약본 한 번 더 보기',ph:'최종'});
+  out.forEach(p=>{const n=dayLoad[p.d]||1;p.min=Math.max(10,Math.round(ev.dailyMin/n/5)*5)});
+  ev.plan=keep.concat(out).sort((x,y)=>x.d.localeCompare(y.d));
+}
 function buildWeeks(ev){
   const oldW={};(ev.weeks||[]).forEach(w=>oldW[w.s]=w);
-  const first=monday(ev.start),last=monday(addDays(ev.date,-1)>=ev.start?addDays(ev.date,-1):ev.start);
-  const starts=[];for(let s=first;s<=last;s=addDays(s,7))starts.push(s);
-  const n=starts.length,P=phases(n,true);const subs=ev.subjects;
+  const last=addDays(ev.date,-1),first=monday(ev.start),lastW=monday(last>=ev.start?last:ev.start);
+  const starts=[];for(let s=first;s<=lastW;s=addDays(s,7))starts.push(s);
+  const mats=ev.materials.filter(m=>unitCount(m)>0);
+  const lastDue=mats.reduce((x,m)=>dueOf(ev,m)>x?dueOf(ev,m):x,ev.start);
+  const tailW=starts.filter(s=>s>monday(lastDue)),T=tail(tailW.length,true);
   ev.weeks=starts.map((s,i)=>{
     let g;
-    if(i<P.concept){g=subs.length?'개념 · '+subs.map(x=>x.units>0?(rangeText(x,unitRange(x.units,i,P.concept))||x.name+' 복습'):x.name+' 진도').join(', '):'개념 진도 나가기'}
-    else if(i<P.concept+P.past)g='기출 · '+(subs.length?subs.map(x=>x.name).join(', '):'기출')+' 기출 회독';
-    else if(i<P.concept+P.past+P.mock)g='실전 · 모의고사 2회 + 오답 정리';
-    else g='최종 점검 · 요약본, 오답 노트, 컨디션 관리';
+    const parts=mats.map(m=>{const dueW=monday(dueOf(ev,m)),W=starts.filter(x=>x<=dueW).length,j=starts.indexOf(s);
+      if(j>=W)return null;const r=slot(unitCount(m),j,W);return r?`${m.name} ${unitText(m,r[0],r[1])}`:`${m.name} 복습`}).filter(Boolean);
+    if(!mats.length){const P=phases(starts.length,true);g=i<P.concept?'개념 진도 나가기':i<P.concept+P.past?'기출 회독':i<P.concept+P.past+P.mock?'실전 · 모의고사 2회 + 오답 정리':'최종 점검 · 요약본, 오답 노트, 컨디션 관리'}
+    else if(parts.length)g='진도 · '+parts.join(', ');
+    else{const k=tailW.indexOf(s);g=k<T.past?`기출 · ${mats.map(m=>m.name).join(', ')} 기출 회독`:k<T.past+T.mock?'실전 · 모의고사 2회 + 오답 정리':'최종 점검 · 요약본, 오답 노트, 컨디션 관리'}
     const o=oldW[s];return {s,goal:o&&o.edited?o.goal:g,edited:!!(o&&o.edited),done:!!(o&&o.done)}})}
+// progress of one material: done units, units that should be done by yesterday
+function matProgress(ev,m){const U=unitCount(m),done=doneUnits(ev,m.id).size;
+  let due=0;(ev.plan||[]).forEach(p=>{if(p.mid===m.id&&p.d<TODAY&&p.u)due+=p.u.length});
+  return {U,done,behind:Math.max(0,Math.min(U,due)-done)}}
 function planFor(d){const items=[];
   S.events.forEach(ev=>{
     if(ev.mode==='auto')ev.plan.forEach((p,idx)=>{if(p.d===d)items.push({ev,p,idx})});
@@ -332,7 +414,7 @@ function itemHTML(r,d){
   let right='';
   if(r.freq!=='daily'){const [f,t]=periodRange(r.freq,d);const c=countIn(r.id,f,t);right=`<span class="r num">${FREQ[r.freq]} ${c}/${r.target}</span>`}
   return `<label class="item${on?' done':''}"><input type="checkbox" data-chk="${r.id}" data-d="${d}"${on?' checked':''}>
-   <span class="t">${esc(r.title)}${r.link?`<a class="link" href="${esc(r.link)}" target="_blank" rel="noopener">열기 ↗</a>`:''}${r.freq!=='daily'?`<span class="sub">${r.freq==='weekly'?'이번 주':r.freq==='monthly'?'이번 달':'올해'} 목표 ${r.target}회 · 오늘 했으면 체크</span>`:''}</span>${right}</label>`}
+   <span class="t">${esc(r.title)}${r.link?`<a class="link" href="${esc(r.link)}" target="_blank" rel="noopener">열기 ↗</a>`:''}${r.when||r.freq!=='daily'?`<span class="sub">${[r.when?'언제 · '+esc(r.when):'',r.freq!=='daily'?`${r.freq==='weekly'?'이번 주':r.freq==='monthly'?'이번 달':'올해'} 목표 ${r.target}회`:''].filter(Boolean).join(' · ')}</span>`:''}</span>${right}</label>`}
 function renderDay(){
   const d=dSel,ds=daily(),done=ds.filter(r=>isOn(d,r.id)).length,pct=ds.length?Math.round(done/ds.length*100):0;
   const plans=planFor(d),wg=weekGoalsFor(d);
@@ -350,7 +432,7 @@ function renderDay(){
    </div>
    <div class="card">
     <div class="row between"><h3>오늘 공부 계획</h3><span class="pill">${plans.length?plans.filter(x=>x.p.done).length+'/'+plans.length:'일정 기반'}</span></div>
-    ${plans.length||wg.length?`<div class="list">${plans.map(({ev,p,idx})=>`<label class="item${p.done?' done':''}"><input type="checkbox" data-plan="${ev.id}" data-idx="${idx}"${p.done?' checked':''}><span class="t">${esc(p.t)}<span class="sub">${esc(ev.name)} · ${ddLabel(diff(d,ev.date))}</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}
+    ${plans.length||wg.length?`<div class="list">${plans.map(({ev,p,idx})=>`<label class="item${p.done?' done':''}"><input type="checkbox" data-plan="${ev.id}" data-idx="${idx}"${p.done?' checked':''}><span class="t">${esc(p.t)}${p.min?` <span class="mins">약 ${p.min}분</span>`:""}<span class="sub">${esc(ev.name)} · ${ddLabel(diff(d,ev.date))}</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}
       ${wg.map(({ev,w})=>`<label class="item${w.done?' done':''}"><input type="checkbox" data-wgoal="${ev.id}" data-ws="${w.s}"${w.done?' checked':''}><span class="t">${esc(w.goal||'이번 주 목표를 적어 주세요')}<span class="sub">${esc(ev.name)} · 이번 주 목표 · ${ddLabel(diff(d,ev.date))}</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}</div>`
       :`<p class="empty">이 날짜에 잡힌 공부 계획이 없어요. 일정·공부계획 탭에서 시험을 추가하면 날짜별 할 일이 여기에 나타나요.</p>`}
    </div>
@@ -383,7 +465,7 @@ function renderWeek(){
    <div class="card">
     <div class="row between"><h3>이번 주 공부 계획</h3><span class="pill">${allP.length?doneP+'/'+allP.length:'일정 기반'}</span></div>
     ${wg.length?`<div class="list">${wg.map(({ev,w})=>`<label class="item${w.done?' done':''}"><input type="checkbox" data-wgoal="${ev.id}" data-ws="${w.s}"${w.done?' checked':''}><span class="t">${esc(w.goal)}<span class="sub">${esc(ev.name)} · 주별 목표</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}</div>`:''}
-    ${allP.length?plans.filter(x=>x.items.length).map(x=>`<div class="area-h">${fmtMD(x.d)}${x.d===TODAY?' · 오늘':''}</div><div class="list">${x.items.map(({ev,p,idx})=>`<label class="item${p.done?' done':''}"><input type="checkbox" data-plan="${ev.id}" data-idx="${idx}"${p.done?' checked':''}><span class="t">${esc(p.t)}<span class="sub">${esc(ev.name)}</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}</div>`).join(''):(!wg.length?'<p class="empty">이번 주에 잡힌 공부 계획이 없어요.</p>':'')}
+    ${allP.length?plans.filter(x=>x.items.length).map(x=>`<div class="area-h">${fmtMD(x.d)}${x.d===TODAY?' · 오늘':''}</div><div class="list">${x.items.map(({ev,p,idx})=>`<label class="item${p.done?' done':''}"><input type="checkbox" data-plan="${ev.id}" data-idx="${idx}"${p.done?' checked':''}><span class="t">${esc(p.t)}${p.min?` <span class="mins">약 ${p.min}분</span>`:""}<span class="sub">${esc(ev.name)}</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}</div>`).join(''):(!wg.length?'<p class="empty">이번 주에 잡힌 공부 계획이 없어요.</p>':'')}
    </div></div>`;
 }
 
@@ -434,8 +516,17 @@ function renderYear(){
 
 /* ---------- EVENTS ---------- */
 let openEv=null,editEv=null;
-function subjRows(list){return (list.length?list:[{name:'',units:'',unit:'강'}]).map((s,i)=>`<div class="subj"><input data-sf="name" placeholder="과목·교재 (예: 한국사 강의)" value="${esc(s.name)}" aria-label="과목 이름"><input data-sf="units" type="number" min="0" inputmode="numeric" placeholder="분량" value="${s.units||''}" aria-label="분량"><input data-sf="unit" placeholder="단위" value="${esc(s.unit||'강')}" aria-label="단위"><button type="button" class="btn sm" data-subrm="${i}" aria-label="과목 삭제">삭제</button></div>`).join('')}
-function evForm(ev){const e=ev||{name:'',date:addDays(TODAY,30),area:'study',mode:'auto',start:TODAY,dailyMin:60,subjects:[]};
+function matRow(m){m=normMat(m||{name:'',kind:'lecture',total:'',unit:'강'});const k='mk'+uid();
+  const kinds=Object.entries(KIND).map(([v,l])=>`<label><input type="radio" name="${k}" value="${v}"${m.kind===v?' checked':''} data-mf="kind">${l}</label>`).join('');
+  return `<div class="mat" data-mid="${m.id}">
+    <div class="mat-top"><input data-mf="name" placeholder="교재·강의 이름 (예: 한능검 기본강의, 기출 500제)" value="${esc(m.name==='교재'?'':m.name)}" aria-label="교재 이름"><button type="button" class="btn sm" data-matrm aria-label="교재 삭제">삭제</button></div>
+    <div class="seg" role="radiogroup" aria-label="분량 넣는 방식">${kinds}</div>
+    <div class="mat-kind" data-for="lecture"${m.kind!=='lecture'?' hidden':''}><label>총<input data-mf="total" type="number" min="1" inputmode="numeric" value="${m.total||''}" placeholder="40" aria-label="총 개수"></label><label>단위<input data-mf="unit" value="${esc(m.unit||'강')}" maxlength="4" aria-label="단위" style="width:64px"></label><span class="note">강의 수, 단원 수, 회차 수 등</span></div>
+    <div class="mat-kind" data-for="pages"${m.kind!=='pages'?' hidden':''}><label>p.<input data-mf="from" type="number" min="1" inputmode="numeric" value="${m.from||1}" aria-label="시작 페이지"></label><span>~</span><label>p.<input data-mf="to" type="number" min="1" inputmode="numeric" value="${m.to||''}" placeholder="320" aria-label="끝 페이지"></label></div>
+    <div class="mat-kind" data-for="toc"${m.kind!=='toc'?' hidden':''}><textarea data-mf="toc" rows="4" placeholder="한 줄에 하나씩 (목차를 복사해 붙여 넣어도 돼요)&#10;1장 선사 시대&#10;2장 고조선과 여러 나라&#10;3장 삼국 시대" aria-label="목차">${esc(m.toc.join('\n'))}</textarea></div>
+    <div class="mat-due"><label>끝낼 날짜<input data-mf="due" type="date" value="${m.due||''}" aria-label="끝낼 날짜"></label><span class="pace" data-pace></span></div>
+  </div>`}
+function evForm(ev){const e=ev||{name:'',date:addDays(TODAY,30),area:'study',mode:'auto',start:TODAY,dailyMin:60,materials:[]};
   return `<form id="evform" class="card" data-id="${ev?ev.id:''}">
     <h3>${ev?'일정 수정':'일정 추가'}</h3>
     <div class="form">
@@ -444,7 +535,7 @@ function evForm(ev){const e=ev||{name:'',date:addDays(TODAY,30),area:'study',mod
       <label>영역<select id="ef-area">${S.areas.map(a=>`<option value="${a.id}"${a.id===e.area?' selected':''}>${esc(a.name)}</option>`).join('')}</select></label>
       <div class="full" style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:700">공부 계획 짜는 방식</span>
         <div class="modes">
-          <label><input type="radio" name="ef-mode" value="auto"${e.mode==='auto'?' checked':''}>역산해서 날짜별 자동 배분</label>
+          <label><input type="radio" name="ef-mode" value="auto"${e.mode==='auto'?' checked':''}>날짜별로 자동 배분</label>
           <label><input type="radio" name="ef-mode" value="weekly"${e.mode==='weekly'?' checked':''}>주별 목표만</label>
           <label><input type="radio" name="ef-mode" value="none"${e.mode==='none'?' checked':''}>디데이만</label>
         </div>
@@ -454,55 +545,90 @@ function evForm(ev){const e=ev||{name:'',date:addDays(TODAY,30),area:'study',mod
         <label>공부 시작일<input id="ef-start" type="date" value="${e.start}"></label>
         <label>하루 공부 시간 (분)<input id="ef-min" type="number" min="10" step="10" inputmode="numeric" value="${e.dailyMin}"></label>
       </div>
-      <div class="full plan-only" style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:700">과목과 분량</span>
-        <div id="ef-subs" style="display:flex;flex-direction:column;gap:6px">${subjRows(e.subjects)}</div>
-        <div><button type="button" class="btn sm" id="ef-addsub">+ 과목 추가</button></div>
-        <p class="note">분량에 강의 수나 단원 수를 넣으면 개념 기간 동안 날짜별로 나눠 줘요. 비워 두면 과목 이름만으로 계획을 잡아요.</p>
+      <div class="full plan-only" style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700">교재·강의와 분량</span>
+        <p class="note">교재마다 강의 수, 페이지, 목차 중 하나로 분량을 넣고 끝낼 날짜를 정하세요. 끝낼 날짜까지 매일 나눠 주고, 모든 교재가 끝난 뒤부터 시험 전날까지는 기출 → 실전 모의고사 → 최종 점검으로 채워요.</p>
+        <div id="ef-mats" class="mats">${(e.materials&&e.materials.length?e.materials:[null]).map(matRow).join('')}</div>
+        <div><button type="button" class="btn sm" id="ef-addmat">+ 교재·강의 추가</button></div>
       </div>
     </div>
-    <div class="row"><button class="btn primary" type="submit">${ev?'저장하고 계획 다시 짜기':'추가하고 계획 짜기'}</button><button class="btn" type="button" id="ef-cancel">취소</button></div>
+    <div class="row"><button class="btn primary" type="submit">${ev?'저장하고 남은 분량 다시 나누기':'추가하고 계획 짜기'}</button><button class="btn" type="button" id="ef-cancel">취소</button></div>
+    ${ev?'<p class="note">저장하면 오늘부터 남은 분량을 다시 나눠요. 이미 체크한 부분과 지난 날짜 기록은 그대로 남아요.</p>':''}
   </form>`}
-const MODE_HELP={auto:'시작일부터 시험 전날까지를 개념 50% → 기출 30% → 실전 모의고사 20% → 마지막 1~2일 최종 점검으로 나눠 날짜별 할 일을 만들어요. 일간 화면에 그날 할 일이 떠요.',
-  weekly:'시험까지 남은 주마다 목표 칸을 만들고 단계별 추천 목표를 채워 둬요. 내용은 직접 고칠 수 있어요.',none:'공부 계획 없이 디데이만 표시해요.'};
+const MODE_HELP={auto:'교재별 끝낼 날짜까지 매일 할 분량(예: 5~6강, p.41~60)을 나눠서 일간 화면에 띄워 줘요.',
+  weekly:'시험까지 남은 주마다 이번 주 분량을 목표로 채워 둬요. 내용은 직접 고칠 수 있어요.',none:'공부 계획 없이 디데이만 표시해요.'};
+function readMat(el){const v=f=>{const x=el.querySelector(`[data-mf=${f}]`+(f==='kind'?':checked':''));return x?x.value:''};
+  return normMat({id:el.dataset.mid,name:v('name'),kind:v('kind'),total:v('total'),unit:v('unit').trim()||'강',from:v('from'),to:v('to'),toc:v('toc').split('\n'),due:v('due')})}
+function readMats(){return [...document.querySelectorAll('#ef-mats .mat')].map(readMat).filter(m=>m.name!=='교재'||unitCount(m)>0)}
+function updatePace(){const st=$('ef-start')?.value||TODAY,dt=$('ef-date')?.value;if(!dt)return;
+  document.querySelectorAll('#ef-mats .mat').forEach(el=>{const m=readMat(el),U=unitCount(m),box=el.querySelector('[data-pace]'),dueIn=el.querySelector('[data-mf=due]');
+    if(!dueIn.value){dueIn.value=defaultDue(st,dt)}
+    const due=dueIn.value,D=diff(st,due)+1;
+    if(!U){box.textContent='분량을 넣으면 하루 분량을 계산해 줘요';box.className='pace';return}
+    if(due>=dt){box.textContent='시험 전날까지로 맞춰서 나눠요';box.className='pace warn';return}
+    if(D<1){box.textContent='끝낼 날짜가 시작일보다 앞이에요';box.className='pace warn';return}
+    const per=U/D,w=unitWord(m),r=per>=10?Math.round(per):Math.round(per*10)/10;
+    box.textContent=per>=1?`→ ${D}일 동안 하루 약 ${r}${w}`:`→ ${D}일 동안 1${w}에 약 ${Math.round(D/U*10)/10}일씩`;box.className='pace'})}
 function evCard(e){
   const a=area(e.area),n=diff(TODAY,e.date),open=openEv===e.id;
   let body='',prog='';
+  const mats=(e.materials||[]).filter(m=>unitCount(m)>0);
+  const matHTML=mats.length?`<div class="matprog">${mats.map(m=>{const pr=e.mode==='auto'?matProgress(e,m):{U:unitCount(m),done:0,behind:0},w=unitWord(m),due=dueOf(e,m);
+    return `<div class="mp"><div class="row between"><span><b>${esc(m.name)}</b> <span class="muted" style="font-size:12px">${KIND[m.kind]} · ${fmtMD(due)}까지</span></span>
+      ${e.mode==='auto'?`<span class="num muted" style="font-size:12px">${pr.done}/${pr.U}${w}</span>`:`<span class="num muted" style="font-size:12px">${pr.U}${w}</span>`}</div>
+      ${e.mode==='auto'?`<div class="track"><i style="width:${pr.U?pr.done/pr.U*100:0}%;background:${a.c}"></i></div>
+      <span class="${pr.behind?'pill warn':pr.done>=pr.U?'pill':'pill gray'}">${pr.done>=pr.U?'다 끝냈어요':pr.behind?`${pr.behind}${w} 밀림`:'계획대로 가는 중'}</span>`:''}</div>`}).join('')}</div>`:'';
   if(e.mode==='auto'){const done=e.plan.filter(p=>p.done).length;prog=`${done}/${e.plan.length}`;
-    const P=phases(diff(e.start,e.date));
-    body=`<p class="note">개념 ${P.concept}일 · 기출 ${P.past}일 · 실전 ${P.mock}일 · 최종 ${P.final}일, 하루 약 ${e.dailyMin}분</p>
-      <details class="plan"${open?' open':''} data-evdet="${e.id}"><summary>날짜별 계획 보기 (${e.plan.length}개)</summary><div class="planlist">${e.plan.map(p=>`<div class="pd${p.d===TODAY?' today':''}"><span class="d">${fmtMD(p.d)}</span><span>${p.done?`<s>${esc(p.t)}</s>`:esc(p.t)}</span></div>`).join('')||'<span class="empty">시작일이 시험일보다 늦어서 계획을 만들지 못했어요.</span>'}</div></details>`}
+    const cnt=ph=>new Set(e.plan.filter(p=>p.ph===ph).map(p=>p.d)).size;
+    const anyBehind=mats.some(m=>matProgress(e,m).behind>0);
+    body=`${matHTML}<p class="note">진도 ${cnt('진도')+cnt('개념')}일 · 기출 ${cnt('기출')}일 · 실전 ${cnt('실전')}일 · 최종 ${cnt('최종')}일, 하루 약 ${e.dailyMin}분</p>
+      ${anyBehind?`<div class="behind"><span>밀린 분량이 있어요. 오늘부터 끝낼 날짜까지 남은 분량을 다시 나눌 수 있어요.</span><button class="btn sm primary" data-evregen="${e.id}">오늘부터 다시 나누기</button></div>`:''}
+      <details class="plan"${open?' open':''} data-evdet="${e.id}"><summary>날짜별 계획 보기 (${e.plan.length}개)</summary><div class="planlist">${e.plan.map(p=>`<div class="pd${p.d===TODAY?' today':''}"><span class="d">${fmtMD(p.d)}</span><span>${p.done?`<s>${esc(p.t)}</s>`:p.moved?`<s class="muted">${esc(p.t)}</s> <span class="mins">뒤로 다시 나눔</span>`:esc(p.t)}${p.min&&!p.moved?` <span class="mins">${p.min}분</span>`:''}</span></div>`).join('')||'<span class="empty">시작일이 시험일보다 늦어서 계획을 만들지 못했어요.</span>'}</div></details>`}
   else if(e.mode==='weekly'){const done=e.weeks.filter(w=>w.done).length;prog=`${done}/${e.weeks.length}주`;const cm=monday(TODAY);
-    body=`<div class="wkplan">${e.weeks.map((w,i)=>`<div class="w${w.s===cm?' cur':''}"><input type="checkbox" data-wgoal="${e.id}" data-ws="${w.s}"${w.done?' checked':''} aria-label="${fmtMD(w.s)} 주 완료"><span class="wd">${fmtMD(w.s)}~</span><input type="text" data-wedit="${e.id}" data-ws="${w.s}" value="${esc(w.goal)}" aria-label="${fmtMD(w.s)} 주 목표"></div>`).join('')||'<span class="empty">남은 주가 없어요.</span>'}</div>`}
+    body=`${matHTML}<div class="wkplan">${e.weeks.map(w=>`<div class="w${w.s===cm?' cur':''}"><input type="checkbox" data-wgoal="${e.id}" data-ws="${w.s}"${w.done?' checked':''} aria-label="${fmtMD(w.s)} 주 완료"><span class="wd">${fmtMD(w.s)}~</span><input type="text" data-wedit="${e.id}" data-ws="${w.s}" value="${esc(w.goal)}" aria-label="${fmtMD(w.s)} 주 목표"></div>`).join('')||'<span class="empty">남은 주가 없어요.</span>'}</div>`}
   return `<div class="ev-card" style="border-left:4px solid ${a.c}" id="ev-${e.id}">
     <div class="row between"><div><b style="font-size:16px">${esc(e.name)}</b><div class="note">${e.date.replace(/-/g,'.')} · ${esc(a.name)} · ${e.mode==='auto'?'날짜별 자동 배분':e.mode==='weekly'?'주별 목표':'디데이만'}</div></div><div style="text-align:right"><div class="dday">${ddLabel(n)}</div>${prog?`<span class="pill">${prog}</span>`:''}</div></div>
     ${body}
-    <div class="row"><button class="btn sm" data-evedit="${e.id}">수정</button>${e.mode!=='none'?`<button class="btn sm" data-evregen="${e.id}">계획 다시 짜기</button>`:''}<button class="btn sm danger" data-evdel="${e.id}">삭제</button></div>
+    <div class="row"><button class="btn sm" data-evedit="${e.id}">수정 (교재·분량·날짜)</button>${e.mode==='weekly'?`<button class="btn sm" data-evregen="${e.id}">주 목표 다시 채우기</button>`:''}<button class="btn sm danger" data-evdel="${e.id}">삭제</button></div>
   </div>`}
 let delArm=null;
 function renderEvents(){
   const list=[...S.events].sort((a,b)=>a.date.localeCompare(b.date));
   const up=list.filter(e=>e.date>=TODAY),past=list.filter(e=>e.date<TODAY);
   $('v-events').innerHTML=`<div class="page" style="padding:0">
-    ${editEv!==null?evForm(editEv?S.events.find(e=>e.id===editEv):null):`<div class="row"><button class="btn primary" id="ev-new">+ 일정 추가</button><span class="note">시험이나 마감일을 넣으면 공부 계획을 짜 줘요.</span></div>`}
+    ${editEv!==null?evForm(editEv?S.events.find(e=>e.id===editEv):null):`<div class="row"><button class="btn primary" id="ev-new">+ 일정 추가</button><span class="note">시험이나 마감일과 교재 분량을 넣으면 날짜별 공부 계획을 짜 줘요.</span></div>`}
     <div class="card"><h3>다가오는 일정</h3>${up.length?up.map(evCard).join(''):'<p class="empty">다가오는 일정이 없어요.</p>'}</div>
     ${past.length?`<div class="card"><h3>지난 일정</h3>${past.map(evCard).join('')}</div>`:''}
   </div>`;
-  if(editEv!==null)syncModeHelp();
+  if(editEv!==null){syncModeHelp();updatePace()}
 }
 function syncModeHelp(){const m=(document.querySelector('input[name=ef-mode]:checked')||{}).value||'auto';$('ef-modehelp').textContent=MODE_HELP[m];
   document.querySelectorAll('#evform .plan-only').forEach(el=>el.hidden=m==='none')}
-function readSubs(){return [...document.querySelectorAll('#ef-subs .subj')].map(r=>({name:r.querySelector('[data-sf=name]').value.trim(),units:Math.max(0,parseInt(r.querySelector('[data-sf=units]').value)||0),unit:r.querySelector('[data-sf=unit]').value.trim()})).filter(s=>s.name)}
 
 /* ---------- MANAGE ---------- */
 function renderManage(){
   const freqOpt=r=>Object.entries({daily:'매일',weekly:'주 n회',monthly:'월 n회',yearly:'연 n회'}).map(([k,v])=>`<option value="${k}"${r.freq===k?' selected':''}>${v}</option>`).join('');
+  const nd=daily().length;
   $('v-manage').innerHTML=`<div class="page" style="padding:0">
+   <details class="guide"${S.guideOpen!==false?' open':''} id="guide"><summary>루틴 잘 세우는 법</summary>
+    <ol>
+      <li><b>아주 작게 시작해요.</b> 하기 싫은 날에도 할 수 있는 크기로 정하고, 2주 동안 지켜지면 늘려요.<span class="ex">"영어 공부 1시간" 대신 "단어 10개", "책 읽기" 대신 "책 2쪽"</span></li>
+      <li><b>언제·어디서 할지 정해요.</b> "시간 날 때"는 거의 안 지켜져요. 아래 '언제' 칸에 적어 두면 일간 화면에 같이 보여요.<span class="ex">"저녁 먹고 나서 책상에서 기출 20문제"</span></li>
+      <li><b>이미 매일 하는 일 바로 뒤에 붙여요.</b> 양치, 출근길, 점심처럼 빠지지 않는 일이 신호가 돼요.<span class="ex">"양치하고 나서 스트레칭 5분", "버스 타면 단어 앱 켜기"</span></li>
+      <li><b>매일 루틴은 3~5개만 둬요.</b> 나머지는 '주 n회'로 돌리면 하루가 무너져도 전체가 무너지지 않아요.</li>
+      <li><b>완벽 말고 80%를 목표로 해요.</b> 하루 빠져도 괜찮고, 이틀 연속으로만 빠지지 않게 해요. 일요일에 주간 화면을 보고 안 지켜진 루틴 하나만 줄이거나 시간을 옮겨요.</li>
+    </ol>
+   </details>
+   ${nd>5?`<div class="behind"><span>매일 루틴이 ${nd}개예요. 처음엔 3~5개가 지키기 쉬워요. 덜 중요한 것은 주기를 '주 n회'로 바꿔 보세요.</span></div>`:''}
+   <div class="card"><div class="row between"><h3>추천 루틴 세트</h3><span class="note">누르면 루틴 목록에 추가돼요. 이미 있는 이름은 건너뛰어요.</span></div>
+    <div class="sets">${SETS.map((x,i)=>`<div class="set"><b>${esc(x.name)}</b><ul>${x.items.map(it=>`<li>${esc(it[1])}${it[4]?` · ${esc(it[4])}`:''} <span class="num">(${it[2]==='daily'?'매일':FREQ[it[2]]+' '+it[3]+'회'})</span></li>`).join('')}</ul><button class="btn sm" data-set="${i}">이 세트 추가</button></div>`).join('')}</div>
+   </div>
    <div class="card"><div class="row between"><h3>루틴 목록</h3><button class="btn primary" id="r-add">+ 루틴 추가</button></div>
     <p class="note">주기를 고르고 횟수를 넣으면 일간·주간·월간·연간 화면에 나눠서 보여요. 매일 루틴은 횟수가 필요 없어요.</p>
     ${S.areas.map(a=>{const rs=S.routines.filter(r=>r.area===a.id);return `<div class="area-h" style="--c:${a.c}"><span class="sw"></span>${esc(a.name)} <span class="num">${rs.length}</span></div>
       <div class="list">${rs.map(r=>`<div class="mrow" data-rid="${r.id}">
         <select data-rf="area" aria-label="영역">${S.areas.map(x=>`<option value="${x.id}"${x.id===r.area?' selected':''}>${esc(x.name)}</option>`).join('')}</select>
         <input class="mt" data-rf="title" value="${esc(r.title)}" aria-label="루틴 이름">
+        <input class="mw" data-rf="when" value="${esc(r.when||'')}" placeholder="언제 (예: 아침 먹고 나서)" aria-label="언제 할지">
         <select data-rf="freq" aria-label="주기">${freqOpt(r)}</select>
         <input data-rf="target" type="number" min="1" inputmode="numeric" value="${r.target}" aria-label="횟수"${r.freq==='daily'?' disabled':''}>
         <button class="btn sm danger" data-rdel="${r.id}">삭제</button></div>`).join('')||'<p class="empty">이 영역에 루틴이 없어요.</p>'}</div>`}).join('')}
@@ -517,6 +643,13 @@ function renderManage(){
    </div>
   </div>`;
 }
+const SETS=[ // [area, title, freq, target, when]
+  {name:'공시생 기본',items:[['study','영어 단어 30개','daily',1,'아침 먹고 나서'],['study','국어 문법·독해 20문제','daily',1,'점심 먹고 나서'],['study','기출 오답 정리','weekly',3,'저녁 먹고 나서'],['study','다음 주 공부 계획 점검','weekly',1,'일요일 저녁']]},
+  {name:'아침 루틴',items:[['health','일어나자마자 물 한 잔','daily',1,'알람 끄고 바로'],['life','이불 정리','daily',1,'일어나서'],['life','오늘 할 일 3개 적기','daily',1,'아침 먹고 나서']]},
+  {name:'건강',items:[['health','12시 전에 눕기','daily',1,'11시 반에 폰 내려놓기'],['health','30분 운동','weekly',4,'퇴근·하교 직후'],['health','물 1.5L 마시기','daily',1,'']]},
+  {name:'돈 관리',items:[['life','가계부 기록','daily',1,'자기 전'],['life','무지출 데이','weekly',2,''],['life','한 달 지출 결산','monthly',1,'매달 말일']]},
+  {name:'커리어·코딩',items:[['career','코딩테스트 1문제','daily',1,'저녁 먹고 나서'],['career','프로젝트 작업','weekly',2,'주말 오전'],['career','공부 기록 글 쓰기','monthly',2,'']]}
+];
 const COLORS=['#2340E8','#7A3FE0','#13996A','#D9771E','#D6336C','#0E8FA3','#8A6D1F','#5C6178'];
 
 /* ---------- views ---------- */
@@ -534,11 +667,12 @@ document.addEventListener('change',e=>{const t=e.target;
   if(t.dataset.wgoal){const ev=S.events.find(x=>x.id===t.dataset.wgoal);const w=ev.weeks.find(w=>w.s===t.dataset.ws);w.done=t.checked;write();render();return}
   if(t.dataset.wedit){const ev=S.events.find(x=>x.id===t.dataset.wedit);const w=ev.weeks.find(w=>w.s===t.dataset.ws);w.goal=t.value;w.edited=true;write();toast('주 목표를 저장했어요');return}
   if(t.name==='ef-mode'){syncModeHelp();report();return}
+  if(t.dataset.mf==='kind'){const box=t.closest('.mat');box.querySelectorAll('.mat-kind').forEach(k=>k.hidden=k.dataset.for!==t.value);updatePace();report();return}
   const row=t.closest('.mrow');if(row){const r=S.routines.find(x=>x.id===row.dataset.rid),f=t.dataset.rf;
     r[f]=f==='target'?Math.max(1,parseInt(t.value)||1):t.value;if(f==='freq'&&r.freq==='daily')r.target=1;write();renderTop();if(f==='area'||f==='freq')renderManage();report();return}
   if(t.dataset.aname){const a=S.areas.find(x=>x.id===t.dataset.aname);a.name=t.value.trim()||a.name;write();return}
 });
-document.addEventListener('input',e=>{if(e.target.id==='memo'){const v=e.target.value;if(v)S.memo[dSel]=v;else delete S.memo[dSel];clearTimeout(window.__m);window.__m=setTimeout(write,500)}});
+document.addEventListener('input',e=>{if(e.target.closest&&e.target.closest('#evform')&&(e.target.dataset.mf||['ef-start','ef-date'].includes(e.target.id)))updatePace();if(e.target.id==='memo'){const v=e.target.value;if(v)S.memo[dSel]=v;else delete S.memo[dSel];clearTimeout(window.__m);window.__m=setTimeout(write,500)}});
 document.addEventListener('click',e=>{const t=e.target.closest('button,[data-goev],[data-goday]');if(!t)return;
   const d=t.dataset;
   if(d.chk&&t.classList.contains('cell')){toggle(d.d,d.chk);render();return}
@@ -553,13 +687,16 @@ document.addEventListener('click',e=>{const t=e.target.closest('button,[data-goe
   if(d.unlog){const ds=logDates(d.unlog,`${ySel}-01-01`,`${ySel}-12-31`);if(ds.length){toggle(ds[ds.length-1],d.unlog,false);render()}return}
   if(t.id==='ev-new'){editEv='';render();$('ef-name').focus();return}
   if(t.id==='ef-cancel'){editEv=null;render();return}
-  if(t.id==='ef-addsub'){const box=$('ef-subs');const subs=readSubs();box.innerHTML=subjRows([...subs,{name:'',units:'',unit:'강'}]);report();return}
-  if(d.subrm!==undefined){const rows=[...document.querySelectorAll('#ef-subs .subj')];rows[+d.subrm]?.remove();if(!$('ef-subs').children.length)$('ef-subs').innerHTML=subjRows([]);
-    document.querySelectorAll('#ef-subs [data-subrm]').forEach((b,i)=>b.dataset.subrm=i);report();return}
+  if(t.id==='ef-addmat'){$('ef-mats').insertAdjacentHTML('beforeend',matRow(null));updatePace();report();const ins=$('ef-mats').querySelectorAll('[data-mf=name]');ins[ins.length-1].focus();return}
+  if(t.hasAttribute('data-matrm')){t.closest('.mat').remove();if(!$('ef-mats').children.length)$('ef-mats').insertAdjacentHTML('beforeend',matRow(null));updatePace();report();return}
   if(d.evedit){editEv=d.evedit;render();$('evform').scrollIntoView({block:'start'});return}
-  if(d.evregen){const ev=S.events.find(x=>x.id===d.evregen);if(ev.mode==='weekly')ev.weeks.forEach(w=>w.edited=false);buildPlan(ev);write();openEv=ev.id;render();toast('계획을 다시 짰어요. 이미 체크한 항목은 유지돼요.');return}
+  if(d.evregen){const ev=S.events.find(x=>x.id===d.evregen);if(ev.mode==='weekly')ev.weeks.forEach(w=>w.edited=false);buildPlan(ev);write();openEv=ev.id;render();toast(ev.mode==='auto'?'오늘부터 남은 분량을 다시 나눴어요. 체크한 부분은 그대로예요.':'주 목표를 다시 채웠어요.');return}
   if(d.evdel){if(delArm!==d.evdel){delArm=d.evdel;t.textContent='한 번 더 누르면 삭제';setTimeout(()=>{if(delArm===d.evdel){delArm=null;if(t.isConnected)t.textContent='삭제'}},3000);return}
     S.events=S.events.filter(x=>x.id!==d.evdel);delArm=null;write();render();toast('일정을 삭제했어요');return}
+  if(d.set!==undefined){const set=SETS[+d.set];let n=0;
+    set.items.forEach(([ar,title,freq,target,when])=>{if(S.routines.some(r=>r.title===title))return;
+      const a=S.areas.find(x=>x.id===ar)||S.areas[0];S.routines.push({id:uid(),area:a.id,title,freq,target,when});n++});
+    write();render();toast(n?`${n}개 루틴을 추가했어요. 언제 할지는 목록에서 바꿀 수 있어요.`:'이미 다 들어 있어요');return}
   if(d.acolor){const a=S.areas.find(x=>x.id===d.acolor);a.c=d.c;write();render();return}
   if(d.adel){if(S.areas.length<2)return;
     if(delArm!==d.adel){delArm=d.adel;t.textContent='한 번 더 누르면 삭제';setTimeout(()=>{if(delArm===d.adel){delArm=null;if(t.isConnected)t.textContent='삭제'}},3000);return}
@@ -570,7 +707,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('button,[data-goe
   if(d.rdel){if(delArm!==d.rdel){delArm=d.rdel;t.textContent='한 번 더';setTimeout(()=>{if(delArm===d.rdel){delArm=null;if(t.isConnected)t.textContent='삭제'}},3000);return}
     S.routines=S.routines.filter(x=>x.id!==d.rdel);delArm=null;write();renderManage();renderTop();report();return}
 });
-document.addEventListener('toggle',e=>{if(e.target.dataset&&e.target.dataset.evdet)openEv=e.target.open?e.target.dataset.evdet:null;report()},true);
+document.addEventListener('toggle',e=>{if(e.target.id==='guide'){S.guideOpen=e.target.open;write()}if(e.target.dataset&&e.target.dataset.evdet)openEv=e.target.open?e.target.dataset.evdet:null;report()},true);
 document.addEventListener('submit',e=>{if(e.target.id!=='aform')return;e.preventDefault();
   const name=$('a-name').value.trim();if(!name)return;
   if(S.areas.some(a=>a.name===name)){toast('같은 이름의 영역이 이미 있어요');return}
@@ -580,7 +717,9 @@ document.addEventListener('submit',e=>{if(e.target.id!=='evform')return;e.preven
   const name=$('ef-name').value.trim(),date=$('ef-date').value;if(!name||!date)return;
   const mode=document.querySelector('input[name=ef-mode]:checked').value;
   const start=$('ef-start').value||TODAY;if(mode!=='none'&&start>=date){toast('공부 시작일은 일정 날짜보다 앞이어야 해요');$('ef-start').focus();return}
-  const o={name,date,area:$('ef-area').value,mode,start,dailyMin:Math.max(10,parseInt($('ef-min').value)||60),subjects:readSubs()};
+  const mats=readMats();
+  const bad=mats.find(m=>m.name!=='교재'&&!unitCount(m));if(mode!=='none'&&bad){toast(`"${bad.name}"의 분량(강의 수·페이지·목차)을 넣어 주세요`);return}
+  const o={name,date,area:$('ef-area').value,mode,start,dailyMin:Math.max(10,parseInt($('ef-min').value)||60),materials:mats};
   const id=e.target.dataset.id;let ev;
   if(id){ev=S.events.find(x=>x.id===id);const keepEdits=ev.mode===mode;Object.assign(ev,o);if(!keepEdits){ev.plan=[];ev.weeks=[]}buildPlan(ev)}
   else{ev=makeEvent(o);S.events.push(ev)}
