@@ -179,8 +179,8 @@
 window.setTimeout(function(){if(!window.myPlanCloudBooted)document.getElementById('cloud-status').textContent='연결 코드를 불러오지 못했습니다. GitHub에 cloud.js와 supabase-config.js가 함께 올라갔는지 확인하고 페이지를 새로고침하세요.';},6000);
 </script>
 <script src="supabase-config.js?v=20261104days13"></script>
-<script src="rooms.js?v=1"></script>
-<script src="cloud.js?v=20261112rooms25"></script>
+<script src="rooms.js?v=2"></script>
+<script src="cloud.js?v=20261112rooms26"></script>
 <script>window.addEventListener('message',function(e){const frame=document.getElementById('habit-frame');if(frame&&e.origin===location.origin&&e.source===frame.contentWindow&&e.data?.type==='myplan-habits-height'&&Number.isFinite(e.data.height)){frame.style.height=Math.min(20000,Math.max(300,e.data.height))+'px';}});</script>
 </body>
 </html>
