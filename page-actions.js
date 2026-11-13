@@ -75,3 +75,18 @@ document.querySelectorAll('[data-page-clear]').forEach(b=>b.addEventListener('cl
  try{if(kind==='meal')window.myPlanMeals.clearWeek();else if(kind==='routine'){const api=$('routine-frame').contentWindow.myPlanRoutineActions;if(!api)throw Error('루틴 탭 로딩을 기다려주세요.');api.clearChecks();}else if(kind==='habits'){const api=$('habit-frame').contentWindow.myPlanHabitActions;if(!api)throw Error('습관 트래커 로딩을 기다려주세요.');api.clearAll();}else window.myPlanPageData.clear(kind);}catch(e){alert('삭제하지 못했습니다: '+e.message);}
 }));
 })();
+
+// 팝업 창(<dialog>) 바깥 어두운 부분을 누르면 닫기 — 시간표 불러오기, 기록방 삭제 등
+(()=>{
+ const outside=(d,e)=>{const r=d.getBoundingClientRect();return e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom;};
+ document.querySelectorAll('dialog').forEach(d=>{
+  let downOut=false;
+  // 창 안에서 누르고 바깥에서 뗀 경우(글자 드래그 등)는 닫지 않도록, 누를 때와 뗄 때 모두 바깥이어야 닫힘
+  d.addEventListener('pointerdown',e=>{downOut=e.target===d&&outside(d,e);});
+  d.addEventListener('click',e=>{
+   if(e.target!==d||!downOut||(e.clientX===0&&e.clientY===0))return;
+   if(outside(d,e))d.close();
+   downOut=false;
+  });
+ });
+})();

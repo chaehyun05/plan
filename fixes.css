@@ -210,3 +210,8 @@
 .range-hint{margin:8px 0 0;font-size:13px;font-weight:700;color:#2340E8;}
 .range-hint:empty{display:none;}
 .range-hint.warn{color:#C62F3A;}
+
+/* 시간표 불러오기 창: 닫기 버튼이 스크롤해도 항상 보이게 */
+.picker-dialog{padding-top:0!important;}
+.picker-dialog #preset-close{position:sticky;top:0;z-index:3;float:right;margin:12px -8px 0 12px;background:#fff;box-shadow:0 2px 10px rgba(17,20,51,.12);}
+.picker-dialog>section{padding-top:24px;}

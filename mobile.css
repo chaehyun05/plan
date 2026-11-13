@@ -171,3 +171,11 @@ html.m .range-inputs{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;}
 html.m .range-inputs input[type=date]{min-width:0;width:100%;font-size:16px!important;padding:6px 8px;}
 html.m #range-clear{grid-column:1/-1;}
 html.m .range-quick .chip-btn{min-height:34px;}
+/* 시간표 불러오기 표: 칸이 겹치지 않게 옆으로 스크롤 */
+html.m .picker-dialog{width:calc(100% - 16px);padding-left:14px!important;padding-right:14px!important;}
+html.m .picker-dialog .meal-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+html.m .picker-dialog .meal-table{min-width:0!important;width:auto!important;table-layout:auto!important;}
+html.m .picker-dialog .meal-table td:nth-child(2){min-width:96px;max-width:120px;word-break:keep-all;}
+html.m .picker-dialog .meal-table th,html.m .picker-dialog .meal-table td{padding:8px 6px;}
+html.m .picker-dialog .meal-table th,html.m .picker-dialog .meal-table td{display:table-cell!important;}
+html.m .picker-dialog .meal-table input[type=time]{min-width:118px;}
