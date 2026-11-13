@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Poppins:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=controls17">
   <link rel="stylesheet" href="meal.css?v=fix19">
-<meta name="apple-mobile-web-app-capable" content="yes"><style>body:not(.auth-ready) .app-tabs,body:not(.auth-ready) [role=tabpanel]{display:none!important}.cloud-bar{padding:18px;margin:16px 0;background:#eef1ff;border-radius:12px}.cloud-bar form{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.cloud-bar input{padding:12px;max-width:100%;box-sizing:border-box;border:1px solid #aaa;border-radius:8px;font:inherit}</style><link rel="stylesheet" href="cards.css?v=inline-status18"><link rel="stylesheet" href="fixes.css?v=weeks1"><link rel="stylesheet" href="mobile-forced.css?v=m1"><link rel="stylesheet" href="mobile.css?v=m3"></head>
+<meta name="apple-mobile-web-app-capable" content="yes"><style>body:not(.auth-ready) .app-tabs,body:not(.auth-ready) [role=tabpanel]{display:none!important}.cloud-bar{padding:18px;margin:16px 0;background:#eef1ff;border-radius:12px}.cloud-bar form{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.cloud-bar input{padding:12px;max-width:100%;box-sizing:border-box;border:1px solid #aaa;border-radius:8px;font:inherit}</style><link rel="stylesheet" href="cards.css?v=inline-status18"><link rel="stylesheet" href="fixes.css?v=range1"><link rel="stylesheet" href="mobile-forced.css?v=m1"><link rel="stylesheet" href="mobile.css?v=m4"></head>
 <body>
   <main class="container">
     <header class="app-header">
@@ -43,6 +43,22 @@
           <span class="label">할 일</span>
           <input type="text" id="task" maxlength="40" placeholder="예: 전공 수업">
         </label>
+        <div class="field range-field" id="range-field">
+          <span class="label">기간 <small>선택 · 비워 두면 보고 있는 주에만 추가돼요</small></span>
+          <div class="range-inputs">
+            <input type="date" id="range-start" aria-label="시작 날짜">
+            <span class="range-dash">~</span>
+            <input type="date" id="range-end" aria-label="끝 날짜">
+            <button type="button" class="btn small" id="range-clear" hidden>지우기</button>
+          </div>
+          <div class="range-quick" id="range-quick">
+            <button type="button" class="chip-btn" data-range="4">4주</button>
+            <button type="button" class="chip-btn" data-range="8">8주</button>
+            <button type="button" class="chip-btn" data-range="month">이번 달 끝까지</button>
+            <button type="button" class="chip-btn" data-range="16">한 학기(16주)</button>
+          </div>
+          <p class="range-hint" id="range-hint" aria-live="polite"></p>
+        </div>
         <div class="field color-field">
           <span class="label">블록 색 <small>같은 할 일은 모두 같은 색으로 보여요</small></span>
           <div class="color-pick" id="color-pick"></div>
@@ -202,7 +218,7 @@ window.setTimeout(function(){if(!window.myPlanCloudBooted)document.getElementByI
 </script>
 <script src="supabase-config.js?v=20261104days13"></script>
 <script src="rooms.js?v=2"></script>
-<script src="cloud.js?v=20261113weeks1"></script>
+<script src="cloud.js?v=20261113range1"></script>
 <script>window.addEventListener('message',function(e){const frame=document.getElementById('habit-frame');if(frame&&e.origin===location.origin&&e.source===frame.contentWindow&&e.data?.type==='myplan-habits-height'&&Number.isFinite(e.data.height)){frame.style.height=Math.min(20000,Math.max(300,e.data.height))+'px';}});
 window.addEventListener('message',function(e){const frame=document.getElementById('routine-frame');if(frame&&e.origin===location.origin&&e.source===frame.contentWindow&&e.data?.type==='myplan-routine-height'&&Number.isFinite(e.data.height)){frame.style.height=Math.min(20000,Math.max(300,e.data.height))+'px';}});</script>
 </body>

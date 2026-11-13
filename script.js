@@ -616,7 +616,7 @@ function toast(msg) {
 // ===== 겹치는 일정 처리 =====
 // base: 기존 일정들, entries: 새로 넣을 일정들
 // 결과로 바뀐 전체 일정 배열을 돌려주고, 취소하면 null
-async function resolveConflicts(base, entries) {
+async function resolveConflicts(base, entries, forced) {
   const hits = entries.map((e) => ({ e, others: base.filter((p) => overlapMin(p, e) > 0) }));
   const conflicted = hits.filter((h) => h.others.length);
   if (!conflicted.length) return base.concat(entries);
@@ -639,7 +639,8 @@ async function resolveConflicts(base, entries) {
     : null;
 
   let choice;
-  if (allSame) {
+  if (forced) choice = forced;
+  else if (allSame) {
     // 시간이 완전히 같을 때 → 교체 여부 확인
     choice = await showModal({
       title: '같은 시간에 이미 일정이 있어요',
@@ -826,13 +827,16 @@ form.addEventListener('submit', async (e) => {
   const prevColor = [colorMap[task], colorPinned[task]];
   if (pickedColor != null) { colorMap[task] = pickedColor; colorPinned[task] = true; }
   else if (editing && colorPinned[task] && pickedColor === null && pickAuto) { delete colorPinned[task]; delete colorMap[task]; }
-  const added = await commitEntries(items, task);
+  const rng = !editing && readRange();
+  if (rng && rng.error) { restoreColor(); $('range-start').focus(); return toast(rng.error); }
+  const added = rng ? await commitRange(items, task, rng) : await commitEntries(items, task);
+  function restoreColor() { if (prevColor[0] === undefined) delete colorMap[task]; else colorMap[task] = prevColor[0]; if (prevColor[1]) colorPinned[task] = true; else delete colorPinned[task]; }
   if (!added) { if (prevColor[0] === undefined) delete colorMap[task]; else colorMap[task] = prevColor[0]; if (prevColor[1]) colorPinned[task] = true; else delete colorPinned[task]; return; }
   saveData(); render();
 
   const wasEdit = !!editing;
   resetForm();
-  toast(wasEdit ? '수정했어요.' : added > 1 ? `${added}개 일정을 추가했어요.` : '추가했어요.');
+  toast(wasEdit ? '수정했어요.' : rng ? `${rng.weeks.length}주(${fmtD(rng.start)} ~ ${fmtD(rng.end)})에 일정 ${added}개를 추가했어요.` : added > 1 ? `${added}개 일정을 추가했어요.` : '추가했어요.');
   taskIn.focus();
 });
 
@@ -852,6 +856,7 @@ function startEdit(members, groupId) {
   clearSlots();
   byTime.forEach((t) => addSlot(t));
 
+  $('range-field').hidden = true;
   $('form-title').textContent = '할 일 수정';
   $('submit-btn').textContent = '수정 저장';
   $('cancel-edit').classList.remove('hidden');
@@ -867,7 +872,9 @@ function resetForm() {
   clearSlots();
   addSlot();
   $('form-title').textContent = '할 일 추가';
+  $('range-field').hidden = false;
   $('submit-btn').textContent = '추가하기';
+  if (typeof updateRangeHint === 'function') updateRangeHint();
   $('cancel-edit').classList.add('hidden');
   updatePreview();
 }
@@ -1646,6 +1653,98 @@ resetForm();
 render();
 renderTodos();
 renderMandals();
+
+// ===== 기간: 며칠부터 며칠까지 (선택) =====
+const DOW = ['일', '월', '화', '수', '목', '금', '토'];
+const fmtD = (d) => `${d.getMonth() + 1}.${d.getDate()}(${DOW[d.getDay()]})`;
+const parseDateIn = (v) => { if (!/^\d{4}-\d{2}-\d{2}$/.test(v || '')) return null; const [y, m, d] = v.split('-').map(Number); return new Date(y, m - 1, d); };
+// 빈칸이면 null(= 보고 있는 주만), 값이 있으면 {start, end, weeks} 또는 {error}
+function readRange() {
+  const a = $('range-start').value, b = $('range-end').value;
+  if (!a && !b) return null;
+  if (!a || !b) return { error: a ? '끝나는 날짜도 골라주세요.' : '시작 날짜도 골라주세요.' };
+  let start = parseDateIn(a), end = parseDateIn(b);
+  if (!start || !end) return { error: '날짜를 다시 골라주세요.' };
+  if (end < start) [start, end] = [end, start];
+  const weeksList = [];
+  for (let k = weekKeyOf(start); k <= weekKeyOf(end); k = addWeeks(k, 1)) weeksList.push(k);
+  if (weeksList.length > 60) return { error: '기간은 60주(약 1년)까지 정할 수 있어요.' };
+  return { start, end, weeks: weeksList };
+}
+function updateRangeHint() {
+  const r = readRange(), hint = $('range-hint');
+  $('range-clear').hidden = !$('range-start').value && !$('range-end').value;
+  $('range-field').classList.toggle('on', !!(r && !r.error));
+  if (!r) { hint.textContent = ''; if (!editing) $('submit-btn').textContent = '추가하기'; return; }
+  if (r.error) { hint.textContent = r.error; hint.classList.add('warn'); return; }
+  hint.classList.remove('warn');
+  hint.textContent = `${fmtD(r.start)} ~ ${fmtD(r.end)} · ${r.weeks.length}주에 걸쳐 고른 요일마다 추가돼요.`;
+  if (!editing) $('submit-btn').textContent = `${r.weeks.length}주에 추가하기`;
+}
+const toInput = (d) => keyOfDate(d);
+['range-start', 'range-end'].forEach((id) => $(id).addEventListener('input', updateRangeHint));
+$('range-start').addEventListener('change', () => {
+  // 시작만 고르면 끝 날짜 고르기 쉽게 같은 날로 맞춰 둠
+  if ($('range-start').value && !$('range-end').value) $('range-end').min = $('range-start').value;
+  updateRangeHint();
+});
+$('range-clear').addEventListener('click', () => { $('range-start').value = ''; $('range-end').value = ''; updateRangeHint(); });
+$('range-quick').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-range]'); if (!b) return;
+  // 시작: 보고 있는 주가 이번 주면 오늘, 아니면 그 주 일요일
+  const start = weekKey === THIS_WEEK ? new Date(new Date().setHours(0, 0, 0, 0)) : dateOfKey(weekKey);
+  let end;
+  if (b.dataset.range === 'month') end = new Date(start.getFullYear(), start.getMonth() + 1, 0);
+  else { end = dateOfKey(addWeeks(weekKeyOf(start), Number(b.dataset.range) - 1)); end.setDate(end.getDate() + 6); }
+  $('range-start').value = toInput(start); $('range-end').value = toInput(end);
+  updateRangeHint();
+});
+// 기간 안의 모든 주에 넣기. 겹치는 일정이 있으면 한 번만 물어봄
+async function commitRange(items, task, r) {
+  const startK = keyOfDate(r.start), endK = keyOfDate(r.end);
+  stashWeek();
+  const perWeek = [];
+  for (const k of r.weeks) {
+    const sun = dateOfKey(k);
+    const inRange = (day) => { const d = new Date(sun); d.setDate(sun.getDate() + day); const dk = keyOfDate(d); return dk >= startK && dk <= endK; };
+    const list = items.flatMap((it) => it.days.filter(inRange).map((day) => ({ day, start: it.start, end: it.end, task })));
+    if (!list.length) continue;
+    const groupId = list.length > 1 ? newId() : null;
+    perWeek.push({ k, entries: list.map((x) => ({ ...x, id: newId(), groupId })) });
+  }
+  if (!perWeek.length) { toast('고른 요일이 기간 안에 없어요. 날짜나 요일을 확인해주세요.'); return 0; }
+  for (const w of perWeek) for (let i = 0; i < w.entries.length; i++) for (let j = i + 1; j < w.entries.length; j++) {
+    if (overlapMin(w.entries[i], w.entries[j]) > 0) { toast(`${DAYS[w.entries[i].day]} 시간이 서로 겹쳐요. 시간을 확인해주세요.`); return 0; }
+  }
+  const baseOf = (k) => (k === weekKey ? plans : weeks[k] || []);
+  const clashWeeks = perWeek.filter((w) => w.entries.some((e) => baseOf(w.k).some((p) => overlapMin(p, e) > 0)));
+  let forced = 'both';
+  if (clashWeeks.length) {
+    forced = await showModal({
+      title: '시간이 겹치는 일정이 있어요',
+      body: `<p>${perWeek.length}주 중 <b>${clashWeeks.length}주</b>에 같은 시간대 일정이 이미 있어요 (예: ${weekInfo(clashWeeks[0].k).range}). 어떻게 할까요?</p>`,
+      buttons: [
+        { label: '새 일정 우선 (기존 일정에서 겹치는 시간만 빼기)', value: 'trim', style: 'primary' },
+        { label: '새 일정으로 교체 (겹치는 기존 일정 삭제)', value: 'replace' },
+        { label: '겹치는 것은 빼고 나머지만 추가', value: 'skip' },
+        { label: '둘 다 그대로 두기', value: 'both' },
+        { label: '취소', value: null },
+      ],
+      stacked: true,
+    });
+    if (!forced) return 0;
+  }
+  remember();
+  let added = 0;
+  for (const w of perWeek) {
+    const result = await resolveConflicts(baseOf(w.k), w.entries, forced);
+    if (!result) continue;
+    added += w.entries.filter((x) => result.includes(x)).length;
+    if (w.k === weekKey) plans = result; else if (result.length) weeks[w.k] = result; else delete weeks[w.k];
+  }
+  saveData(); render();
+  return added;
+}
 
 // ===== 주 넘기기 ‹ › =====
 function updateWeekUI() {

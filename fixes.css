@@ -197,3 +197,16 @@
 .g-head.today{color:#2340E8;}
 .g-head.today .g-date{opacity:1;display:inline-grid;place-items:center;min-width:1.7em;height:1.7em;border-radius:50%;background:#2340E8;color:#fff;font-weight:700;}
 .side .js-week-range{margin-top:4px;}
+
+/* ===== 기간 (선택) ===== */
+.range-field{margin-bottom:6px;}
+.range-inputs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.range-inputs input[type=date]{min-height:42px;padding:6px 10px;border:1px solid #cdd4e5;border-radius:8px;background:#fff;color:#263754;font:inherit;font-size:14px;min-width:150px;}
+.range-field.on .range-inputs input[type=date]{border-color:#2340E8;background:#F5F7FF;}
+.range-dash{color:#9DA1B8;font-weight:700;}
+.range-quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.range-quick .chip-btn{min-height:30px;padding:3px 11px;border:1px solid #DCDFEA;border-radius:999px;background:#fff;font:inherit;font-size:12.5px;font-weight:700;color:#536077;cursor:pointer;}
+.range-quick .chip-btn:hover{border-color:#2340E8;color:#2340E8;}
+.range-hint{margin:8px 0 0;font-size:13px;font-weight:700;color:#2340E8;}
+.range-hint:empty{display:none;}
+.range-hint.warn{color:#C62F3A;}
