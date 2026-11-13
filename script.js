@@ -112,7 +112,8 @@ const isValidPlan = (p) =>
 const migrateV1 = (arr) =>
   arr.map((p) => ({ ...p, day: Number.isInteger(p.day) ? (p.day + 1) % 7 : p.day, groupId: null })).filter(isValidPlan);
 
-const isValidTodo = (t) => t && typeof t.id === 'string' && typeof t.text === 'string' && typeof t.done === 'boolean';
+const isValidTodo = (t) => t && typeof t.id === 'string' && typeof t.text === 'string' && typeof t.done === 'boolean' &&
+  (t.due == null || (typeof t.due === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(t.due)));
 const isValidMandal = (m) =>
   m && typeof m.id === 'string' && Array.isArray(m.cells) && m.cells.length === 9 &&
   m.cells.every((r) => Array.isArray(r) && r.length === 9 && r.every((x) => typeof x === 'string'));
@@ -1264,15 +1265,71 @@ gridEl.addEventListener('click', (e) => {
   showPicked();
 });
 
-// 일정 우클릭 → 수정/삭제 메뉴
-gridEl.addEventListener('contextmenu', (e) => {
-  const block = e.target.closest('.block');
-  if (!block) return;
-  e.preventDefault();
-  const id = block.dataset.id;
+// ===== 우클릭한 채 끌기 → 상자에 닿은 일정 모두 선택 =====
+let rsel = null, suppressCtx = false;
+function lassoRect(r) {
+  return { left: Math.min(r.x0, r.x1), right: Math.max(r.x0, r.x1), top: Math.min(r.y0, r.y1), bottom: Math.max(r.y0, r.y1) };
+}
+function lassoHits(r) {
+  const L = lassoRect(r);
+  return [...gridEl.querySelectorAll('.block')].filter((b) => {
+    const q = b.getBoundingClientRect();
+    return q.left < L.right && q.right > L.left && q.top < L.bottom && q.bottom > L.top;
+  }).map((b) => b.dataset.id);
+}
+function drawLasso(r) {
+  let el = $('lasso');
+  if (!el) { el = document.createElement('div'); el.id = 'lasso'; el.className = 'lasso'; document.body.appendChild(el); }
+  const L = lassoRect(r);
+  Object.assign(el.style, { left: L.left + 'px', top: L.top + 'px', width: L.right - L.left + 'px', height: L.bottom - L.top + 'px' });
+  const hits = new Set(lassoHits(r));
+  gridEl.querySelectorAll('.block').forEach((b) => b.classList.toggle('selected', hits.has(b.dataset.id) || (r.add && picked.has(b.dataset.id))));
+}
+gridEl.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'touch' || e.button !== 2 || !e.target.closest('.g-day')) return;
+  // 누른 순간 아래 있던 일정을 기억 (끌기 중에는 이벤트가 계획표 전체로 와서 일정을 알 수 없음)
+  rsel = { x0: e.clientX, y0: e.clientY, x1: e.clientX, y1: e.clientY, moved: false, ctx: false, block: e.target.closest('.block')?.dataset.id || null, add: e.shiftKey };
+  gridEl.setPointerCapture(e.pointerId);
+});
+gridEl.addEventListener('pointermove', (e) => {
+  if (!rsel) return;
+  rsel.x1 = e.clientX; rsel.y1 = e.clientY;
+  if (!rsel.moved && Math.hypot(rsel.x1 - rsel.x0, rsel.y1 - rsel.y0) < 6) return;
+  rsel.moved = true;
+  drawLasso(rsel);
+});
+gridEl.addEventListener('pointerup', (e) => {
+  if (!rsel || e.button !== 2) return;
+  const r = rsel; rsel = null;
+  $('lasso')?.remove();
+  if (r.moved) {
+    // 윈도우 등에서는 손을 뗀 뒤에 메뉴 이벤트가 오므로 잠깐 막음
+    suppressCtx = true; setTimeout(() => { suppressCtx = false; }, 400);
+    const hits = lassoHits(r);
+    picked = r.add ? new Set([...picked, ...hits]) : new Set(hits);
+    showPicked();
+    if (!picked.size) return toast('상자 안에 일정이 없어요.');
+    if (picked.size === 1) onBlock([...picked][0]); else onPicked();
+  } else if (r.ctx && r.block) {
+    // 맥처럼 누르는 순간 메뉴 이벤트가 오는 경우: 끌지 않았으면 원래대로 그 일정 메뉴
+    openBlockMenu(r.block);
+  }
+});
+gridEl.addEventListener('pointercancel', () => { if (rsel) { rsel = null; $('lasso')?.remove(); showPicked(); } });
+function openBlockMenu(id) {
   if (!picked.has(id)) { picked = new Set([id]); showPicked(); }
   if (picked.size > 1) onPicked();
   else onBlock(id);
+}
+
+// 일정 우클릭 → 수정/삭제 메뉴
+gridEl.addEventListener('contextmenu', (e) => {
+  if (rsel) { e.preventDefault(); rsel.ctx = true; return; }
+  if (suppressCtx) { e.preventDefault(); return; }
+  const block = e.target.closest('.block');
+  if (!block) return;
+  e.preventDefault();
+  openBlockMenu(block.dataset.id);
 });
 
 gridEl.addEventListener('keydown', (e) => {
@@ -1480,20 +1537,49 @@ function renderTodos() {
   list.style.setProperty('--cols', cols);
   list.style.setProperty('--rows', rows);
 
-  let html = todos.map((t) =>
-    `<div class="todo-item${t.done ? ' done' : ''}" data-id="${t.id}">` +
+  // 급한 순서: 안 끝난 일 중 기한 빠른 것 → 기한 없는 것 → 끝낸 일
+  const order = todos.map((t, i) => ({ t, i, d: t.done ? null : daysLeft(t.due) }))
+    .sort((a, b) => (a.t.done - b.t.done) || ((a.d ?? 1e9) - (b.d ?? 1e9)) || (a.i - b.i));
+  let html = order.map(({ t, d }) => {
+    const lv = t.done || d == null ? '' : urgency(d);
+    const due = t.due ? dueParts(t.due, d, t.done) : null;
+    return `<div class="todo-item${t.done ? ' done' : ''}${lv ? ' u-' + lv : ''}${t.due ? ' has-due' : ''}" data-id="${t.id}">` +
       `<button type="button" class="todo-check" aria-label="${t.done ? '완료 취소' : '완료'}" aria-pressed="${t.done}"></button>` +
       `<span class="todo-text" title="눌러서 고치기">${escapeHtml(t.text)}</span>` +
+      `<span class="todo-due-wrap">` +
+        `<span class="todo-due${due ? '' : ' empty'}" title="${due ? escapeHtml(due.title) + ' · 눌러서 바꾸기' : '기한 정하기'}">${due ? escapeHtml(due.label) : '＋기한'}</span>` +
+        `<input type="date" class="todo-due-input" value="${t.due || ''}" aria-label="${escapeHtml(t.text)} 기한">` +
+      `</span>` +
       `<button type="button" class="todo-del" aria-label="삭제" title="삭제">×</button>` +
-    `</div>`
-  ).join('');
+    `</div>`;
+  }).join('');
   for (let i = todos.length; i < cols * rows; i++) {
     html += '<div class="todo-item blank"><span class="todo-check"></span><span class="todo-text"></span></div>';
   }
   list.innerHTML = html;
 
   const done = todos.filter((t) => t.done).length;
-  $('todo-progress').innerHTML = todos.length ? `<b>${done}</b> / ${todos.length} 완료` : '';
+  const open = todos.filter((t) => !t.done && t.due).map((t) => daysLeft(t.due));
+  const over = open.filter((d) => d < 0).length, soon = open.filter((d) => d >= 0 && d <= 1).length;
+  $('todo-progress').innerHTML = todos.length
+    ? `<b>${done}</b> / ${todos.length} 완료` + (over ? `<br><span class="todo-alert over">기한 지남 ${over}</span>` : '') + (soon ? `${over ? ' ' : '<br>'}<span class="todo-alert soon">오늘·내일 ${soon}</span>` : '')
+    : '';
+}
+
+// ===== 할 일 기한 =====
+const todayStart = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+function daysLeft(due) {
+  if (!due) return null;
+  const [y, m, d] = due.split('-').map(Number);
+  return Math.round((new Date(y, m - 1, d) - todayStart()) / 86400000);
+}
+// 남은 날짜에 따라 단계: 지남 > 오늘 > 내일 > 3일 안 > 일주일 안 > 여유
+const urgency = (d) => (d < 0 ? 'over' : d === 0 ? 'today' : d === 1 ? 'tomorrow' : d <= 3 ? 'soon' : d <= 7 ? 'week' : 'later');
+function dueParts(due, d, done) {
+  const [y, m, dd] = due.split('-').map(Number);
+  const dt = new Date(y, m - 1, dd), md = `${m}.${dd}(${'일월화수목금토'[dt.getDay()]})`;
+  const rel = done ? '' : d < 0 ? `${-d}일 지남` : d === 0 ? '오늘까지' : d === 1 ? '내일까지' : `D-${d}`;
+  return { label: rel ? `${rel} · ${md}` : md, title: `${y}년 ${md}까지` };
 }
 
 $('todo-form').addEventListener('submit', (e) => {
@@ -1502,8 +1588,10 @@ $('todo-form').addEventListener('submit', (e) => {
   const text = input.value.trim();
   if (!text) return;
   remember();
-  todos.push({ id: newId(), text, done: false });
+  const due = $('todo-due-new').value;
+  todos.push({ id: newId(), text, done: false, ...(due ? { due } : {}) });
   input.value = '';
+  $('todo-due-new').value = ''; syncNewDue();
   saveData();
   renderTodos();
 });
@@ -1559,6 +1647,34 @@ $('todo-list').addEventListener('click', (e) => {
     editTodo(item);
   }
 });
+// 기한 고르기: 칩 위에 투명한 날짜 칸이 덮여 있어서 누르면 달력이 열림
+$('todo-list').addEventListener('click', (e) => {
+  const inp = e.target.closest('.todo-due-input');
+  if (inp) { try { inp.showPicker?.(); } catch { /* 일부 브라우저는 직접 열림 */ } }
+});
+$('todo-list').addEventListener('change', (e) => {
+  const inp = e.target.closest('.todo-due-input'); if (!inp) return;
+  const t = todos.find((x) => x.id === inp.closest('.todo-item').dataset.id); if (!t) return;
+  const v = inp.value;
+  if ((t.due || '') === v) return;
+  remember();
+  if (v) t.due = v; else delete t.due;
+  saveData(); renderTodos();
+  toast(v ? `기한: ${dueParts(v, daysLeft(v), false).label}` : '기한을 지웠어요.');
+});
+// 새 할 일의 기한 칸
+function syncNewDue() {
+  const v = $('todo-due-new').value, lab = $('todo-due-new-label');
+  lab.textContent = v ? dueParts(v, daysLeft(v), false).label : '기한 (선택)';
+  lab.closest('.todo-due-new').classList.toggle('set', !!v);
+  $('todo-due-clear').hidden = !v;
+}
+$('todo-due-new').addEventListener('change', syncNewDue);
+$('todo-due-new').addEventListener('click', (e) => { try { e.target.showPicker?.(); } catch {} });
+$('todo-due-clear').addEventListener('click', () => { $('todo-due-new').value = ''; syncNewDue(); });
+// 자정이 지나면 D-day 다시 계산
+setInterval(() => { if (!$('panel-todo').hidden) renderTodos(); }, 10 * 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') renderTodos(); });
 
 // ===== 만다라트 (저장할 때 3번째 장부터) =====
 // 9칸짜리 블록 9개. 가운데 블록(4번)의 가운데 칸이 핵심 목표, 그 주변 8칸이 세부 목표.

@@ -179,3 +179,10 @@ html.m .picker-dialog .meal-table td:nth-child(2){min-width:96px;max-width:120px
 html.m .picker-dialog .meal-table th,html.m .picker-dialog .meal-table td{padding:8px 6px;}
 html.m .picker-dialog .meal-table th,html.m .picker-dialog .meal-table td{display:table-cell!important;}
 html.m .picker-dialog .meal-table input[type=time]{min-width:118px;}
+html.m .todo-add{display:grid;grid-template-columns:1fr auto;gap:8px;}
+html.m .todo-add #todo-input{grid-column:1/-1;}
+html.m .todo-due-new{min-height:42px;justify-content:center;}
+html.m .todo-add:has(#todo-due-clear:not([hidden])){grid-template-columns:1fr auto auto;}
+html.m .todo-due{font-size:12px;}
+html.m .todo-due.empty{opacity:1;}
+html.m .todo-item.u-week,html.m .todo-item.u-soon,html.m .todo-item.u-tomorrow,html.m .todo-item.u-today,html.m .todo-item.u-over{padding-left:10px;}

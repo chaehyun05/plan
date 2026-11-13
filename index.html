@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Poppins:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=controls17">
   <link rel="stylesheet" href="meal.css?v=fix19">
-<meta name="apple-mobile-web-app-capable" content="yes"><style>body:not(.auth-ready) .app-tabs,body:not(.auth-ready) [role=tabpanel]{display:none!important}.cloud-bar{padding:18px;margin:16px 0;background:#eef1ff;border-radius:12px}.cloud-bar form{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.cloud-bar input{padding:12px;max-width:100%;box-sizing:border-box;border:1px solid #aaa;border-radius:8px;font:inherit}</style><link rel="stylesheet" href="cards.css?v=inline-status18"><link rel="stylesheet" href="fixes.css?v=vline1"><link rel="stylesheet" href="mobile-forced.css?v=m1"><link rel="stylesheet" href="mobile.css?v=m5"></head>
+<meta name="apple-mobile-web-app-capable" content="yes"><style>body:not(.auth-ready) .app-tabs,body:not(.auth-ready) [role=tabpanel]{display:none!important}.cloud-bar{padding:18px;margin:16px 0;background:#eef1ff;border-radius:12px}.cloud-bar form{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.cloud-bar input{padding:12px;max-width:100%;box-sizing:border-box;border:1px solid #aaa;border-radius:8px;font:inherit}</style><link rel="stylesheet" href="cards.css?v=inline-status18"><link rel="stylesheet" href="fixes.css?v=vline1"><link rel="stylesheet" href="mobile-forced.css?v=m1"><link rel="stylesheet" href="mobile.css?v=m6"></head>
 <body>
   <main class="container">
     <header class="app-header">
@@ -161,6 +161,8 @@
         <h2>할 일 목록</h2>
         <form class="todo-add" id="todo-form" autocomplete="off">
           <input type="text" id="todo-input" maxlength="60" placeholder="할 일을 입력하고 Enter" aria-label="새 할 일">
+          <span class="todo-due-new"><span id="todo-due-new-label">기한 (선택)</span><input type="date" id="todo-due-new" aria-label="기한 (선택)"></span>
+          <button type="button" class="btn small" id="todo-due-clear" hidden aria-label="기한 지우기">×</button>
           <button type="submit" class="btn primary">추가</button>
         </form>
       </div>
@@ -218,7 +220,7 @@ window.setTimeout(function(){if(!window.myPlanCloudBooted)document.getElementByI
 </script>
 <script src="supabase-config.js?v=20261104days13"></script>
 <script src="rooms.js?v=2"></script>
-<script src="cloud.js?v=20261113merge1"></script>
+<script src="cloud.js?v=20261113lasso1"></script>
 <script>window.addEventListener('message',function(e){const frame=document.getElementById('habit-frame');if(frame&&e.origin===location.origin&&e.source===frame.contentWindow&&e.data?.type==='myplan-habits-height'&&Number.isFinite(e.data.height)){frame.style.height=Math.min(20000,Math.max(300,e.data.height))+'px';}});
 window.addEventListener('message',function(e){const frame=document.getElementById('routine-frame');if(frame&&e.origin===location.origin&&e.source===frame.contentWindow&&e.data?.type==='myplan-routine-height'&&Number.isFinite(e.data.height)){frame.style.height=Math.min(20000,Math.max(300,e.data.height))+'px';}});</script>
 </body>

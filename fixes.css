@@ -220,3 +220,45 @@
 .g-day{border-left:1px solid #E1E4EE;}
 .g-head:not(.g-corner){border-left:1px solid #E1E4EE;}
 .g-day:last-child{border-right:1px solid #E1E4EE;}
+
+/* ===== 주간 계획: 요일 사이 세로선 + 시간 가로선 조금 더 또렷하게 ===== */
+#grid .g-day{border-left:1px solid #E3E6EF;}
+#grid .g-slot{border-top-color:#E6E8F0;}
+#grid .g-slot:nth-child(6n+1):not(:first-child){border-top-color:#D6DAE6;}  /* 6시간마다 조금 진하게 */
+
+/* ===== 할 일: 기한 ===== */
+.todo-add{flex-wrap:wrap;}
+.todo-due-new{position:relative;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border:1px dashed #C9D0EA;border-radius:10px;background:#fff;color:#6A6F8E;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;}
+.todo-due-new.set{border-style:solid;border-color:#2340E8;color:#2340E8;background:#F5F7FF;}
+.todo-due-new input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0;}
+#todo-due-clear{min-width:32px;padding:0 8px;}
+
+.todo-due-wrap{position:relative;flex:0 0 auto;display:inline-flex;}
+.todo-due{display:inline-flex;align-items:center;padding:.18em .6em;border-radius:999px;font-size:.78em;font-weight:700;line-height:1.3;white-space:nowrap;background:#EEF0F6;color:#5B6178;}
+.todo-due.empty{background:transparent;color:#B6BBCC;font-weight:600;opacity:0;}
+.todo-item:hover .todo-due.empty,.todo-due-input:focus+.todo-due.empty{opacity:1;}
+.todo-due-input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0;margin:0;font-size:16px;}
+.todo-item.blank .todo-due-wrap{display:none;}
+
+/* 급할수록 진하게 · 빨갛게 (지남 > 오늘 > 내일 > 3일 > 일주일 > 여유) */
+.todo-item.u-later .todo-due{background:#EEF1FF;color:#4457B8;}
+.todo-item.u-week  .todo-due{background:#FFF4D6;color:#8A6200;}
+.todo-item.u-soon  .todo-due{background:#FFE2C2;color:#B04A00;}
+.todo-item.u-tomorrow .todo-due{background:#FFC9B8;color:#B02A10;}
+.todo-item.u-today .todo-due{background:#F2545B;color:#fff;}
+.todo-item.u-over  .todo-due{background:#B4141D;color:#fff;}
+.todo-item.u-week{box-shadow:inset 3px 0 0 #F2C14E;}
+.todo-item.u-soon{box-shadow:inset 3px 0 0 #F08A3C;background:#FFF8F1;}
+.todo-item.u-tomorrow{box-shadow:inset 4px 0 0 #E8572F;background:#FFF1EC;}
+.todo-item.u-today{box-shadow:inset 4px 0 0 #E5484D;background:#FFECEC;}
+.todo-item.u-over{box-shadow:inset 5px 0 0 #B4141D;background:#FFE3E3;}
+.todo-item.u-week,.todo-item.u-soon,.todo-item.u-tomorrow,.todo-item.u-today,.todo-item.u-over{padding-left:.6em;}
+.todo-item.u-tomorrow .todo-text,.todo-item.u-today .todo-text{font-weight:700;}
+.todo-item.u-over .todo-text{font-weight:800;color:#8E0F16;}
+.todo-item.done .todo-due{background:#F2F3F7;color:#B6BBCC;}
+.todo-alert{display:inline-block;margin-top:4px;padding:1px 8px;border-radius:999px;font-size:.9em;font-weight:700;}
+.todo-alert.over{background:#B4141D;color:#fff;}
+.todo-alert.soon{background:#FFE2D6;color:#B02A10;}
+
+/* 우클릭 끌기 선택 상자 */
+.lasso{position:fixed;z-index:80;border:1.5px dashed #2340E8;background:rgba(35,64,232,.08);border-radius:4px;pointer-events:none;}
