@@ -130,19 +130,55 @@ function loadData() {
         colorPinned: d.pinned && typeof d.pinned === 'object' ? d.pinned : {},
         todos: (Array.isArray(d.todos) ? d.todos : []).filter(isValidTodo),
         mandals: (Array.isArray(d.mandals) ? d.mandals : []).filter(isValidMandal),
+        weeks: cleanWeeks(d.weeks),
       };
     }
     const old = JSON.parse(localStorage.getItem(OLD_STORAGE_KEY));
-    if (Array.isArray(old)) return { plans: migrateV1(old), month: '', colorMap: {}, colorPinned: {}, todos: [], mandals: [] };
+    if (Array.isArray(old)) return { plans: migrateV1(old), month: '', colorMap: {}, colorPinned: {}, todos: [], mandals: [], weeks: {} };
   } catch { /* 저장된 값이 없거나 읽을 수 없음 */ }
-  return { plans: [], month: '', colorMap: {}, colorPinned: {}, todos: [], mandals: [] };
+  return { plans: [], month: '', colorMap: {}, colorPinned: {}, todos: [], mandals: [], weeks: {} };
+}
+// ===== 여러 주: 주마다 따로 저장 (키 = 그 주 일요일 날짜 'YYYY-MM-DD') =====
+const WEEK_RE = /^\d{4}-\d{2}-\d{2}$/;
+function cleanWeeks(w) {
+  const out = {};
+  if (!w || typeof w !== 'object' || Array.isArray(w)) return out;
+  for (const [k, list] of Object.entries(w)) {
+    if (!WEEK_RE.test(k) || !Array.isArray(list)) continue;
+    const ok = list.filter(isValidPlan);
+    if (ok.length) out[k] = ok;
+  }
+  return out;
+}
+const pad2 = (n) => String(n).padStart(2, '0');
+const keyOfDate = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const dateOfKey = (k) => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+const weekKeyOf = (date) => { const d = new Date(date.getFullYear(), date.getMonth(), date.getDate()); d.setDate(d.getDate() - d.getDay()); return keyOfDate(d); };
+const addWeeks = (k, n) => { const d = dateOfKey(k); d.setDate(d.getDate() + 7 * n); return keyOfDate(d); };
+const THIS_WEEK = weekKeyOf(new Date());
+// "11월 2주차" — 그 주 수요일이 속한 달 기준
+function weekInfo(k) {
+  const sun = dateOfKey(k), wed = new Date(sun), sat = new Date(sun);
+  wed.setDate(sun.getDate() + 3); sat.setDate(sun.getDate() + 6);
+  const dates = Array.from({ length: 7 }, (_, i) => { const d = new Date(sun); d.setDate(sun.getDate() + i); return d; });
+  return {
+    month: wed.getMonth() + 1, nth: Math.ceil(wed.getDate() / 7), year: wed.getFullYear(), dates,
+    range: `${sun.getMonth() + 1}.${sun.getDate()} ~ ${sat.getMonth() + 1}.${sat.getDate()}`,
+  };
 }
 function saveData() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 2, month, plans, colors: colorMap, pinned: colorPinned, todos, mandals })); }
+  stashWeek();
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 2, month, plans, weeks, colors: colorMap, pinned: colorPinned, todos, mandals })); }
   catch { toast('브라우저에 저장하지 못했어요. 백업 파일 저장을 이용해주세요.'); }
 }
 
-let { plans, month, colorMap, colorPinned, todos, mandals } = loadData();
+let { plans, month, colorMap, colorPinned, todos, mandals, weeks } = loadData();
+// 예전처럼 주 구분 없이 저장된 일정은 이번 주 계획으로 옮김
+if (!Object.keys(weeks).length && plans.length) weeks[THIS_WEEK] = plans;
+let weekKey = THIS_WEEK;
+plans = weeks[weekKey] || [];
+// 보고 있는 주의 일정을 weeks에 반영 (빈 주는 지움)
+function stashWeek() { if (plans.length) weeks[weekKey] = plans; else delete weeks[weekKey]; }
 // Restore prior generated commute expansion without changing manually entered work.
 function cleanGeneratedCommutes(){
  let changed=false;
@@ -200,7 +236,8 @@ dedupeColors();
 // ===== 되돌리기 / 다시 실행 (⌘Z, Ctrl+Z) =====
 const undoStack = [];
 const redoStack = [];
-const snapshot = () => JSON.stringify({ plans, colorMap, colorPinned, todos, mandals });
+// 모든 주를 함께 기억 (주를 넘긴 뒤 되돌려도 맞는 주가 복원됨). k = 복원했을 때 보여줄 주
+const snapshot = (k) => { stashWeek(); return JSON.stringify({ weeks, weekKey: k || weekKey, colorMap, colorPinned, todos, mandals }); };
 
 // 일정을 바꾸기 직전에 부름
 function remember() {
@@ -210,7 +247,9 @@ function remember() {
 }
 function restoreSnapshot(json) {
   const d = JSON.parse(json);
-  plans = d.plans;
+  if (d.weekKey && d.weekKey !== weekKey) picked.clear();
+  if (d.weeks) { weeks = d.weeks; weekKey = d.weekKey || weekKey; plans = weeks[weekKey] || []; }
+  else plans = d.plans || [];
   colorMap = d.colorMap || {};
   colorPinned = d.colorPinned || {};
   todos = d.todos || [];
@@ -218,19 +257,22 @@ function restoreSnapshot(json) {
   if (editing && !editing.ids.every((id) => plans.some((p) => p.id === id))) resetForm();
   saveData();
   render();
+  updateWeekUI();
   renderTodos();
   renderMandals();
 }
 function undo() {
   if (!undoStack.length) return toast('되돌릴 작업이 없어요.');
-  redoStack.push(snapshot());
-  restoreSnapshot(undoStack.pop());
+  const target = undoStack.pop();
+  redoStack.push(snapshot(JSON.parse(target).weekKey));
+  restoreSnapshot(target);
   toast('되돌렸어요.');
 }
 function redo() {
   if (!redoStack.length) return toast('다시 실행할 작업이 없어요.');
-  undoStack.push(snapshot());
-  restoreSnapshot(redoStack.pop());
+  const target = redoStack.pop();
+  undoStack.push(snapshot(JSON.parse(target).weekKey));
+  restoreSnapshot(target);
   toast('다시 실행했어요.');
 }
 document.addEventListener('keydown', (e) => {
@@ -901,7 +943,11 @@ function displaySegments(items){
 }
 function render() {
   const grid = $('grid');
-  let html = `<div class="g-head g-corner"></div>` + SHORT.map((d) => `<div class="g-head">${d}</div>`).join('');
+  const wi = weekInfo(weekKey), today = keyOfDate(new Date());
+  let html = `<div class="g-head g-corner"></div>` + SHORT.map((d, i) => {
+    const dt = wi.dates[i], isToday = keyOfDate(dt) === today;
+    return `<div class="g-head${isToday ? ' today' : ''}">${d}<span class="g-date">${dt.getDate()}</span></div>`;
+  }).join('');
 
   html += '<div class="g-time">';
   for (let h = 0; h < 24; h++) html += `<div class="g-hour">${pad(h)}:00</div>`;
@@ -929,6 +975,7 @@ function render() {
     html += '</div>';
   }
   grid.innerHTML = html;
+  if ($('week-title')) updateWeekUI();
 }
 
 // ===== 일정 블록 클릭 → 수정 / 삭제 =====
@@ -1207,8 +1254,8 @@ document.addEventListener('pointerdown', (e) => {
 $('clear-all').addEventListener('click', async () => {
   if (!plans.length) return toast('삭제할 일정이 없어요.');
   const ok = await showModal({
-    title: '모든 일정을 삭제할까요?',
-    body: `<p>${plans.length}개의 일정이 모두 지워져요. 지운 뒤에도 ⌘Z로 되돌릴 수 있어요.</p>`,
+    title: '이 주의 일정을 모두 삭제할까요?',
+    body: `<p>${weekInfo(weekKey).range} 일정 ${plans.length}개가 지워져요. 다른 주는 그대로예요. 지운 뒤에도 ⌘Z로 되돌릴 수 있어요.</p>`,
     buttons: [
       { label: '취소', value: false },
       { label: '전체 삭제', value: true, style: 'danger' },
@@ -1318,7 +1365,8 @@ $('save-pdf').addEventListener('click', async () => {
 
 // ===== 백업 / 불러오기 =====
 $('backup').addEventListener('click', () => {
-  const data = JSON.stringify({ version: 2, month, plans, colors: colorMap, pinned: colorPinned, todos, mandals, meals: window.myPlanMeals?.getData() }, null, 2);
+  stashWeek();
+  const data = JSON.stringify({ version: 2, month, plans, weeks, colors: colorMap, pinned: colorPinned, todos, mandals, meals: window.myPlanMeals?.getData() }, null, 2);
   download(new Blob([data], { type: 'application/json' }), 'myplan-backup.json');
   toast('백업 파일을 저장했어요.');
 });
@@ -1331,7 +1379,7 @@ $('restore-file').addEventListener('change', async (e) => {
   if (!file) return;
   try {
     const raw = JSON.parse(await file.text());
-    let data, m = '', colors = {}, pins = {}, tds = [], mds = [];
+    let data, m = '', colors = {}, pins = {}, tds = [], mds = [], wks = null;
     if (Array.isArray(raw)) {                 // 예전 버전 백업
       if (!raw.every((p) => isValidPlan({ ...p, day: (p.day + 1) % 7, groupId: null }))) throw new Error();
       data = migrateV1(raw);
@@ -1342,13 +1390,14 @@ $('restore-file').addEventListener('change', async (e) => {
       if (raw.pinned && typeof raw.pinned === 'object') pins = raw.pinned;
       if (Array.isArray(raw.todos)) tds = raw.todos.filter(isValidTodo);
       if (Array.isArray(raw.mandals)) mds = raw.mandals.filter(isValidMandal);
+      if (raw.weeks) wks = cleanWeeks(raw.weeks);
     } else {
       throw new Error('형식 오류');
     }
 
     const ok = await showModal({
       title: '백업 파일을 불러올까요?',
-      body: `<p>일정 ${data.length}개, 할 일 ${tds.length}개, 만다라트 ${mds.length}개를 불러와요. 지금 있는 내용은 모두 바뀌어요.</p>`,
+      body: `<p>${wks && Object.keys(wks).length ? `${Object.keys(wks).length}주 분량의 일정` : `일정 ${data.length}개(이번 주로)`}, 할 일 ${tds.length}개, 만다라트 ${mds.length}개를 불러와요. 지금 있는 내용은 모두 바뀌어요.</p>`,
       buttons: [
         { label: '취소', value: false },
         { label: '불러오기', value: true, style: 'primary' },
@@ -1357,7 +1406,8 @@ $('restore-file').addEventListener('change', async (e) => {
     if (!ok) return;
     remember();
     if (raw.meals && window.myPlanMeals) window.myPlanMeals.importData(raw.meals);
-    plans = data;
+    if (wks && Object.keys(wks).length) { weeks = wks; plans = weeks[weekKey] || []; }
+    else { weeks = {}; plans = data; }
     month = m;
     colorMap = colors;
     colorPinned = pins;
@@ -1597,19 +1647,75 @@ render();
 renderTodos();
 renderMandals();
 
+// ===== 주 넘기기 ‹ › =====
+function updateWeekUI() {
+  const wi = weekInfo(weekKey);
+  const title = `${wi.year !== new Date().getFullYear() ? wi.year + '년 ' : ''}${wi.month}월 ${wi.nth}주차`;
+  $('week-title').textContent = title;
+  $('week-range').textContent = wi.range;
+  document.querySelectorAll('.js-week-range').forEach((el) => { el.textContent = `${wi.month}월 ${wi.nth}주차 · ${wi.range}`; });
+  const isNow = weekKey === THIS_WEEK;
+  $('week-today').hidden = isNow;
+  $('week-badge').hidden = !isNow;
+  const empty = !plans.length;
+  $('week-empty').hidden = !empty;
+  const src = prevWeekWithPlans();
+  $('week-copy').disabled = !src;
+  $('week-copy').textContent = src && src !== addWeeks(weekKey, -1) ? `가장 최근 주(${weekInfo(src).range}) 복사` : '지난주 그대로 복사';
+  // 다른 주에 계획이 있는지 점으로 표시
+  $('week-prev').classList.toggle('has-plans', Object.keys(weeks).some((k) => k < weekKey));
+  $('week-next').classList.toggle('has-plans', Object.keys(weeks).some((k) => k > weekKey));
+}
+function prevWeekWithPlans() {
+  const ks = Object.keys(weeks).filter((k) => k < weekKey && weeks[k].length).sort();
+  return ks[ks.length - 1] || null;
+}
+function goWeek(k) {
+  if (k === weekKey) return;
+  if (editing) resetForm();
+  stashWeek();
+  weekKey = k;
+  plans = weeks[k] || [];
+  picked.clear();
+  const wi = weekInfo(k);
+  month = String(wi.month); monthIn.value = month; fitMonth();
+  saveData(); render(); updateWeekUI();
+}
+$('week-prev').addEventListener('click', () => goWeek(addWeeks(weekKey, -1)));
+$('week-next').addEventListener('click', () => goWeek(addWeeks(weekKey, 1)));
+$('week-today').addEventListener('click', () => goWeek(THIS_WEEK));
+$('week-copy').addEventListener('click', () => {
+  const src = prevWeekWithPlans(); if (!src) return;
+  remember();
+  plans = weeks[src].map((p) => ({ ...p, id: (String(p.id).startsWith('preset-') ? 'preset-' : '') + newId() }));
+  saveData(); render(); updateWeekUI();
+  toast(`${weekInfo(src).range} 일정 ${plans.length}개를 복사했어요.`);
+});
+$('week-preset').addEventListener('click', () => $('preset-open').click());
+// 키보드: 계획표 탭에서 Alt+← / Alt+→ 로 주 넘기기
+document.addEventListener('keydown', (e) => {
+  if (!e.altKey || $('panel-week').hidden || /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '')) return;
+  if (e.key === 'ArrowLeft') { e.preventDefault(); goWeek(addWeeks(weekKey, -1)); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); goWeek(addWeeks(weekKey, 1)); }
+});
+// 처음 열 때: 이번 주, 월은 이번 주 기준으로
+if (!month || month !== String(weekInfo(weekKey).month)) { month = String(weekInfo(weekKey).month); monthIn.value = month; fitMonth(); }
+updateWeekUI();
+render();
+
 // 개인 시간표 추가: 기존 계획 유지 + 중복 방지
 window.myPlanSchedule = {add(rows,replaceManaged=false){
  const valid=rows.filter(isValidPlan);if(valid.length!==rows.length)throw Error('잘못된 시간표입니다.');
  if(replaceManaged)plans=plans.filter(p=>!(String(p.id).startsWith('preset-')&&String(p.groupId).startsWith('preset-')));
  const added=[],skipped=[];let conflicts=0;
  for(const r of valid){if(plans.some(p=>p.day===r.day&&p.start===r.start&&p.end===r.end&&p.task===r.task)||added.some(p=>p.day===r.day&&p.start===r.start&&p.end===r.end&&p.task===r.task)){skipped.push(r);continue;}if([...plans,...added].some(p=>overlapMin(p,r)>0))conflicts++;added.push(r);}
- if(added.length){plans.push(...added);saveData();render();}
+ if(added.length){plans.push(...added);saveData();render();updateWeekUI();}
  return {added:added.length,skipped:skipped.length,conflicts};
 }};
 
 window.myPlanPageData={clear(kind){
  remember();
- if(kind==='week'){plans=[];colorMap={};colorPinned={};render();}
+ if(kind==='week'){plans=[];stashWeek();if(!Object.keys(weeks).length){colorMap={};colorPinned={};}render();updateWeekUI();}
  else if(kind==='todo'){todos=[];renderTodos();}
  else if(kind==='mandal'){mandals=[];renderMandals();}
  saveData();

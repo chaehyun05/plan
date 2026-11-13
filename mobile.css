@@ -153,3 +153,17 @@ html.m .title-meta{flex:1 1 auto;overflow:hidden;}
 html.m .recent-list{grid-template-columns:1fr}
 html.m .recent-open{padding:12px}
 html.m .recent-del{flex-basis:48px}
+html.m .week-nav{gap:6px;margin-bottom:10px;}
+html.m .week-label{flex:1;justify-content:center;flex-direction:column;align-items:center;gap:0;}
+html.m .week-label b{font-size:17px;}
+html.m .week-label #week-range{font-size:12px;}
+html.m .week-badge{display:none;}
+html.m #week-today{margin-left:0;padding:4px 8px;font-size:12px;min-height:32px;}
+html.m .week-empty{flex-direction:column;align-items:stretch;padding:12px;}
+html.m .week-empty-actions .btn{flex:1;min-height:42px;}
+html.m .g-head{flex-direction:column;line-height:1.05;height:34px;}
+html.m .g-head .g-date{margin:1px 0 0;font-size:10px;}
+html.m .g-head.today .g-date{min-width:16px;height:16px;font-size:9.5px;}
+/* 탭이 6개 이상이어도 한 줄로 */
+html.m .app-tabs{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);}
+html.m .app-tabs button{font-size:10.5px;}

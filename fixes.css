@@ -180,3 +180,20 @@
 .site-links{display:flex;gap:8px;margin:6px 0 2px}
 .site-links a{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:999px;border:1px solid #DCDFEA;background:#fff;color:#2340E8;font-size:13px;font-weight:700;text-decoration:none}
 .site-links a:hover{border-color:#2340E8;background:#EEF1FF}
+
+/* ===== 주 넘기기 ‹ › ===== */
+.week-nav{display:flex;align-items:center;gap:10px;margin:0 0 14px;}
+.week-arrow{width:42px;height:42px;min-height:42px;padding:0;border-radius:50%;font-size:22px;line-height:1;position:relative;}
+.week-arrow.has-plans::after{content:"";position:absolute;top:6px;right:7px;width:6px;height:6px;border-radius:50%;background:#2340E8;}
+.week-label{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0;}
+.week-label b{font-size:19px;font-weight:900;color:#111433;}
+.week-label #week-range{font-family:"Poppins",sans-serif;font-size:14px;font-weight:600;color:#6A6F8E;}
+.week-badge{padding:2px 8px;border-radius:999px;background:#E8ECFF;color:#2340E8;font-size:12px;font-weight:700;}
+#week-today{margin-left:auto;}
+.week-empty{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:14px 16px;border:1px dashed #C9D0EA;border-radius:12px;background:#F7F8FF;}
+.week-empty p{margin:0;font-size:14px;color:#4a5369;}
+.week-empty-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.g-head .g-date{margin-left:5px;font-family:"Poppins",sans-serif;font-weight:500;opacity:.55;}
+.g-head.today{color:#2340E8;}
+.g-head.today .g-date{opacity:1;display:inline-grid;place-items:center;min-width:1.7em;height:1.7em;border-radius:50%;background:#2340E8;color:#fff;font-weight:700;}
+.side .js-week-range{margin-top:4px;}
