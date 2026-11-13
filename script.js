@@ -706,12 +706,43 @@ function cutOut(p, e) {
   return out;
 }
 
+// ===== 같은 일정 흡수: 같은 요일·같은 이름이 겹치거나 바로 이어지면 하나로 합침 =====
+// 예) 복싱 10:30–11:30 이 있을 때 복싱 11:00–12:00 을 넣으면 → 복싱 10:30–12:00
+let lastAbsorbed = [];
+function absorbSame(base, entries) {
+  let rest = base.slice();
+  const merged = [];
+  const out = entries.map((e0) => {
+    let e = { ...e0 };
+    for (;;) {
+      const i = rest.findIndex((p) => p.task === e.task && p.day === e.day && p.start <= e.end && e.start <= p.end);
+      if (i < 0) break;
+      const p = rest[i];
+      const ns = Math.min(p.start, e.start), ne = Math.max(p.end, e.end);
+      if (ne - ns > DAY_MIN) break;
+      // 기존 일정의 id·묶음을 이어받아서, 요일별 묶음(예: 월~금 복싱)이 그대로 유지됨
+      e = { ...e, start: ns, end: ne, id: p.id, groupId: p.groupId ?? e.groupId };
+      merged.push({ before: p, after: e });
+      rest.splice(i, 1);
+    }
+    return e;
+  });
+  // 합쳐진 결과만 남기기 (같은 기존 일정에 여러 번 합쳐진 경우 마지막 것)
+  for (const m of merged) m.after = out.find((x) => x.id === m.after.id) || m.after;
+  return { base: rest, entries: out, merged };
+}
+function absorbedText() {
+  if (!lastAbsorbed.length) return '';
+  const a = lastAbsorbed[lastAbsorbed.length - 1].after;
+  return `같은 일정과 합쳤어요 · ${a.task} ${rangeText(a)}${lastAbsorbed.length > 1 ? ` 외 ${lastAbsorbed.length - 1}곳` : ''}`;
+}
+
 // 새 일정 추가(또는 수정) 공통 처리. items: [{ days, start, end }], 실제로 추가된 개수를 돌려줌
 async function commitEntries(items, task) {
   const count = items.reduce((n, it) => n + it.days.length, 0);
   // 한 번에 여러 개를 넣으면 같은 묶음(groupId)으로 저장 → 나중에 한꺼번에 수정/삭제 가능
   const groupId = count > 1 ? (editing?.groupId || newId()) : null;
-  const entries = items.flatMap((it) =>
+  let entries = items.flatMap((it) =>
     it.days.map((day) => ({ id: newId(), groupId, day, start: it.start, end: it.end, task }))
   );
 
@@ -725,7 +756,8 @@ async function commitEntries(items, task) {
     }
   }
 
-  const base = editing ? plans.filter((p) => !editing.ids.includes(p.id)) : plans;
+  const ab = absorbSame(editing ? plans.filter((p) => !editing.ids.includes(p.id)) : plans, entries);
+  const base = ab.base; entries = ab.entries; lastAbsorbed = ab.merged;
   const result = await resolveConflicts(base, entries);
   if (!result) return 0;
   remember();
@@ -836,6 +868,8 @@ form.addEventListener('submit', async (e) => {
 
   const wasEdit = !!editing;
   resetForm();
+  if (lastAbsorbed.length && !wasEdit) { const t = absorbedText(); lastAbsorbed = []; toast(rng ? `${rng.weeks.length}주에 추가 · ${t}` : t); taskIn.focus(); return; }
+  lastAbsorbed = [];
   toast(wasEdit ? '수정했어요.' : rng ? `${rng.weeks.length}주(${fmtD(rng.start)} ~ ${fmtD(rng.end)})에 일정 ${added}개를 추가했어요.` : added > 1 ? `${added}개 일정을 추가했어요.` : '추가했어요.');
   taskIn.focus();
 });
@@ -1116,7 +1150,8 @@ async function quickAdd(days, start, end) {
     editing = null; // 폼에서 수정 중이던 것과 섞이지 않게
     const added = await commitEntries([{ days, start: t.start, end: t.end }], task);
     editing = prevEditing;
-    if (added) toast(added > 1 ? `${added}개 일정을 추가했어요.` : '추가했어요.');
+    if (added) toast(lastAbsorbed.length ? absorbedText() : added > 1 ? `${added}개 일정을 추가했어요.` : '추가했어요.');
+    lastAbsorbed = [];
     return;
   }
 }
@@ -1716,8 +1751,10 @@ async function commitRange(items, task, r) {
   for (const w of perWeek) for (let i = 0; i < w.entries.length; i++) for (let j = i + 1; j < w.entries.length; j++) {
     if (overlapMin(w.entries[i], w.entries[j]) > 0) { toast(`${DAYS[w.entries[i].day]} 시간이 서로 겹쳐요. 시간을 확인해주세요.`); return 0; }
   }
-  const baseOf = (k) => (k === weekKey ? plans : weeks[k] || []);
-  const clashWeeks = perWeek.filter((w) => w.entries.some((e) => baseOf(w.k).some((p) => overlapMin(p, e) > 0)));
+  const rawBase = (k) => (k === weekKey ? plans : weeks[k] || []);
+  lastAbsorbed = [];
+  for (const w of perWeek) { const ab = absorbSame(rawBase(w.k), w.entries); w.base = ab.base; w.entries = ab.entries; lastAbsorbed.push(...ab.merged); }
+  const clashWeeks = perWeek.filter((w) => w.entries.some((e) => w.base.some((p) => overlapMin(p, e) > 0)));
   let forced = 'both';
   if (clashWeeks.length) {
     forced = await showModal({
@@ -1737,7 +1774,7 @@ async function commitRange(items, task, r) {
   remember();
   let added = 0;
   for (const w of perWeek) {
-    const result = await resolveConflicts(baseOf(w.k), w.entries, forced);
+    const result = await resolveConflicts(w.base, w.entries, forced);
     if (!result) continue;
     added += w.entries.filter((x) => result.includes(x)).length;
     if (w.k === weekKey) plans = result; else if (result.length) weeks[w.k] = result; else delete weeks[w.k];
