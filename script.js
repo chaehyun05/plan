@@ -1476,8 +1476,13 @@ $('restore-file').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   e.target.value = '';
   if (!file) return;
+  importBackupText(await file.text());
+});
+
+// 백업 파일과 링크(cloud.js) 모두 이 함수로 불러와요.
+async function importBackupText(text) {
   try {
-    const raw = JSON.parse(await file.text());
+    const raw = JSON.parse(text);
     let data, m = '', colors = {}, pins = {}, tds = [], mds = [], wks = null;
     if (Array.isArray(raw)) {                 // 예전 버전 백업
       if (!raw.every((p) => isValidPlan({ ...p, day: (p.day + 1) % 7, groupId: null }))) throw new Error();
@@ -1523,7 +1528,8 @@ $('restore-file').addEventListener('change', async (e) => {
   } catch {
     toast('올바른 백업 파일이 아니에요.');
   }
-});
+}
+window.myPlanImportText = importBackupText;
 
 // ===== 할 일 목록 (저장할 때 2번째 장) =====
 const TODO_ROWS = 16; // 기본: 2줄 × 16칸 (빈 칸은 손으로 적을 수 있게 줄만 그려둠)
