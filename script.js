@@ -1978,3 +1978,16 @@ window.myPlanPageData={clear(kind){
  else if(kind==='mandal'){mandals=[];renderMandals();}
  saveData();
 }};
+
+// 연간 계획(year.html)에서 만다라트·투두로 보내기
+window.myPlanYearBridge={
+ addMandal(cells){
+  if(!isValidMandal({id:'x',cells}))throw Error('만다라트 형식 오류');
+  remember();mandals.push({id:newId(),cells:cells.map(r=>r.slice())});saveData();renderMandals();
+ },
+ addTodo(text,due){
+  text=String(text||'').trim();if(!text)return;
+  if(todos.some(t=>t.text===text&&!t.done))return;
+  remember();todos.push({id:newId(),text,done:false,...(due&&/^\d{4}-\d{2}-\d{2}$/.test(due)?{due}:{})});saveData();renderTodos();
+ }
+};
