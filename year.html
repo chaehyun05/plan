@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>My Plan 연간 계획</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Poppins:wght@500;600&display=swap">
+<style>
+/* 루틴·습관 페이지와 같은 톤: ink #111433, accent #2340E8 */
+:root{--ink:#111433;--muted:#6A6F8E;--line:#DCDFEA;--soft:#EEF1FF;--accent:#2340E8;--track:#F0F2F7;--warn:#C62828;
+  --body:"Noto Sans KR",-apple-system,"Apple SD Gothic Neo",sans-serif;--num:Poppins,var(--body);color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--ink);font-family:var(--body);line-height:1.5;font-size:15px}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+.page{display:flex;flex-direction:column;gap:18px;padding:0 2px 12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 13px;cursor:pointer;font-size:13px;font-weight:700;line-height:1.4}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.sm{padding:4px 9px;font-size:12px;border-radius:8px}
+.btn.danger{color:var(--warn)}
+.x{border:0;background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:4px 6px;border-radius:6px}
+.x:hover{color:var(--warn);background:#FDECEC}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.muted{color:var(--muted)}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.note{font-size:13px;color:var(--muted);margin:0}
+/* 입력칸: 평소엔 글처럼, 누르면 칸처럼 */
+.ed{border:1px solid transparent;border-radius:8px;padding:4px 8px;background:transparent;min-width:0;width:100%}
+.ed:hover{border-color:var(--line)}
+.ed:focus{border-color:var(--accent);background:#fff;outline:0}
+textarea.ed{resize:vertical;min-height:34px}
+
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid #EDEEF3}
+.top h1{margin:0;font-size:26px;font-weight:900;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.top h1 button{width:32px;height:32px;padding:0}
+.overall{font-size:13px;color:var(--muted);text-align:right}
+.overall b{display:block;font-family:var(--num);font-size:26px;color:var(--accent);line-height:1.1}
+.vision{background:var(--soft);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.vision label{font-size:12px;font-weight:700;color:var(--accent)}
+.vision .ed.big{font-size:18px;font-weight:900}
+.top3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.top3 .ed{background:#fff;border-color:#DDE2FA;font-weight:700}
+.vtabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+.vtabs button{border:0;background:none;padding:9px 12px;font-weight:700;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+.vtabs button[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+.track{height:7px;background:var(--track);border-radius:4px;overflow:hidden}
+.track i{display:block;height:100%;border-radius:4px;background:var(--accent);transition:width .2s}
+
+/* 목표 카드 */
+.areas{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.area{border:1px solid #EDEEF3;border-top:4px solid var(--c);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.area-head{display:flex;align-items:center;gap:6px}
+.area-head .ed{font-weight:900;font-size:16px}
+.area-head input[type=color]{width:26px;height:26px;border:0;padding:0;background:none;cursor:pointer;flex:0 0 auto}
+.lbl{font-size:11px;font-weight:700;color:var(--muted);margin:2px 0 -4px 8px}
+.goal{font-weight:700}
+.kr{display:flex;align-items:center;gap:4px}
+.kr input[type=checkbox],.item input[type=checkbox]{width:18px;height:18px;flex:0 0 auto;accent-color:var(--c,var(--accent));cursor:pointer}
+.kr.done .ed,.item.done .ed{text-decoration:line-through;color:var(--muted)}
+.area .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.add-line{display:flex;gap:6px}
+.add-line input{flex:1;border:1px dashed var(--line);border-radius:8px;padding:5px 9px;min-width:0}
+
+/* 월별 */
+.quarter{display:flex;flex-direction:column;gap:10px}
+.q-head{display:flex;align-items:center;gap:10px}
+.q-head h3{margin:0;font-size:16px;white-space:nowrap}
+.q-head .track{flex:1}
+.months{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.month{border:1px solid #EDEEF3;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.month.now{border-color:var(--accent);box-shadow:0 0 0 2px var(--soft)}
+.month h4{margin:0;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+.month h4 small{font-family:var(--num);color:var(--muted);font-weight:600}
+.item{display:flex;align-items:center;flex-wrap:wrap;gap:0 3px;border-left:3px solid var(--c);padding:2px 0 4px 4px}
+.item .ed{flex:1 1 0;width:auto}
+.item .ctl{display:flex;align-items:center;gap:4px;margin-left:22px;width:calc(100% - 22px)}
+.item .ctl select{flex:1}
+.item select{border:0;background:none;font-size:11px;color:var(--c);font-weight:700;padding:0;cursor:pointer;min-width:0}
+.item .todo{font-size:11px;white-space:nowrap}
+.filter{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.chip i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.chip[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff}
+
+/* 일정 */
+.events{display:flex;flex-direction:column;gap:6px}
+.ev{display:grid;grid-template-columns:86px 150px 1fr 110px auto;align-items:center;gap:8px;border:1px solid #EDEEF3;border-left:4px solid var(--c);border-radius:10px;padding:6px 8px}
+.ev b{font-family:var(--num);color:var(--accent);font-size:15px}
+.ev.past b{color:var(--muted)}
+.ev input[type=date]{border:1px solid var(--line);border-radius:8px;padding:4px 6px}
+.ev select{border:1px solid var(--line);border-radius:8px;padding:4px 6px;min-width:0}
+.memo textarea{width:100%;min-height:120px;border:1px solid var(--line);border-radius:10px;padding:10px}
+.foot{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;border-top:1px solid #EDEEF3;padding-top:12px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:9px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:9}
+.toast.on{opacity:1;transform:translateX(-50%)}
+@media (max-width:760px){
+  .months{grid-template-columns:1fr}
+  .top3{grid-template-columns:1fr}
+  .areas{grid-template-columns:1fr}
+  .ev{grid-template-columns:64px 1fr auto;grid-template-areas:"d n x" "d dt a"}
+  .ev b{grid-area:d}.ev .ev-name{grid-area:n}.ev input[type=date]{grid-area:dt}.ev select{grid-area:a}.ev .x{grid-area:x}
+}
+</style>
+</head>
+<body>
+<div class="page" id="page">
+  <div class="top">
+    <h1><button type="button" class="btn" id="y-prev" aria-label="이전 해">‹</button><span class="num" id="y-label"></span>년 연간 계획<button type="button" class="btn" id="y-next" aria-label="다음 해">›</button></h1>
+    <div class="overall"><b id="overall">0%</b>올해 전체 달성률</div>
+  </div>
+
+  <div class="vision">
+    <label for="v-vision">올해 한 줄 비전</label>
+    <input class="ed big" id="v-vision" data-f="vision" placeholder="예: 세상을 넓게 보고, 실력으로 증명하는 한 해">
+    <label>올해 이것만큼은 꼭 (TOP 3)</label>
+    <div class="top3" id="top3"></div>
+  </div>
+
+  <div class="vtabs" role="tablist" aria-label="연간 계획 보기">
+    <button type="button" role="tab" data-v="goals" aria-selected="true">영역별 목표</button>
+    <button type="button" role="tab" data-v="months" aria-selected="false">분기·월별 계획</button>
+    <button type="button" role="tab" data-v="events" aria-selected="false">주요 일정 D-day</button>
+    <button type="button" role="tab" data-v="memo" aria-selected="false">장기 비전·메모</button>
+  </div>
+
+  <section id="v-goals">
+    <div class="areas" id="areas"></div>
+    <div class="row" style="margin-top:12px"><button type="button" class="btn" id="add-area">＋ 영역 추가</button><span class="note">영역 8개는 만다라트 바깥 8칸과 1:1로 맞춰져요.</span></div>
+  </section>
+
+  <section id="v-months" hidden>
+    <div class="filter" id="filter"></div>
+    <div id="quarters" style="display:flex;flex-direction:column;gap:18px;margin-top:12px"></div>
+  </section>
+
+  <section id="v-events" hidden>
+    <p class="note" style="margin-bottom:10px">시험·접수·출국처럼 날짜가 정해진 일정이에요. 날짜순으로 정렬되고 D-day가 계산돼요.</p>
+    <div class="events" id="events"></div>
+    <form class="add-line" id="ev-form" style="margin-top:10px"><input id="ev-name" placeholder="일정 이름 (예: 정보처리기사 1회 필기)" aria-label="일정 이름"><input type="date" id="ev-date" aria-label="날짜" style="flex:0 0 150px;border-style:solid"><button class="btn primary sm">추가</button></form>
+  </section>
+
+  <section id="v-memo" hidden class="memo">
+    <p class="note" style="margin-bottom:8px">3년·5년 뒤 모습, 올해 안 하기로 미룬 것들, 떠오르는 아이디어를 적어두세요.</p>
+    <textarea id="memo" data-f="memo" aria-label="장기 비전 메모"></textarea>
+  </section>
+
+  <div class="foot">
+    <button type="button" class="btn" id="to-mandal">만다라트로 보내기</button>
+    <button type="button" class="btn" id="load-draft" hidden>2027 초안 다시 불러오기</button>
+    <button type="button" class="btn danger" id="clear-year">이 해 계획 비우기</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(()=>{
+'use strict';
+const KEY='myplan-year-v1';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const pad=n=>String(n).padStart(2,'0');
+const now=new Date(),TODAY=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('on'),1900)}
+
+/* 저장: 부모 페이지 localStorage에 써야 기록방(클라우드)에 함께 저장됨 */
+const STORE=(()=>{try{if(parent!==window&&parent.localStorage)return parent.localStorage}catch(e){}return localStorage})();
+function read(){try{return JSON.parse(STORE.getItem(KEY)||'null')}catch(e){return null}}
+let saveT;
+function write(){clearTimeout(saveT);saveT=setTimeout(()=>{try{STORE.setItem(KEY,JSON.stringify(S))}catch(e){toast('저장에 실패했어요.')}},250)}
+
+/* ---------- 2027 초안 (대화로 정리한 내용) ---------- */
+function draft2027(){
+  const A=(id,name,c,goal,why,krs)=>({id,name,c,goal,why,krs:krs.map(t=>({id:uid(),t,done:false}))});
+  const areas=[
+    A('vol','프봉 (해외봉사)','#13996A','KOICA 프로젝트봉사단 10기 합격·파견, 현지에서 성과 1개 이상 남기기','세상을 넓게 보는 경험 + 외국어 + 공공·ODA 커리어',
+      ['10기 공고·파견국·출국 시기 확인 (확인 필요)','서류(자소서)·면접 준비','건강검진·여권·출국 준비','현지 활동 기록 매달 1편 → 포트폴리오']),
+    A('cert','자격증','#2340E8','올해 기사 2~3개 + 한능검 3급 (기사 7개는 2029년까지 로드맵)','공무원 가산점·취업 스펙, 전공 지식 정리',
+      ['한능검 3급 (82회 · 2/13)','정보처리기사 필기 합격','정보처리기사 실기 합격','기사 7개 목록·순서 확정','두 번째 기사 필기 합격']),
+    A('gov','9급 공무원 (전산직)','#7A3FE0','전산직 필기 기본기 완성 → 실제 응시 시점 결정','안정적인 첫 직장을 확보하고 대기업 준비',
+      ['직렬(전산직?)·응시 연도 확정','컴퓨터일반 1회독','정보보호론 1회독','국어·영어 기출 루틴 만들기']),
+    A('dev','개발·코테·부트캠프','#0E7C86','코테 실전 수준 + 부트캠프 1곳 + 앱 1개 배포','대기업 개발자 합격의 핵심 무기',
+      ['코테 하루 1문제 (누적 300문제)','부트캠프 1곳 선정·지원 (싸피는 4-2 직전/졸업 후)','언어 순서: C·Python → Java → HTML/CSS/JS → Kotlin·Swift','개인 프로젝트 1개 배포']),
+    A('lang','언어','#D9771E','토익 850 (복학 전) · 영어·프랑스어 집중, 일·중·스는 여행 회화','면접·해외봉사·여행, 더 넓은 기회',
+      ['토익 600 (상반기)','토익 750','토익 850','영어 스피킹·발음 매일 15분','프랑스어 A1 → A2','파견국 언어 생존 회화 100문장']),
+    A('money','돈·경제·투자','#B8860B','시드 500만 → 목표액까지 모으기 + 경제·주식 기본기','5년 안 부동산 투자 초기 자금',
+      ['비상금 따로 떼기','알바 월 저축액 정하고 자동이체','경제 책 6권 + 경제 뉴스 주 3회','소액 투자 기록 · 매월 결산','부동산 공부 시작 (하반기~)']),
+    A('body','몸·목소리','#C2185B','건강하게 -10kg, 누가 봐도 탄탄한 몸 + 아나운서 발성','자신감, 체력, 면접 인상',
+      ['매일 운동 2시간 (근력+유산소·복싱)','매일 스트레칭 1시간','몸무게·눈바디 주 1회 기록 (시작 몸무게 적기)','-5kg (상반기, 한 달 약 1kg)','-10kg (연말)','발성·호흡 매일 10분, 월 1회 녹음 비교']),
+    A('read','독서·교양','#5D4037','1년 52권 (주 1권) · 분야 골고루 지식 쌓기','생각의 깊이, 면접·글쓰기 밑천',
+      ['매주 일요일 1권 완독 + 한 줄 기록','분야 돌려 읽기: 경제·역사·과학·철학·에세이','매달 "배운 것 1가지" 정리','26권 (상반기)','52권 (연말)'])
+  ];
+  const M={};const it=(m,a,t)=>(M[m]=M[m]||[]).push({id:uid(),t,a,done:false});
+  it(1,'life','계절학기 종강(1/12) → 알바 시작');
+  it(1,'life','등록휴학 신청 확인');
+  it(1,'cert','한능검 82회 접수 · 하루 1강');
+  it(1,'cert','정보처리기사 1회 필기 접수 (큐넷 공고 확인)');
+  it(1,'lang','토익 1회 응시로 현재 점수 확인');
+  it(1,'vol','프봉 10기 일정·파견국 확인');
+  it(1,'money','비상금 분리 + 저축 자동이체 설정');
+  it(1,'body','시작 몸무게·사진 기록, 운동 2h + 스트레칭 1h 루틴 시작');
+  it(1,'read','책 4권');
+  it(2,'cert','한능검 3급 응시 (2/13)');
+  it(2,'cert','정보처리기사 필기');
+  it(2,'lang','토익 LC·RC 기본서 1회독');
+  it(2,'dev','코테 하루 1문제 습관 만들기');
+  it(2,'read','책 4권');
+  it(3,'gov','9급 국가직(3/27) 응시 여부 결정');
+  it(3,'cert','정보처리기사 실기 준비');
+  it(3,'lang','토익 응시 (목표 600)');
+  it(3,'money','경제 기초 책 1권');
+  it(3,'read','책 4~5권');
+  it(4,'cert','정보처리기사 실기');
+  it(4,'dev','부트캠프 리서치·지원');
+  it(4,'body','중간 점검 -3kg');
+  it(4,'gov','컴퓨터일반 1회독 시작');
+  it(5,'vol','프봉 서류·면접 준비 (일정 맞춰 이동)');
+  it(5,'lang','프랑스어 시작 (A1)');
+  it(5,'dev','Java로 코테 언어 넓히기');
+  it(6,'life','상반기 결산: 저축액·몸무게·책 26권');
+  it(6,'life','하반기 계획 재조정 (프봉 일정 반영)');
+  it(6,'body','중간 점검 -5kg');
+  it(7,'vol','출국 준비·국내 교육 (가정, 확인 필요)');
+  it(8,'lang','토익 750');
+  it(9,'vol','현지 활동 기록 1편 (매달)');
+  it(9,'dev','온라인 강의로 코테·개발 유지');
+  it(10,'money','투자 결산 · 부동산 공부 시작');
+  it(11,'lang','파견국 언어 생존 회화 100문장');
+  it(12,'life','연간 결산 & 2028 계획');
+  it(12,'read','52권 달성 체크');
+  return {vision:'더 넓은 세상을 보고, 실력으로 증명하는 해',
+    top3:['프봉 10기 합격·파견','정보처리기사 + 토익 850 로드맵','건강하게 -10kg & 주 1권 독서'],
+    areas:[...areas,{id:'life',name:'생활·학업',c:'#6A6F8E',goal:'휴학·알바·학교 일정 관리',why:'',krs:[]}],
+    months:M,
+    events:[
+      {id:uid(),name:'계절학기 종강',date:'2027-01-12',a:'life'},
+      {id:uid(),name:'한능검 82회 시험',date:'2027-02-13',a:'cert'},
+      {id:uid(),name:'9급 국가직 필기',date:'2027-03-27',a:'gov'}
+    ],
+    memo:'[5년 안]\n- 9급 합격 → 대기업 개발자 합격\n- 부동산 공부 및 첫 투자\n- 프랑스어·영어 능숙, 일·중·스 여행 회화\n- 기사 7개\n\n[올해 미뤄둔 것]\n- \n'};
+}
+const blank=()=>({vision:'',top3:['','',''],areas:[],months:{},events:[],memo:''});
+
+let S=read();
+if(!S||!S.years){S={v:1,cur:2027,years:{2027:draft2027()}};write()}
+let Y=S.cur||2027,view='goals',filterA='';
+const D=()=>S.years[Y]||(S.years[Y]=blank());
+
+/* ---------- 계산 ---------- */
+const areaOf=id=>D().areas.find(a=>a.id===id);
+const colorOf=id=>areaOf(id)?.c||'#9AA0B8';
+const pct=(n,d)=>d?Math.round(n/d*100):0;
+function allItems(){return Object.values(D().months).flat()}
+function overall(){const krs=D().areas.flatMap(a=>a.krs),its=allItems();const n=krs.filter(k=>k.done).length+its.filter(i=>i.done).length;return pct(n,krs.length+its.length)}
+const dday=d=>{const [y,m,dd]=d.split('-').map(Number);const n=Math.round((new Date(y,m-1,dd)-new Date(now.getFullYear(),now.getMonth(),now.getDate()))/864e5);return n===0?'D-DAY':n>0?'D-'+n:'D+'+(-n)};
+const areaSelect=(sel)=>D().areas.map(a=>`<option value="${a.id}"${a.id===sel?' selected':''}>${esc(a.name)}</option>`).join('');
+
+/* ---------- 그리기 ---------- */
+function render(){
+  const d=D();
+  $('y-label').textContent=Y;
+  $('overall').textContent=overall()+'%';
+  $('v-vision').value=d.vision||'';
+  $('memo').value=d.memo||'';
+  $('top3').innerHTML=[0,1,2].map(i=>`<input class="ed" data-top="${i}" value="${esc(d.top3[i]||'')}" placeholder="${i+1}순위" aria-label="TOP ${i+1}">`).join('');
+  $('load-draft').hidden=Y!==2027;
+  document.querySelectorAll('.vtabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.v===view)));
+  ['goals','months','events','memo'].forEach(v=>$('v-'+v).hidden=v!==view);
+  if(view==='goals')renderAreas();
+  if(view==='months')renderMonths();
+  if(view==='events')renderEvents();
+  report();
+}
+function renderAreas(){
+  $('areas').innerHTML=D().areas.map(a=>{
+    const done=a.krs.filter(k=>k.done).length,mi=allItems().filter(i=>i.a===a.id),md=mi.filter(i=>i.done).length;
+    return `<article class="area" style="--c:${a.c}" data-area="${a.id}">
+      <div class="area-head"><input type="color" value="${a.c}" data-af="c" aria-label="색"><input class="ed" value="${esc(a.name)}" data-af="name" aria-label="영역 이름"><button type="button" class="x" data-del-area title="영역 삭제" aria-label="영역 삭제">×</button></div>
+      <div class="lbl">연간 목표</div><textarea class="ed goal" rows="1" data-af="goal" placeholder="올해 이 영역에서 이루고 싶은 것">${esc(a.goal)}</textarea>
+      <div class="lbl">왜?</div><input class="ed muted" value="${esc(a.why)}" data-af="why" placeholder="이 목표가 중요한 이유">
+      <div class="lbl">핵심 결과 (체크하면 달성)</div>
+      ${a.krs.map(k=>`<div class="kr${k.done?' done':''}" data-kr="${k.id}"><input type="checkbox"${k.done?' checked':''} aria-label="달성"><input class="ed" value="${esc(k.t)}" aria-label="핵심 결과"><button type="button" class="x" data-del-kr aria-label="삭제">×</button></div>`).join('')}
+      <form class="add-line" data-add-kr><input placeholder="＋ 핵심 결과 추가" aria-label="핵심 결과 추가"></form>
+      <div class="track"><i style="width:${pct(done,a.krs.length)}%;background:${a.c}"></i></div>
+      <div class="meta"><span>핵심 결과 ${done}/${a.krs.length}</span><span>월별 할 일 ${md}/${mi.length}</span></div>
+    </article>`}).join('');
+  $('areas').querySelectorAll('textarea').forEach(fit);
+}
+function renderMonths(){
+  const d=D();
+  $('filter').innerHTML=`<button type="button" class="chip" data-fa="" aria-pressed="${!filterA}">전체</button>`+d.areas.map(a=>`<button type="button" class="chip" style="--c:${a.c}" data-fa="${a.id}" aria-pressed="${filterA===a.id}"><i></i>${esc(a.name)}</button>`).join('');
+  const curM=now.getFullYear()===Y?now.getMonth()+1:0;
+  $('quarters').innerHTML=[1,2,3,4].map(q=>{
+    const ms=[q*3-2,q*3-1,q*3],its=ms.flatMap(m=>d.months[m]||[]),dn=its.filter(i=>i.done).length;
+    return `<div class="quarter"><div class="q-head"><h3>${q}분기 <span class="muted num" style="font-size:13px">${ms[0]}~${ms[2]}월</span></h3><div class="track"><i style="width:${pct(dn,its.length)}%"></i></div><span class="num muted" style="font-size:13px">${dn}/${its.length}</span></div>
+    <div class="months">${ms.map(m=>{const list=(d.months[m]||[]).filter(i=>!filterA||i.a===filterA);const all=d.months[m]||[];
+      return `<div class="month${m===curM?' now':''}" data-m="${m}"><h4>${m}월<small>${all.filter(i=>i.done).length}/${all.length}</small></h4>
+      ${list.map(i=>`<div class="item${i.done?' done':''}" style="--c:${colorOf(i.a)}" data-it="${i.id}"><input type="checkbox"${i.done?' checked':''} aria-label="완료"><input class="ed" value="${esc(i.t)}" aria-label="할 일"><div class="ctl"><select aria-label="영역">${areaSelect(i.a)}</select><button type="button" class="btn sm todo" data-todo title="투두리스트에 추가">→투두</button><button type="button" class="x" data-del-it aria-label="삭제">×</button></div></div>`).join('')}
+      <form class="add-line" data-add-it><input placeholder="＋ ${m}월 할 일" aria-label="${m}월 할 일 추가"></form></div>`}).join('')}</div></div>`}).join('');
+}
+function renderEvents(){
+  const ev=[...D().events].sort((a,b)=>a.date.localeCompare(b.date));
+  $('events').innerHTML=ev.length?ev.map(e=>`<div class="ev${e.date<TODAY?' past':''}" style="--c:${colorOf(e.a)}" data-ev="${e.id}"><b>${dday(e.date)}</b><input type="date" value="${e.date}" aria-label="날짜"><input class="ed ev-name" value="${esc(e.name)}" aria-label="일정 이름"><select aria-label="영역"><option value="">영역 없음</option>${areaSelect(e.a)}</select><button type="button" class="x" data-del-ev aria-label="삭제">×</button></div>`).join(''):'<p class="note">아직 일정이 없어요.</p>';
+}
+function fit(t){t.style.height='auto';t.style.height=t.scrollHeight+2+'px'}
+function report(){try{if(parent!==window){requestAnimationFrame(()=>{const h=Math.ceil($('page').getBoundingClientRect().height)+40;parent.postMessage({type:'myplan-year-height',height:h},location.origin)})}}catch(e){}}
+
+/* ---------- 입력 ---------- */
+const findKr=el=>{const a=areaOf(el.closest('[data-area]').dataset.area);return [a,a.krs.find(k=>k.id===el.closest('[data-kr]').dataset.kr)]};
+const findIt=el=>{const m=el.closest('[data-m]').dataset.m;return [m,D().months[m].find(i=>i.id===el.closest('[data-it]').dataset.it)]};
+document.addEventListener('input',e=>{
+  const t=e.target,d=D();
+  if(t.dataset.f){d[t.dataset.f]=t.value;return write()}
+  if(t.dataset.top){d.top3[+t.dataset.top]=t.value;return write()}
+  if(t.dataset.af){const a=areaOf(t.closest('[data-area]').dataset.area);a[t.dataset.af]=t.value;if(t.tagName==='TEXTAREA')fit(t);if(t.dataset.af==='c'){t.closest('.area').style.setProperty('--c',t.value)}return write()}
+  if(t.closest('[data-kr]')&&t.type!=='checkbox'){findKr(t)[1].t=t.value;return write()}
+  if(t.closest('[data-it]')&&t.classList.contains('ed')){findIt(t)[1].t=t.value;return write()}
+  if(t.closest('[data-ev]')&&t.classList.contains('ed')){D().events.find(x=>x.id===t.closest('[data-ev]').dataset.ev).name=t.value;return write()}
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.type==='checkbox'&&t.closest('[data-kr]')){findKr(t)[1].done=t.checked;write();render();if(t.checked)toast('핵심 결과 달성! 🎉');return}
+  if(t.type==='checkbox'&&t.closest('[data-it]')){findIt(t)[1].done=t.checked;write();render();return}
+  if(t.tagName==='SELECT'&&t.closest('[data-it]')){findIt(t)[1].a=t.value;write();render();return}
+  if(t.closest('[data-ev]')){const ev=D().events.find(x=>x.id===t.closest('[data-ev]').dataset.ev);if(t.type==='date'&&t.value)ev.date=t.value;if(t.tagName==='SELECT')ev.a=t.value;write();render();return}
+  if(t.dataset.af==='c')render();
+});
+document.addEventListener('submit',e=>{
+  const f=e.target;e.preventDefault();
+  const inp=f.querySelector('input'),v=inp?.value.trim();
+  if(f.id==='ev-form'){const n=$('ev-name').value.trim(),dt=$('ev-date').value;if(!n||!dt){toast('이름과 날짜를 넣어주세요.');return}D().events.push({id:uid(),name:n,date:dt,a:''});write();render();return}
+  if(!v)return;
+  if(f.dataset.addKr!==undefined){areaOf(f.closest('[data-area]').dataset.area).krs.push({id:uid(),t:v,done:false})}
+  if(f.dataset.addIt!==undefined){const m=f.closest('[data-m]').dataset.m;(D().months[m]=D().months[m]||[]).push({id:uid(),t:v,a:filterA||D().areas[0]?.id||'',done:false})}
+  write();render();
+  const sel=f.dataset.addKr!==undefined?`[data-area="${f.closest?.('[data-area]')?.dataset.area}"] [data-add-kr] input`:null;
+  const again=document.querySelector(f.dataset.addIt!==undefined?`[data-m="${f.closest('[data-m]')?.dataset.m}"] [data-add-it] input`:sel);again?.focus();
+});
+document.addEventListener('click',e=>{
+  const t=e.target;
+  const vt=t.closest('.vtabs button');if(vt){view=vt.dataset.v;render();return}
+  const fa=t.closest('[data-fa]');if(fa){filterA=fa.dataset.fa;render();return}
+  if(t.closest('[data-del-kr]')){const [a,k]=findKr(t);a.krs.splice(a.krs.indexOf(k),1);write();render();return}
+  if(t.closest('[data-del-it]')){const [m,i]=findIt(t);D().months[m].splice(D().months[m].indexOf(i),1);write();render();return}
+  if(t.closest('[data-del-ev]')){const id=t.closest('[data-ev]').dataset.ev;D().events=D().events.filter(x=>x.id!==id);write();render();return}
+  if(t.closest('[data-del-area]')){const a=areaOf(t.closest('[data-area]').dataset.area);if(!confirm(`"${a.name}" 영역을 지울까요? 이 영역의 월별 할 일은 남아요.`))return;D().areas=D().areas.filter(x=>x!==a);write();render();return}
+  if(t.closest('[data-todo]')){const [m,i]=findIt(t);const last=new Date(Y,+m,0);const due=`${Y}-${pad(+m)}-${pad(last.getDate())}`;
+    try{parent.myPlanYearBridge.addTodo(i.t,due);toast(`투두리스트에 추가했어요 (마감 ${m}/${last.getDate()})`)}catch(err){toast('투두리스트 연결은 My Plan 안에서만 돼요.')}return}
+});
+$('add-area').onclick=()=>{const cs=['#2340E8','#13996A','#D9771E','#7A3FE0','#C2185B','#0E7C86','#B8860B','#5D4037'];D().areas.push({id:uid(),name:'새 영역',c:cs[D().areas.length%cs.length],goal:'',why:'',krs:[]});write();render()};
+$('y-prev').onclick=()=>{Y--;S.cur=Y;write();render()};
+$('y-next').onclick=()=>{Y++;S.cur=Y;write();render()};
+$('load-draft').onclick=()=>{if(!confirm('2027년 계획을 처음 초안으로 되돌릴까요? 지금 2027년에 적은 내용은 사라져요.'))return;S.years[2027]=draft2027();write();render();toast('초안을 불러왔어요.')};
+$('clear-year').onclick=()=>{if(!confirm(`${Y}년 계획을 모두 비울까요?`))return;S.years[Y]=blank();write();render()};
+/* 만다라트: 가운데 = 올해 비전, 바깥 8칸 = 영역, 각 영역 칸 주변 8칸 = 핵심 결과 */
+$('to-mandal').onclick=()=>{
+  const d=D(),ar=d.areas.filter(a=>a.id!=='life').slice(0,8);
+  if(!ar.length){toast('영역을 먼저 추가하세요.');return}
+  const cells=Array.from({length:9},()=>Array(9).fill(''));
+  const order=[0,1,2,3,5,6,7,8];
+  cells[4][4]=d.vision||`${Y}년`;
+  ar.forEach((a,i)=>{const b=order[i];cells[4][b]=a.name;cells[b][4]=a.name;a.krs.slice(0,8).forEach((k,j)=>{cells[b][order[j]]=k.t})});
+  try{parent.myPlanYearBridge.addMandal(cells);toast('만다라트 탭에 새 만다라트로 추가했어요.')}catch(err){toast('만다라트 연결은 My Plan 안에서만 돼요.')}
+};
+window.myPlanYearActions={clearAll(){S.years[Y]=blank();write();render()}};
+window.addEventListener('resize',report);
+render();
+})();
+</script>
+</body>
+</html>
