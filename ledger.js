@@ -33,20 +33,24 @@
   ].map(([name, icon], i) => ({ id: 'c' + i, name, icon, color: COLORS[i % COLORS.length], budget: null, period: 'week' }));
 
   /* ---------- 데이터 ---------- */
-  function blank() { return { version: 1, categories: DEFAULT_CATS.map((c) => ({ ...c })), entries: [] }; }
+  function blank() { return { version: 1, total: { budget: null, period: 'month' }, categories: DEFAULT_CATS.map((c) => ({ ...c })), entries: [] }; }
   function validate(raw) {
     if (!raw || typeof raw !== 'object') return null;
     const cats = (Array.isArray(raw.categories) ? raw.categories : []).filter((c) => c && typeof c.id === 'string' && typeof c.name === 'string').slice(0, 40)
       .map((c, i) => ({ id: c.id, name: c.name.slice(0, 20), icon: typeof c.icon === 'string' ? c.icon.slice(0, 4) : '', color: /^#[0-9a-f]{6}$/i.test(c.color) ? c.color : COLORS[i % COLORS.length], budget: Number.isFinite(c.budget) && c.budget >= 0 ? Math.round(c.budget) : null, period: c.period === 'month' ? 'month' : 'week' }));
     const entries = (Array.isArray(raw.entries) ? raw.entries : []).filter((e) => e && /^\d{4}-\d{2}-\d{2}$/.test(e.date) && Number.isFinite(e.amount) && e.amount > 0).slice(0, 20000)
       .map((e) => ({ id: typeof e.id === 'string' ? e.id : uid(), date: e.date, type: e.type === 'in' ? 'in' : 'out', cat: typeof e.cat === 'string' ? e.cat : '', amount: Math.round(e.amount), memo: typeof e.memo === 'string' ? e.memo.slice(0, 60) : '' }));
-    return { version: 1, categories: cats.length ? cats : blank().categories, entries };
+    const t = raw.total && typeof raw.total === 'object' ? raw.total : {};
+    const total = { budget: Number.isFinite(t.budget) && t.budget >= 0 ? Math.round(t.budget) : null, period: t.period === 'week' ? 'week' : 'month' };
+    return { version: 1, total, categories: cats.length ? cats : blank().categories, entries };
   }
   let data;
   try { data = validate(JSON.parse(localStorage.getItem(KEY) || 'null')) || blank(); } catch { data = blank(); }
   const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch {} };
   if (!localStorage.getItem(KEY)) persist();
   const catOf = (id) => data.categories.find((c) => c.id === id);
+  // 편집칸에서 '전체 예산' 줄도 분야처럼 다룸 (budget·period 모양이 같음)
+  const editTarget = (id) => (id === '__total' ? data.total : catOf(id));
 
   /* ---------- 상태 ---------- */
   let wk = THIS, type = 'out', cat = data.categories[0]?.id || '', editId = null, budgetMode = false, undo = null;
@@ -86,30 +90,46 @@
     const out = list.filter((e) => e.type === 'out'), inc = list.filter((e) => e.type === 'in');
     const spent = out.reduce((s, e) => s + e.amount, 0), income = inc.reduce((s, e) => s + e.amount, 0);
     const budgets = data.categories.filter((c) => c.budget != null);
-    const budgetSum = budgets.reduce((s, c) => s + weekBudget(c, wk), 0);
+    const catWeekSum = budgets.reduce((s, c) => s + weekBudget(c, wk), 0);
+    // 전체 예산을 정했으면 그게 기준 (모든 지출과 비교), 아니면 분야 예산 합계
+    const hasTotal = data.total.budget != null;
+    const budgetSum = hasTotal ? weekBudget(data.total, wk) : catWeekSum;
     // 이번 달(이 주의 수요일이 속한 달) 기준: 달 예산으로 정한 분야만
     const ym = `${wl.year}-${pad(wl.month + 1)}`;
     const monthCats = data.categories.filter((c) => c.budget != null && c.period === 'month');
-    const monthBudget = monthCats.reduce((s, c) => s + c.budget, 0);
+    const totalMonth = hasTotal && data.total.period === 'month';
+    const monthBudget = totalMonth ? data.total.budget : monthCats.reduce((s, c) => s + c.budget, 0);
     const monthSpentOf = (cid) => data.entries.filter((e) => e.type === 'out' && e.cat === cid && e.date.slice(0, 7) === ym).reduce((t, e) => t + e.amount, 0);
-    const monthUsed = monthCats.reduce((s, c) => s + monthSpentOf(c.id), 0);
-    // 예산 있는 분야에서 쓴 돈만 예산과 비교
-    const spentBudgeted = out.filter((e) => catOf(e.cat)?.budget != null).reduce((s, e) => s + e.amount, 0);
+    const monthAll = data.entries.filter((e) => e.type === 'out' && e.date.slice(0, 7) === ym).reduce((t, e) => t + e.amount, 0);
+    const monthUsed = totalMonth ? monthAll : monthCats.reduce((s, c) => s + monthSpentOf(c.id), 0);
+    // 전체 예산이면 모든 지출, 아니면 예산 있는 분야에서 쓴 돈만 예산과 비교
+    const spentBudgeted = hasTotal ? spent : out.filter((e) => catOf(e.cat)?.budget != null).reduce((s, e) => s + e.amount, 0);
     const left = budgetSum - spentBudgeted;
     const monthOut = data.entries.filter((e) => e.type === 'out' && e.date.slice(0, 7) === `${wl.year}-${pad(wl.month + 1)}`).reduce((s, e) => s + e.amount, 0);
 
     $('lg-summary').innerHTML = `
       <div class="lg-stat"><span>이번 주 지출</span><b>${won(spent)}</b></div>
-      <div class="lg-stat"><span>한 주 예산</span><b>${budgetSum ? won(budgetSum) : '<em>미정</em>'}</b></div>
+      <div class="lg-stat"><span>${hasTotal ? '전체 한 주 예산' : '한 주 예산'}</span><b>${budgetSum ? won(budgetSum) : '<em>미정</em>'}</b></div>
       <div class="lg-stat ${budgetSum ? (left < 0 ? 'over' : 'ok') : ''}"><span>${left < 0 ? '예산 초과' : '남은 예산'}</span><b>${budgetSum ? won(Math.abs(left)) : '—'}</b></div>
       ${income ? `<div class="lg-stat in"><span>이번 주 수입</span><b>+${won(income)}</b></div>` : ''}
-      ${monthBudget ? `<div class="lg-month-bar ${monthUsed > monthBudget ? 'over' : ''}"><span>${wl.month + 1}월 예산 <b>${won(monthUsed)}</b> / ${won(monthBudget)} 사용</span><span class="lg-bar" aria-hidden="true"><span style="width:${Math.min(100, Math.round((monthUsed / Math.max(1, monthBudget)) * 100))}%"></span></span><em>${monthUsed > monthBudget ? `${won(monthUsed - monthBudget)} 초과` : `${won(monthBudget - monthUsed)} 남음`}</em></div>` : ''}
+      ${monthBudget ? `<div class="lg-month-bar ${monthUsed > monthBudget ? 'over' : ''}"><span>${wl.month + 1}월 ${totalMonth ? '전체 ' : ''}예산 <b>${won(monthUsed)}</b> / ${won(monthBudget)} 사용</span><span class="lg-bar" aria-hidden="true"><span style="width:${Math.min(100, Math.round((monthUsed / Math.max(1, monthBudget)) * 100))}%"></span></span><em>${monthUsed > monthBudget ? `${won(monthUsed - monthBudget)} 초과` : `${won(monthBudget - monthUsed)} 남음`}</em></div>` : ''}
       <p class="lg-month">${wl.month + 1}월 전체 지출 <b>${won(monthOut)}</b></p>`;
 
     // 분야별 예산
     if (keepEditor) { /* 편집칸 유지 */ }
     else if (budgetMode) {
-      $('lg-cats').innerHTML = `<p class="lg-edit-help">분야마다 <b>주</b> 또는 <b>달</b>을 골라 예산을 넣으세요. 달로 넣으면 그 달 날짜 수에 맞춰 주마다 알아서 나눠요.</p><div class="lg-edit-head"><span></span><span>분야</span><span>예산</span><span></span></div>` +
+      $('lg-cats').innerHTML = `<p class="lg-edit-help">전체·분야마다 <b>주</b> 또는 <b>달</b>을 골라 예산을 넣으세요. 달로 넣으면 그 달 날짜 수에 맞춰 주마다 알아서 나눠요. 모두 비워 둬도 돼요.</p>
+        <div class="lg-edit-row lg-total-row" data-cid="__total">
+          <span class="lg-total-ico" aria-hidden="true">₩</span>
+          <b class="lg-total-name">전체 예산 <small>모든 지출 합계</small></b>
+          <span class="lg-budget-cell">
+            <span class="lg-period" role="group" aria-label="전체 예산 단위"><button type="button" data-period="week" aria-pressed="${data.total.period === 'week'}">주</button><button type="button" data-period="month" aria-pressed="${data.total.period === 'month'}">달</button></span>
+            <span class="lg-budget-wrap"><input class="lg-budget-in" inputmode="numeric" value="${data.total.budget != null ? data.total.budget.toLocaleString('ko-KR') : ''}" placeholder="없음" aria-label="전체 ${data.total.period === 'month' ? '한 달' : '한 주'} 예산"><span>원</span></span>
+            <small class="lg-split">${splitHint(data.total)}</small>
+          </span><span></span>
+        </div>
+        <p class="lg-total-warn" id="lg-total-warn"></p>
+        <div class="lg-edit-head"><span></span><span>분야</span><span>예산</span><span></span></div>` +
         data.categories.map((c) => `<div class="lg-edit-row" data-cid="${esc(c.id)}">
           <input class="lg-icon-in" value="${esc(c.icon)}" maxlength="4" aria-label="${esc(c.name)} 아이콘">
           <input class="lg-name-in" value="${esc(c.name)}" maxlength="20" aria-label="분야 이름">
@@ -230,10 +250,10 @@
   });
 
   /* ---------- 예산·분야 편집 ---------- */
-  $('lg-budget-toggle').addEventListener('click', () => { budgetMode = !budgetMode; render(); if (budgetMode) document.querySelector('.lg-budget-in')?.focus(); });
+  $('lg-budget-toggle').addEventListener('click', () => { budgetMode = !budgetMode; render(); if (budgetMode) { totalWarn(); document.querySelector('.lg-budget-in')?.focus(); } });
   $('lg-cats').addEventListener('input', (e) => {
     const row = e.target.closest('.lg-edit-row'); if (!row) return;
-    const c = catOf(row.dataset.cid); if (!c) return;
+    const c = editTarget(row.dataset.cid); if (!c) return;
     if (e.target.classList.contains('lg-budget-in')) {
       const n = parseAmt(e.target.value);
       e.target.value = e.target.value.trim() === '' ? '' : n.toLocaleString('ko-KR');
@@ -243,16 +263,24 @@
     else if (e.target.classList.contains('lg-icon-in')) c.icon = e.target.value.trim();
     persist();
     render(true);
+    totalWarn();
   });
+  // 분야 예산 합계가 전체 예산보다 많으면 알려 줌 (이번 주 기준)
+  function totalWarn() {
+    const el = $('lg-total-warn'); if (!el) return;
+    if (data.total.budget == null) { el.textContent = ''; return; }
+    const tw = weekBudget(data.total, wk), cw = data.categories.reduce((s, c) => s + (c.budget != null ? weekBudget(c, wk) : 0), 0);
+    el.textContent = cw > tw ? `분야별 예산 합계(이번 주 ${won(cw)})가 전체 예산(이번 주 ${won(tw)})보다 ${won(cw - tw)} 많아요.` : '';
+  }
   $('lg-cats').addEventListener('click', (e) => {
     const pb = e.target.closest('[data-period]');
     if (pb) {
-      const row = pb.closest('.lg-edit-row'), c = catOf(row.dataset.cid); if (!c) return;
+      const row = pb.closest('.lg-edit-row'), c = editTarget(row.dataset.cid), cid = row.dataset.cid; if (!c) return;
       const next = pb.dataset.period; if (c.period === next) return;
       // 단위를 바꾸면 금액도 대략 맞춰 줌 (주 7만원 ↔ 달 30만원)
       if (c.budget != null) c.budget = next === 'month' ? Math.round((c.budget * 30) / 7 / 1000) * 1000 : approxWeek(c.budget);
-      c.period = next; persist(); render();
-      document.querySelector(`.lg-edit-row[data-cid="${CSS.escape(c.id)}"] .lg-budget-in`)?.focus();
+      c.period = next; persist(); render(); totalWarn();
+      document.querySelector(`.lg-edit-row[data-cid="${CSS.escape(cid)}"] .lg-budget-in`)?.focus();
       return;
     }
     if (e.target.closest('#lg-cat-add')) {
