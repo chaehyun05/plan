@@ -30,14 +30,14 @@
   const DEFAULT_CATS = [
     ['식비', '🍚'], ['카페·간식', '☕'], ['교통', '🚌'], ['쇼핑', '🛍️'],
     ['생활', '🏠'], ['문화·여가', '🎬'], ['교육', '📚'], ['기타', '✦'],
-  ].map(([name, icon], i) => ({ id: 'c' + i, name, icon, color: COLORS[i % COLORS.length], budget: null }));
+  ].map(([name, icon], i) => ({ id: 'c' + i, name, icon, color: COLORS[i % COLORS.length], budget: null, period: 'week' }));
 
   /* ---------- 데이터 ---------- */
   function blank() { return { version: 1, categories: DEFAULT_CATS.map((c) => ({ ...c })), entries: [] }; }
   function validate(raw) {
     if (!raw || typeof raw !== 'object') return null;
     const cats = (Array.isArray(raw.categories) ? raw.categories : []).filter((c) => c && typeof c.id === 'string' && typeof c.name === 'string').slice(0, 40)
-      .map((c, i) => ({ id: c.id, name: c.name.slice(0, 20), icon: typeof c.icon === 'string' ? c.icon.slice(0, 4) : '', color: /^#[0-9a-f]{6}$/i.test(c.color) ? c.color : COLORS[i % COLORS.length], budget: Number.isFinite(c.budget) && c.budget >= 0 ? Math.round(c.budget) : null }));
+      .map((c, i) => ({ id: c.id, name: c.name.slice(0, 20), icon: typeof c.icon === 'string' ? c.icon.slice(0, 4) : '', color: /^#[0-9a-f]{6}$/i.test(c.color) ? c.color : COLORS[i % COLORS.length], budget: Number.isFinite(c.budget) && c.budget >= 0 ? Math.round(c.budget) : null, period: c.period === 'month' ? 'month' : 'week' }));
     const entries = (Array.isArray(raw.entries) ? raw.entries : []).filter((e) => e && /^\d{4}-\d{2}-\d{2}$/.test(e.date) && Number.isFinite(e.amount) && e.amount > 0).slice(0, 20000)
       .map((e) => ({ id: typeof e.id === 'string' ? e.id : uid(), date: e.date, type: e.type === 'in' ? 'in' : 'out', cat: typeof e.cat === 'string' ? e.cat : '', amount: Math.round(e.amount), memo: typeof e.memo === 'string' ? e.memo.slice(0, 60) : '' }));
     return { version: 1, categories: cats.length ? cats : blank().categories, entries };
@@ -57,6 +57,20 @@
     return { title: `${w.getFullYear() !== new Date().getFullYear() ? w.getFullYear() + '년 ' : ''}${w.getMonth() + 1}월 ${Math.ceil(w.getDate() / 7)}주차`, range: `${s.getMonth() + 1}.${s.getDate()} ~ ${e.getMonth() + 1}.${e.getDate()}`, start: keyOf(s), end: keyOf(e), month: w.getMonth(), year: w.getFullYear() };
   }
   const inWeek = (e) => weekOf(dateOf(e.date)) === wk;
+  /* ---------- 달 예산 → 주 예산 ----------
+     달로 정한 예산은 그 달 날짜 수로 나눠 하루치를 구하고, 그 주에 들어 있는 날만큼 더함.
+     (예: 11월 30만원 → 하루 1만원 → 11월 안의 7일짜리 주는 7만원. 10/26~11/1처럼 두 달에 걸친 주는 각 달 몫을 합침) */
+  const daysIn = (y, m) => new Date(y, m + 1, 0).getDate();
+  function weekBudget(c, k) {
+    if (c.budget == null) return null;
+    if (c.period !== 'month') return c.budget;
+    const s = dateOf(k); let sum = 0;
+    for (let i = 0; i < 7; i++) { const d = new Date(s); d.setDate(s.getDate() + i); sum += c.budget / daysIn(d.getFullYear(), d.getMonth()); }
+    return Math.round(sum);
+  }
+  const splitHint = (c) => (c.period === 'month' && c.budget ? `→ 이번 주 ${won(weekBudget(c, wk))}` : '');
+  // 대략 한 주 몫 (편집칸 안내용): 30일 기준
+  const approxWeek = (n) => Math.round((n * 7) / 30 / 100) * 100;
 
   /* ---------- 그리기 ---------- */
   // keepEditor: 예산 편집칸에 입력 중일 때는 편집칸은 그대로 두고 나머지만 다시 그림
@@ -72,7 +86,13 @@
     const out = list.filter((e) => e.type === 'out'), inc = list.filter((e) => e.type === 'in');
     const spent = out.reduce((s, e) => s + e.amount, 0), income = inc.reduce((s, e) => s + e.amount, 0);
     const budgets = data.categories.filter((c) => c.budget != null);
-    const budgetSum = budgets.reduce((s, c) => s + c.budget, 0);
+    const budgetSum = budgets.reduce((s, c) => s + weekBudget(c, wk), 0);
+    // 이번 달(이 주의 수요일이 속한 달) 기준: 달 예산으로 정한 분야만
+    const ym = `${wl.year}-${pad(wl.month + 1)}`;
+    const monthCats = data.categories.filter((c) => c.budget != null && c.period === 'month');
+    const monthBudget = monthCats.reduce((s, c) => s + c.budget, 0);
+    const monthSpentOf = (cid) => data.entries.filter((e) => e.type === 'out' && e.cat === cid && e.date.slice(0, 7) === ym).reduce((t, e) => t + e.amount, 0);
+    const monthUsed = monthCats.reduce((s, c) => s + monthSpentOf(c.id), 0);
     // 예산 있는 분야에서 쓴 돈만 예산과 비교
     const spentBudgeted = out.filter((e) => catOf(e.cat)?.budget != null).reduce((s, e) => s + e.amount, 0);
     const left = budgetSum - spentBudgeted;
@@ -83,16 +103,21 @@
       <div class="lg-stat"><span>한 주 예산</span><b>${budgetSum ? won(budgetSum) : '<em>미정</em>'}</b></div>
       <div class="lg-stat ${budgetSum ? (left < 0 ? 'over' : 'ok') : ''}"><span>${left < 0 ? '예산 초과' : '남은 예산'}</span><b>${budgetSum ? won(Math.abs(left)) : '—'}</b></div>
       ${income ? `<div class="lg-stat in"><span>이번 주 수입</span><b>+${won(income)}</b></div>` : ''}
+      ${monthBudget ? `<div class="lg-month-bar ${monthUsed > monthBudget ? 'over' : ''}"><span>${wl.month + 1}월 예산 <b>${won(monthUsed)}</b> / ${won(monthBudget)} 사용</span><span class="lg-bar" aria-hidden="true"><span style="width:${Math.min(100, Math.round((monthUsed / Math.max(1, monthBudget)) * 100))}%"></span></span><em>${monthUsed > monthBudget ? `${won(monthUsed - monthBudget)} 초과` : `${won(monthBudget - monthUsed)} 남음`}</em></div>` : ''}
       <p class="lg-month">${wl.month + 1}월 전체 지출 <b>${won(monthOut)}</b></p>`;
 
     // 분야별 예산
     if (keepEditor) { /* 편집칸 유지 */ }
     else if (budgetMode) {
-      $('lg-cats').innerHTML = `<div class="lg-edit-head"><span></span><span>분야</span><span>한 주 예산</span><span></span></div>` +
+      $('lg-cats').innerHTML = `<p class="lg-edit-help">분야마다 <b>주</b> 또는 <b>달</b>을 골라 예산을 넣으세요. 달로 넣으면 그 달 날짜 수에 맞춰 주마다 알아서 나눠요.</p><div class="lg-edit-head"><span></span><span>분야</span><span>예산</span><span></span></div>` +
         data.categories.map((c) => `<div class="lg-edit-row" data-cid="${esc(c.id)}">
           <input class="lg-icon-in" value="${esc(c.icon)}" maxlength="4" aria-label="${esc(c.name)} 아이콘">
           <input class="lg-name-in" value="${esc(c.name)}" maxlength="20" aria-label="분야 이름">
-          <span class="lg-budget-wrap"><input class="lg-budget-in" inputmode="numeric" value="${c.budget != null ? c.budget.toLocaleString('ko-KR') : ''}" placeholder="없음" aria-label="${esc(c.name)} 한 주 예산"><span>원</span></span>
+          <span class="lg-budget-cell">
+            <span class="lg-period" role="group" aria-label="${esc(c.name)} 예산 단위"><button type="button" data-period="week" aria-pressed="${c.period !== 'month'}">주</button><button type="button" data-period="month" aria-pressed="${c.period === 'month'}">달</button></span>
+            <span class="lg-budget-wrap"><input class="lg-budget-in" inputmode="numeric" value="${c.budget != null ? c.budget.toLocaleString('ko-KR') : ''}" placeholder="없음" aria-label="${esc(c.name)} ${c.period === 'month' ? '한 달' : '한 주'} 예산"><span>원</span></span>
+            <small class="lg-split">${splitHint(c)}</small>
+          </span>
           <button type="button" class="lg-cat-del" aria-label="${esc(c.name)} 분야 삭제" title="분야 삭제">×</button></div>`).join('') +
         `<button type="button" class="btn small" id="lg-cat-add">＋ 분야 추가</button>`;
     } else {
@@ -100,15 +125,16 @@
       const other = out.filter((e) => !catOf(e.cat)).reduce((t, e) => t + e.amount, 0);
       const rows = byCat.filter(({ c, s }) => c.budget != null || s > 0);
       $('lg-cats').innerHTML = (rows.length ? rows.map(({ c, s }) => {
-        const has = c.budget != null, r = has && c.budget > 0 ? s / c.budget : (has && s > 0 ? 2 : 0);
-        const lv = !has ? 'none' : r >= 1 ? (s > c.budget ? 'over' : 'full') : r >= 0.8 ? 'warn' : 'ok';
-        const note = !has ? '예산 없음' : s > c.budget ? `${won(s - c.budget)} 초과` : `${won(c.budget - s)} 남음`;
+        const wb = weekBudget(c, wk), has = wb != null, r = has && wb > 0 ? s / wb : (has && s > 0 ? 2 : 0);
+        const lv = !has ? 'none' : r >= 1 ? (s > wb ? 'over' : 'full') : r >= 0.8 ? 'warn' : 'ok';
+        const mNote = c.period === 'month' && has ? `<small class="lg-mnote">${wl.month + 1}월 ${won(monthSpentOf(c.id))} / ${won(c.budget)}</small>` : '';
+        const note = (!has ? '예산 없음' : s > wb ? `${won(s - wb)} 초과` : `${won(wb - s)} 남음`) + mNote;
         return `<div class="lg-cat lv-${lv}">
           <span class="lg-cat-name"><i style="background:${c.color}">${esc(c.icon)}</i>${esc(c.name)}</span>
           <span class="lg-bar" aria-hidden="true"><span style="width:${Math.min(100, Math.round(r * 100))}%;${lv === 'ok' || lv === 'none' ? `background:${c.color}` : ''}"></span></span>
-          <span class="lg-cat-num"><b>${won(s)}</b>${has ? ` / ${won(c.budget)}` : ''}</span>
+          <span class="lg-cat-num"><b>${won(s)}</b>${has ? ` / ${won(wb)}` : ''}${c.period === 'month' && has ? '<small class="lg-per">달 예산</small>' : ''}</span>
           <span class="lg-cat-note">${note}</span></div>`;
-      }).join('') : '<p class="lg-empty">아직 이번 주 지출이 없어요. [예산·분야 편집]에서 분야별 한 주 예산을 정해 보세요.</p>') +
+      }).join('') : '<p class="lg-empty">아직 이번 주 지출이 없어요. [예산·분야 편집]에서 분야별로 한 주나 한 달 예산을 정해 보세요.</p>') +
         (other ? `<p class="lg-empty">분야가 지워진 지출 ${won(other)}</p>` : '');
     }
     $('lg-budget-toggle').textContent = budgetMode ? '편집 끝내기' : '예산·분야 편집';
@@ -212,14 +238,25 @@
       const n = parseAmt(e.target.value);
       e.target.value = e.target.value.trim() === '' ? '' : n.toLocaleString('ko-KR');
       c.budget = e.target.value === '' ? null : n;
+      row.querySelector('.lg-split').textContent = splitHint(c);
     } else if (e.target.classList.contains('lg-name-in')) { if (e.target.value.trim()) c.name = e.target.value.trim(); }
     else if (e.target.classList.contains('lg-icon-in')) c.icon = e.target.value.trim();
     persist();
     render(true);
   });
   $('lg-cats').addEventListener('click', (e) => {
+    const pb = e.target.closest('[data-period]');
+    if (pb) {
+      const row = pb.closest('.lg-edit-row'), c = catOf(row.dataset.cid); if (!c) return;
+      const next = pb.dataset.period; if (c.period === next) return;
+      // 단위를 바꾸면 금액도 대략 맞춰 줌 (주 7만원 ↔ 달 30만원)
+      if (c.budget != null) c.budget = next === 'month' ? Math.round((c.budget * 30) / 7 / 1000) * 1000 : approxWeek(c.budget);
+      c.period = next; persist(); render();
+      document.querySelector(`.lg-edit-row[data-cid="${CSS.escape(c.id)}"] .lg-budget-in`)?.focus();
+      return;
+    }
     if (e.target.closest('#lg-cat-add')) {
-      const c = { id: 'c' + uid(), name: '새 분야', icon: '•', color: COLORS[data.categories.length % COLORS.length], budget: null };
+      const c = { id: 'c' + uid(), name: '새 분야', icon: '•', color: COLORS[data.categories.length % COLORS.length], budget: null, period: 'week' };
       data.categories.push(c); persist(); render();
       const inp = document.querySelector(`.lg-edit-row[data-cid="${c.id}"] .lg-name-in`); inp?.focus(); inp?.select();
       return;

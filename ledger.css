@@ -139,3 +139,41 @@ html.m .lg-budget-wrap{grid-column:1/3;grid-row:2;}
 html.m .lg-cat-del{grid-row:1;grid-column:3;}
 html.m .lg-type{align-self:stretch;}
 html.m .lg-type-btn{flex:1;}
+
+/* ===== 달 예산 ===== */
+.lg-edit-help{margin:0 0 10px;padding:10px 12px;border-radius:10px;background:#F4F6FF;font-size:13px;line-height:1.6;color:#4a5369;}
+.lg-edit-head,.lg-edit-row{grid-template-columns:52px minmax(0,1fr) 300px 40px;}
+.lg-budget-cell{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:6px;}
+.lg-period{display:inline-flex;padding:3px;border-radius:9px;background:#ECEEF6;}
+.lg-period button{min-width:34px;min-height:32px;border:0;border-radius:7px;background:transparent;font:inherit;font-size:13px;font-weight:700;color:#6A6F8E;cursor:pointer;}
+.lg-period button[aria-pressed=true]{background:#fff;color:#2340E8;box-shadow:0 1px 3px rgba(17,20,51,.14);}
+.lg-period button:focus-visible{outline:2px solid #2340E8;outline-offset:1px;}
+.lg-split{grid-column:1/-1;justify-self:end;font-size:12px;font-weight:700;color:#2340E8;}
+.lg-split:empty{display:none;}
+.lg-per{margin-left:6px;padding:1px 6px;border-radius:999px;background:#EEF1FF;color:#2340E8;font-family:"Noto Sans KR",sans-serif;font-size:10.5px;font-weight:700;vertical-align:1px;}
+.lg-cat{grid-template-columns:130px minmax(0,1fr) 220px 200px;}
+.lg-month-bar{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(80px,1fr) auto;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;background:#F4F6FF;font-size:13px;color:#4a5369;}
+.lg-month-bar b{color:#111433;}
+.lg-month-bar .lg-bar span{background:#2340E8;}
+.lg-month-bar em{font-style:normal;font-weight:700;color:#2340E8;white-space:nowrap;}
+.lg-month-bar.over{background:#FFF0F0;}
+.lg-month-bar.over .lg-bar span{background:#D7262F;}
+.lg-month-bar.over em{color:#C21D27;}
+@media(max-width:900px){.lg-cat{grid-template-columns:110px minmax(0,1fr) 150px;}.lg-edit-head,.lg-edit-row{grid-template-columns:52px minmax(0,1fr) 240px 40px;}}
+@media(max-width:640px){
+  .lg-cat{grid-template-columns:minmax(0,1fr) auto;}
+  .lg-edit-row{grid-template-columns:44px minmax(0,1fr) 40px;}
+  .lg-budget-cell{grid-column:1/3;grid-row:2;}
+  .lg-month-bar{grid-template-columns:1fr auto;row-gap:6px;}
+  .lg-month-bar .lg-bar{grid-column:1/-1;grid-row:2;}
+}
+html.m .lg-cat{grid-template-columns:minmax(0,1fr) auto;}
+html.m .lg-edit-row{grid-template-columns:44px minmax(0,1fr) 40px;}
+html.m .lg-budget-cell{grid-column:1/3;grid-row:2;}
+html.m .lg-month-bar{grid-template-columns:1fr auto;row-gap:6px;}
+html.m .lg-month-bar .lg-bar{grid-column:1/-1;grid-row:2;}
+.lg-cat-note .lg-mnote{display:block;margin-top:1px;font-size:11px;font-weight:600;color:#6A6F8E;}
+.lg-cat{grid-template-columns:130px minmax(0,1fr) 220px 160px;}
+@media(max-width:900px){.lg-cat{grid-template-columns:110px minmax(0,1fr) 150px;}}
+@media(max-width:640px){.lg-cat{grid-template-columns:minmax(0,1fr) auto;}}
+html.m .lg-cat{grid-template-columns:minmax(0,1fr) auto;}
