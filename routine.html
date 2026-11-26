@@ -408,6 +408,8 @@ function renderTop(){
 }
 
 /* ---------- DAY ---------- */
+// 체크한 항목은 목록 맨 아래로 (안 한 것 먼저, 원래 순서 유지)
+const doneLast=(arr,isDone)=>[...arr.filter(x=>!isDone(x)),...arr.filter(x=>isDone(x))];
 let dSel=TODAY;
 function itemHTML(r,d){
   const on=isOn(d,r.id),a=area(r.area);
@@ -415,12 +417,14 @@ function itemHTML(r,d){
   if(r.freq!=='daily'){const [f,t]=periodRange(r.freq,d);const c=countIn(r.id,f,t);right=`<span class="r num">${FREQ[r.freq]} ${c}/${r.target}</span>`}
   return `<label class="item${on?' done':''}"><input type="checkbox" data-chk="${r.id}" data-d="${d}"${on?' checked':''}>
    <span class="t">${esc(r.title)}${r.link?`<a class="link" href="${esc(r.link)}" target="_blank" rel="noopener">열기 ↗</a>`:''}${r.when||r.freq!=='daily'?`<span class="sub">${[r.when?'언제 · '+esc(r.when):'',r.freq!=='daily'?`${r.freq==='weekly'?'이번 주':r.freq==='monthly'?'이번 달':'올해'} 목표 ${r.target}회`:''].filter(Boolean).join(' · ')}</span>`:''}</span>${right}</label>`}
+function planItemHTML({ev,p,idx},d){return `<label class="item${p.done?' done':''}"><input type="checkbox" data-plan="${ev.id}" data-idx="${idx}"${p.done?' checked':''}><span class="t">${esc(p.t)}${p.min?` <span class="mins">약 ${p.min}분</span>`:""}<span class="sub">${esc(ev.name)} · ${ddLabel(diff(d,ev.date))}</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`}
+function wgItemHTML({ev,w},d){return `<label class="item${w.done?' done':''}"><input type="checkbox" data-wgoal="${ev.id}" data-ws="${w.s}"${w.done?' checked':''}><span class="t">${esc(w.goal||'이번 주 목표를 적어 주세요')}<span class="sub">${esc(ev.name)} · 이번 주 목표 · ${ddLabel(diff(d,ev.date))}</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`}
 function renderDay(){
   const d=dSel,ds=daily(),done=ds.filter(r=>isOn(d,r.id)).length,pct=ds.length?Math.round(done/ds.length*100):0;
   const plans=planFor(d),wg=weekGoalsFor(d);
   const pending=S.routines.filter(r=>r.freq==='weekly'||r.freq==='monthly').filter(r=>{const [f,t]=periodRange(r.freq,d);return countIn(r.id,f,t)<r.target||isOn(d,r.id)});
   const byArea=S.areas.map(a=>{const rs=ds.filter(r=>r.area===a.id);if(!rs.length)return '';
-    return `<div class="area-h" style="--c:${a.c}"><span class="sw"></span>${esc(a.name)}</div><div class="list">${rs.map(r=>itemHTML(r,d)).join('')}</div>`}).join('');
+    return `<div class="area-h" style="--c:${a.c}"><span class="sw"></span>${esc(a.name)}</div><div class="list">${doneLast(rs,r=>isOn(d,r.id)).map(r=>itemHTML(r,d)).join('')}</div>`}).join('');
   $('v-day').innerHTML=`<div class="page" style="padding:0">
    <div class="card">
     <div class="row between">
@@ -432,13 +436,12 @@ function renderDay(){
    </div>
    <div class="card">
     <div class="row between"><h3>오늘 공부 계획</h3><span class="pill">${plans.length?plans.filter(x=>x.p.done).length+'/'+plans.length:'일정 기반'}</span></div>
-    ${plans.length||wg.length?`<div class="list">${plans.map(({ev,p,idx})=>`<label class="item${p.done?' done':''}"><input type="checkbox" data-plan="${ev.id}" data-idx="${idx}"${p.done?' checked':''}><span class="t">${esc(p.t)}${p.min?` <span class="mins">약 ${p.min}분</span>`:""}<span class="sub">${esc(ev.name)} · ${ddLabel(diff(d,ev.date))}</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}
-      ${wg.map(({ev,w})=>`<label class="item${w.done?' done':''}"><input type="checkbox" data-wgoal="${ev.id}" data-ws="${w.s}"${w.done?' checked':''}><span class="t">${esc(w.goal||'이번 주 목표를 적어 주세요')}<span class="sub">${esc(ev.name)} · 이번 주 목표 · ${ddLabel(diff(d,ev.date))}</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}</div>`
+    ${plans.length||wg.length?`<div class="list">${doneLast([...plans.map(x=>({done:x.p.done,h:planItemHTML(x,d)})),...wg.map(x=>({done:x.w.done,h:wgItemHTML(x,d)}))],x=>x.done).map(x=>x.h).join('')}</div>`
       :`<p class="empty">이 날짜에 잡힌 공부 계획이 없어요. 일정·공부계획 탭에서 시험을 추가하면 날짜별 할 일이 여기에 나타나요.</p>`}
    </div>
    <div class="card">
     <h3>이번 주·이번 달 루틴</h3>
-    ${pending.length?`<div class="list">${pending.map(r=>itemHTML(r,d)).join('')}</div>`:'<p class="empty">이번 주·이번 달 목표를 모두 채웠어요.</p>'}
+    ${pending.length?`<div class="list">${doneLast(pending,r=>isOn(d,r.id)).map(r=>itemHTML(r,d)).join('')}</div>`:'<p class="empty">이번 주·이번 달 목표를 모두 채웠어요.</p>'}
    </div>
    <div class="card"><h3>오늘 한 줄</h3><input id="memo" placeholder="오늘 잘한 것, 내일 바꿀 것 한 줄" value="${esc(S.memo[d]||'')}" aria-label="오늘 한 줄 회고"></div>
   </div>`;
@@ -464,8 +467,8 @@ function renderWeek(){
    </div>
    <div class="card">
     <div class="row between"><h3>이번 주 공부 계획</h3><span class="pill">${allP.length?doneP+'/'+allP.length:'일정 기반'}</span></div>
-    ${wg.length?`<div class="list">${wg.map(({ev,w})=>`<label class="item${w.done?' done':''}"><input type="checkbox" data-wgoal="${ev.id}" data-ws="${w.s}"${w.done?' checked':''}><span class="t">${esc(w.goal)}<span class="sub">${esc(ev.name)} · 주별 목표</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}</div>`:''}
-    ${allP.length?plans.filter(x=>x.items.length).map(x=>`<div class="area-h">${fmtMD(x.d)}${x.d===TODAY?' · 오늘':''}</div><div class="list">${x.items.map(({ev,p,idx})=>`<label class="item${p.done?' done':''}"><input type="checkbox" data-plan="${ev.id}" data-idx="${idx}"${p.done?' checked':''}><span class="t">${esc(p.t)}${p.min?` <span class="mins">약 ${p.min}분</span>`:""}<span class="sub">${esc(ev.name)}</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}</div>`).join(''):(!wg.length?'<p class="empty">이번 주에 잡힌 공부 계획이 없어요.</p>':'')}
+    ${wg.length?`<div class="list">${doneLast(wg,x=>x.w.done).map(({ev,w})=>`<label class="item${w.done?' done':''}"><input type="checkbox" data-wgoal="${ev.id}" data-ws="${w.s}"${w.done?' checked':''}><span class="t">${esc(w.goal)}<span class="sub">${esc(ev.name)} · 주별 목표</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}</div>`:''}
+    ${allP.length?plans.filter(x=>x.items.length).map(x=>`<div class="area-h">${fmtMD(x.d)}${x.d===TODAY?' · 오늘':''}</div><div class="list">${doneLast(x.items,y=>y.p.done).map(({ev,p,idx})=>`<label class="item${p.done?' done':''}"><input type="checkbox" data-plan="${ev.id}" data-idx="${idx}"${p.done?' checked':''}><span class="t">${esc(p.t)}${p.min?` <span class="mins">약 ${p.min}분</span>`:""}<span class="sub">${esc(ev.name)}</span></span><span class="sw" style="--c:${area(ev.area).c}"></span></label>`).join('')}</div>`).join(''):(!wg.length?'<p class="empty">이번 주에 잡힌 공부 계획이 없어요.</p>':'')}
    </div></div>`;
 }
 
